@@ -6,3 +6,17 @@ export const alignFrom = (txt: string) => (isRTL(txt) ? 'text-right' : 'text-lef
 export const checkClipboardSupport = () => {
   return !!navigator.clipboard && typeof navigator.clipboard.writeText === 'function';
 };
+
+export const formatResponseData = (data: any) => {
+  // Handle different response formats
+  if (typeof data === 'string') {
+    try {
+      return JSON.parse(data);
+    } catch (e) {
+      return { body: data };
+    }
+  }
+  
+  // If it's already an object
+  return data;
+};

@@ -1,6 +1,9 @@
 
 import React from 'react';
 import { Card, CardContent } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Copy } from "lucide-react";
+import { isRTL, dirFrom, alignFrom } from '@/utils/textUtils';
 
 interface ResultCardProps {
   title: string;
@@ -10,32 +13,31 @@ interface ResultCardProps {
 }
 
 export function ResultCard({ title, content, handleCopy, isArrayContent = false }: ResultCardProps) {
-  const isRTL = (txt: string = '') => /[\u0600-\u06FF]/.test(txt);
-  const dirFrom = (txt: string) => (isRTL(txt) ? 'rtl' : 'ltr');
-  const alignFrom = (txt: string) => (isRTL(txt) ? 'text-right' : 'text-left');
-
   if (isArrayContent && Array.isArray(content)) {
     return (
-      <Card className="card-hover">
+      <Card className="overflow-hidden hover:shadow-md transition-shadow duration-300">
         <CardContent className="p-4">
-          <h3 className="font-bold mb-2">{title}</h3>
+          <h3 className="font-bold mb-2 text-purple-800">{title}</h3>
           {title === "Keywords" || title === "Hashtags" ? (
             <div className={title === "Keywords" ? "flex flex-wrap gap-2" : "flex flex-col gap-1"}>
               {content.map((item: string, i: number) => (
                 <div key={i} className="flex items-center">
                   <span
                     dir={dirFrom(item)}
-                    className={alignFrom(item)}
+                    className={`${alignFrom(item)} ${title === "Hashtags" ? "text-purple-600" : ""}`}
                   >
                     {item}
                   </span>
                   {title === "Keywords" && (
-                    <button
+                    <Button
                       onClick={() => handleCopy(item)}
-                      className="text-purple-600 hover:underline ml-1"
+                      variant="ghost"
+                      size="sm"
+                      className="ml-1 p-0 h-auto"
                     >
-                      COPIER
-                    </button>
+                      <Copy className="h-3 w-3 mr-1" /> 
+                      <span className="text-xs">Copier</span>
+                    </Button>
                   )}
                 </div>
               ))}
@@ -50,23 +52,28 @@ export function ResultCard({ title, content, handleCopy, isArrayContent = false 
                   >
                     {item}
                   </span>
-                  <button
+                  <Button
                     onClick={() => handleCopy(item)}
-                    className="text-purple-600 hover:underline ml-2"
+                    variant="ghost"
+                    size="sm"
+                    className="ml-2"
                   >
-                    COPIER
-                  </button>
+                    <Copy className="h-3 w-3 mr-1" />
+                    <span className="text-xs">Copier</span>
+                  </Button>
                 </li>
               ))}
             </ul>
           )}
           {title === "Hashtags" && (
-            <button
+            <Button
               onClick={() => handleCopy(content.join('\n'))}
-              className="mt-2 text-purple-600 hover:underline"
+              variant="outline"
+              size="sm"
+              className="mt-3"
             >
-              COPIER
-            </button>
+              <Copy className="h-4 w-4 mr-2" /> Copier tous
+            </Button>
           )}
         </CardContent>
       </Card>
@@ -74,21 +81,23 @@ export function ResultCard({ title, content, handleCopy, isArrayContent = false 
   }
 
   return (
-    <Card className="card-hover">
+    <Card className="overflow-hidden hover:shadow-md transition-shadow duration-300">
       <CardContent className="p-4">
-        <h3 className="font-bold mb-2">{title}</h3>
+        <h3 className="font-bold mb-2 text-purple-800">{title}</h3>
         <p
           dir={dirFrom(content as string)}
-          className={alignFrom(content as string)}
+          className={`${alignFrom(content as string)} whitespace-pre-wrap`}
         >
           {content as string}
         </p>
-        <button
+        <Button
           onClick={() => handleCopy(content as string)}
-          className="mt-2 text-purple-600 hover:underline"
+          variant="outline"
+          size="sm"
+          className="mt-3"
         >
-          COPIER
-        </button>
+          <Copy className="h-4 w-4 mr-2" /> Copier
+        </Button>
       </CardContent>
     </Card>
   );

@@ -54,9 +54,11 @@ export const useImproveText = () => {
       return;
     }
     setLoading(true);
+    setResult(null); // Reset previous results
+    
     console.log(`Envoi de la requête au webhook d'amélioration: ${WEBHOOK_URL}`);
     
-    // Adapter le format de la charge utile pour correspondre à celui utilisé dans useTranslation
+    // Adapter le format de la charge utile pour correspondre à celui attendu par n8n
     const payload = { 
       text: inputText.trim(), 
       type: "improvement"  // Paramètre essentiel pour identifier le type de requête
@@ -65,6 +67,11 @@ export const useImproveText = () => {
     console.log("Payload envoyé:", payload);
     
     try {
+      toast({
+        title: "Traitement en cours",
+        description: "Envoi de la demande d'amélioration...",
+      });
+      
       const response = await fetch(WEBHOOK_URL, {
         method: 'POST',
         headers: { 
@@ -72,6 +79,7 @@ export const useImproveText = () => {
           'Accept': 'application/json',
         },
         body: JSON.stringify(payload),
+        // Note: On n'utilise pas mode: 'no-cors' car cela empêcherait de lire la réponse
       });
       
       console.log("Statut de la réponse:", response.status);
@@ -84,17 +92,29 @@ export const useImproveText = () => {
       const responseData = await response.json();
       console.log("Réponse complète reçue du webhook:", responseData);
       
-      setResult(responseData);
+      // Gestion des différents formats possibles de réponse
+      let processedResult;
+      if (responseData.Traduction) {
+        // Format utilisé par certaines configurations n8n
+        processedResult = responseData.Traduction;
+        console.log("Format de réponse avec champ Traduction détecté");
+      } else {
+        // Format standard
+        processedResult = responseData;
+        console.log("Format de réponse standard détecté");
+      }
+      
+      setResult(processedResult);
       
       toast({
         title: "Traitement terminé",
         description: "Le texte a été amélioré avec succès",
       });
     } catch (err: any) {
-      console.error("Erreur lors de l'amélioration:", err);
+      console.error("Erreur détaillée lors de l'amélioration:", err);
       toast({
         title: "Erreur",
-        description: `Échec de l'amélioration: ${err.message || 'Problème de connexion'}`,
+        description: `Échec de l'amélioration: ${err.message || 'Problème de connexion ou CORS'}`,
         variant: "destructive",
       });
     } finally {

@@ -1,6 +1,8 @@
 
 import React from 'react';
 import { useToast } from "@/hooks/use-toast";
+import { isRTL, alignFrom, dirFrom } from '@/utils/textUtils';
+import { Loader2 } from 'lucide-react';
 
 interface InputSectionProps {
   inputText: string;
@@ -17,10 +19,6 @@ export function InputSection({
   handleImprove, 
   loading 
 }: InputSectionProps) {
-  const isRTL = (txt: string = '') => /[\u0600-\u06FF]/.test(txt);
-  const dirFrom = (txt: string) => (isRTL(txt) ? 'rtl' : 'ltr');
-  const alignFrom = (txt: string) => (isRTL(txt) ? 'text-right' : 'text-left');
-
   return (
     <div className="space-y-6">
       <textarea
@@ -44,17 +42,28 @@ export function InputSection({
           type="button"
           onClick={handleImprove}
           disabled={loading}
-          className={`px-6 py-2 text-white rounded-md shadow-sm ${
+          className={`px-6 py-2 text-white rounded-md shadow-sm flex items-center justify-center ${
             loading 
               ? 'bg-gray-400' 
               : 'bg-gradient-to-r from-purple-600 to-pink-500 hover:from-purple-700 hover:to-pink-600 transition-colors'
           }`}
         >
-          {loading ? "CHARGEMENT..." : "AMÉLIORER & SEO"}
+          {loading ? (
+            <>
+              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+              CHARGEMENT...
+            </>
+          ) : (
+            "AMÉLIORER & SEO"
+          )}
         </button>
       </div>
 
-      {loading && <p className="text-center">Chargement...</p>}
+      {loading && (
+        <div className="text-center">
+          <p className="text-purple-700">Traitement en cours... Cela peut prendre jusqu'à une minute.</p>
+        </div>
+      )}
     </div>
   );
 }
