@@ -11,36 +11,58 @@ const containsTemplateVariables = (text: string): boolean => {
 };
 
 /**
- * Extracts valid content from text containing template variables
- * If possible, returns the parts that don't contain variables
+ * Checks if an object has unresolved template variables in any of its values
  */
-const extractValidContent = (text: string): string | null => {
-  if (!containsTemplateVariables(text)) return text;
+const objectContainsTemplateVariables = (obj: any): boolean => {
+  if (!obj || typeof obj !== 'object') return false;
   
-  console.log("Extracting valid content from text with template variables:", text);
-  
-  // Try to extract JSON parts that might be valid
-  try {
-    // If it looks like a JSON object with some valid parts
-    if (text.includes('{') && text.includes('}') && text.includes(':')) {
-      // Simple attempt to clean and parse - this may need refinement based on actual data
-      const cleanedText = text.replace(/\{\{\s*.*?\s*\}\}/g, '"[Template Variable]"');
-      console.log("Cleaned text for parsing:", cleanedText);
-      
-      try {
-        const parsed = JSON.parse(cleanedText);
-        console.log("Successfully parsed cleaned JSON:", parsed);
-        return JSON.stringify(parsed, null, 2);
-      } catch (e) {
-        console.log("Failed to parse cleaned JSON, returning original text");
-      }
+  // Check each value in the object
+  return Object.values(obj).some(value => {
+    if (typeof value === 'string') {
+      return containsTemplateVariables(value);
+    } else if (Array.isArray(value)) {
+      return value.some(item => typeof item === 'string' && containsTemplateVariables(item));
+    } else if (typeof value === 'object' && value !== null) {
+      return objectContainsTemplateVariables(value);
     }
-  } catch (e) {
-    console.log("Error extracting valid content:", e);
+    return false;
+  });
+};
+
+/**
+ * Filters out template variables from an object
+ */
+const filterTemplateVariables = (obj: any): any => {
+  if (!obj || typeof obj !== 'object') return obj;
+  
+  // Handle arrays
+  if (Array.isArray(obj)) {
+    return obj
+      .filter(item => !(typeof item === 'string' && containsTemplateVariables(item)))
+      .map(item => {
+        if (typeof item === 'object' && item !== null) {
+          return filterTemplateVariables(item);
+        }
+        return item;
+      });
   }
   
-  // If we can't extract valid JSON, return a user-friendly message
-  return null;
+  // Handle objects
+  const result: Record<string, any> = {};
+  Object.entries(obj).forEach(([key, value]) => {
+    // Skip entries with template variables as values
+    if (typeof value === 'string' && containsTemplateVariables(value)) {
+      return;
+    }
+    
+    if (typeof value === 'object' && value !== null) {
+      result[key] = filterTemplateVariables(value);
+    } else {
+      result[key] = value;
+    }
+  });
+  
+  return result;
 };
 
 /**
@@ -49,51 +71,22 @@ const extractValidContent = (text: string): string | null => {
 export const formatTranslationResult = (data: any): string => {
   console.log("Formatting translation data:", data);
   
-  // Check if the response has a Traduction field
-  if (data && data.Traduction !== undefined) {
-    console.log("Traduction field found:", data.Traduction);
-    
-    // If Traduction is a string that contains unresolved template variables
-    if (typeof data.Traduction === 'string' && containsTemplateVariables(data.Traduction)) {
-      console.log("Traduction contains template variables:", data.Traduction);
-      
-      // Try to extract valid content
-      const validContent = extractValidContent(data.Traduction);
-      if (validContent) {
-        console.log("Valid content extracted:", validContent);
-        return validContent;
-      }
-      
-      // If we couldn't extract valid content, return a user-friendly message
-      return "La réponse contient des variables non résolues. Veuillez réessayer ou contacter l'administrateur.";
-    }
-    
-    // If Traduction is a string that looks like JSON, try to parse it
-    if (typeof data.Traduction === 'string') {
-      try {
-        const parsed = JSON.parse(data.Traduction);
-        console.log("Successfully parsed JSON from Traduction string:", parsed);
-        return JSON.stringify(parsed, null, 2);
-      } catch (e) {
-        console.log("Failed to parse Traduction as JSON, using as raw string");
-        // If parsing fails, return the raw string
-        return data.Traduction;
-      }
-    }
-    
-    // If Traduction is already an object, stringify it
-    if (typeof data.Traduction === 'object' && data.Traduction !== null) {
-      console.log("Traduction is already an object:", data.Traduction);
-      return JSON.stringify(data.Traduction, null, 2);
-    }
-    
-    // For other types (like null, undefined, numbers)
-    return String(data.Traduction);
+  // Filter out template variables
+  const cleanedData = filterTemplateVariables(data);
+  console.log("Cleaned data after filtering template variables:", cleanedData);
+  
+  // Check if we still have useful data after filtering
+  const hasUsefulData = cleanedData && 
+    Object.keys(cleanedData).length > 0 && 
+    !objectContainsTemplateVariables(cleanedData);
+  
+  if (!hasUsefulData) {
+    console.log("No useful data after filtering template variables");
+    return "Aucune traduction disponible dans la réponse du webhook.";
   }
   
-  // For direct JSON response, return stringified version
-  console.log("No Traduction field found, using entire response");
-  return JSON.stringify(data, null, 2);
+  // Return the cleaned data as formatted JSON
+  return JSON.stringify(cleanedData, null, 2);
 };
 
 /**
@@ -102,49 +95,52 @@ export const formatTranslationResult = (data: any): string => {
 export const extractTranslationFromResponse = (data: any): any => {
   console.log("Extracting translation from response:", data);
   
-  // Check for Traduction field first
-  if (data && data.Traduction !== undefined) {
-    console.log("Found Traduction field:", data.Traduction);
+  // First pass: Look for direct translation fields
+  if (data && typeof data === 'object') {
+    // Filter out template variables
+    const cleanedData = filterTemplateVariables(data);
     
-    // Check if Traduction contains template variables
-    if (typeof data.Traduction === 'string' && containsTemplateVariables(data.Traduction)) {
-      console.log("Traduction contains template variables, attempting to extract valid parts");
-      
-      // Try to extract valid content
-      const validContent = extractValidContent(data.Traduction);
-      if (validContent) {
-        try {
-          const parsed = JSON.parse(validContent);
-          console.log("Successfully parsed extracted valid content:", parsed);
-          return parsed;
-        } catch (e) {
-          console.log("Extracted content is not valid JSON, using as string");
-          return validContent;
-        }
-      }
-      
-      // If we couldn't extract valid content, return a simplified message
-      return { error: "Variables non résolues dans la réponse du webhook" };
+    // If we have a "translation" or "translated_text" field, prioritize that
+    if (cleanedData.translation || cleanedData.translated_text || cleanedData.text) {
+      return cleanedData.translation || cleanedData.translated_text || cleanedData.text;
     }
     
-    // If Traduction is a string that might be JSON, try to parse it
-    if (typeof data.Traduction === 'string') {
-      try {
-        const parsedJson = JSON.parse(data.Traduction);
-        console.log("Successfully parsed Traduction JSON:", parsedJson);
-        return parsedJson;
-      } catch (e) {
-        console.log("Traduction is not valid JSON, using as raw string");
-        // If it's not valid JSON, just return the string as is
-        return data.Traduction;
-      }
+    // If we have cleaned data without template variables, return that
+    if (Object.keys(cleanedData).length > 0) {
+      return cleanedData;
     }
-    
-    // Return Traduction field value (could be object, null, etc.)
-    return data.Traduction;
   }
   
-  // Return data directly if no Traduction field
-  console.log("No Traduction field found, returning full response");
+  // If no useful content could be extracted, return a simplified message
+  if (objectContainsTemplateVariables(data)) {
+    return { error: "Variables non résolues dans la réponse du webhook" };
+  }
+  
+  // Return the original data as fallback
   return data;
+};
+
+/**
+ * Detects the type of translation result based on the data structure
+ */
+export const detectResultType = (data: any): 'direct-translation' | 'enhanced-content' | 'error' | 'unknown' => {
+  if (!data) return 'error';
+  
+  // Check for error state
+  if (data.error || data.erreur) return 'error';
+  
+  // Check if it's a simple translation string
+  if (typeof data === 'string') return 'direct-translation';
+  
+  // Check if it's an enhanced content object with structure (main_title, body, etc.)
+  if (data.main_title || data.body || data.content || data.seo_titles || data.hashtags) {
+    return 'enhanced-content';
+  }
+  
+  // Check for direct translation fields
+  if (data.translation || data.translated_text || data.text) {
+    return 'direct-translation';
+  }
+  
+  return 'unknown';
 };

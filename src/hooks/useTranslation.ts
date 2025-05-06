@@ -1,7 +1,7 @@
 
 import { useState } from 'react';
 import { useToast } from "@/hooks/use-toast";
-import { formatTranslationResult, extractTranslationFromResponse } from '@/utils/translationUtils';
+import { formatTranslationResult, extractTranslationFromResponse, detectResultType } from '@/utils/translationUtils';
 
 export const useTranslation = (
   setDebugData: (data: any) => void
@@ -11,6 +11,7 @@ export const useTranslation = (
   const [result, setResult] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+  const [responseType, setResponseType] = useState<'direct-translation' | 'enhanced-content' | 'error' | 'unknown'>('unknown');
   const { toast } = useToast();
 
   // URL fixe du webhook n8n pour la traduction
@@ -42,6 +43,7 @@ export const useTranslation = (
   const handleTranslate = async () => {
     setError('');
     setResult('');
+    setResponseType('unknown');
     setDebugData(null);
     
     // Validation du texte d'entrée
@@ -90,19 +92,10 @@ export const useTranslation = (
       // Enregistrement de la réponse complète pour le débogage
       setDebugData(responseData);
       
-      // Vérification du format de la réponse pour détecter les variables non résolues
-      if (responseData && 
-          responseData.Traduction && 
-          typeof responseData.Traduction === 'string' && 
-          responseData.Traduction.includes('{{') && 
-          responseData.Traduction.includes('}}')) {
-        console.log("Détection de variables non résolues dans la réponse:", responseData.Traduction);
-        toast({
-          title: "Attention",
-          description: "La réponse contient des variables non résolues",
-          variant: "destructive",
-        });
-      }
+      // Déterminer le type de réponse
+      const resultType = detectResultType(responseData);
+      setResponseType(resultType);
+      console.log("Type de réponse détecté:", resultType);
       
       // Extraction et traitement de la traduction en utilisant nos utilitaires
       const translationContent = extractTranslationFromResponse(responseData);
@@ -114,15 +107,26 @@ export const useTranslation = (
       setResult(formattedResult);
       
       // Afficher un toast en fonction du résultat
-      if (formattedResult && !formattedResult.includes('variables non résolues')) {
+      if (resultType === 'direct-translation') {
         toast({
           title: "Traduction complétée",
           description: "Le texte a été traduit avec succès",
         });
+      } else if (resultType === 'enhanced-content') {
+        toast({
+          title: "Contenu amélioré reçu",
+          description: "Le webhook a fourni du contenu amélioré avec SEO",
+        });
+      } else if (resultType === 'error' || formattedResult.includes('Aucune traduction disponible')) {
+        toast({
+          title: "Problème de traduction",
+          description: "Des variables non résolues ont été détectées dans la réponse",
+          variant: "destructive",
+        });
       } else {
         toast({
-          title: "Traduction partielle",
-          description: "Certaines parties n'ont pas pu être traduites correctement",
+          title: "Réponse reçue",
+          description: "Format de réponse inconnu",
           variant: "destructive",
         });
       }
@@ -143,6 +147,7 @@ export const useTranslation = (
     setText('');
     setResult('');
     setError('');
+    setResponseType('unknown');
     setDebugData(null);
   };
 
@@ -164,6 +169,7 @@ export const useTranslation = (
     result,
     error,
     loading,
+    responseType,
     isSourceRTL,
     isTargetRTL,
     handlePaste,

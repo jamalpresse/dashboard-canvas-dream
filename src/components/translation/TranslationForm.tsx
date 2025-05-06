@@ -21,6 +21,7 @@ const TranslationForm: React.FC<TranslationFormProps> = ({ onDebugToggle, setDeb
     result,
     error,
     loading,
+    responseType,
     isSourceRTL,
     isTargetRTL,
     handlePaste,
@@ -56,7 +57,9 @@ const TranslationForm: React.FC<TranslationFormProps> = ({ onDebugToggle, setDeb
       {/* Translation Results */}
       <section>
         <div className="mb-2 flex items-center justify-between">
-          <span className="text-sm font-medium">Résultat de la traduction:</span>
+          <span className="text-sm font-medium">
+            {responseType === 'enhanced-content' ? 'Contenu amélioré:' : 'Résultat de la traduction:'}
+          </span>
           <span className="text-sm text-gray-500">
             {isTargetRTL ? 'RTL' : 'LTR'}
           </span>
@@ -66,6 +69,7 @@ const TranslationForm: React.FC<TranslationFormProps> = ({ onDebugToggle, setDeb
           result={result} 
           isRTL={isTargetRTL} 
           onCopy={handleCopy}
+          responseType={responseType}
         />
         
         <ResultActions 
