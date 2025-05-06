@@ -60,7 +60,7 @@ export const useTranslation = (
     setLoading(true);
     console.log(`Envoi de la requête au webhook de traduction: ${WEBHOOK_URL}`);
     
-    // Préparer les données avec le format exact attendu par le webhook
+    // Simplifier la charge utile selon le format d'origine
     const payload = { 
       text: text.trim(), 
       langPair,
@@ -86,7 +86,7 @@ export const useTranslation = (
       }
 
       // Récupération de la réponse JSON
-      let responseData = await response.json();
+      const responseData = await response.json();
       console.log("Réponse complète reçue du webhook:", responseData);
       
       // Enregistrement de la réponse complète pour le débogage
@@ -95,28 +95,38 @@ export const useTranslation = (
       // Définir le type de réponse comme traduction directe
       setResponseType('direct-translation');
       
-      // Traitement spécial pour le format spécifique du webhook:
-      // Si responseData.Traduction est une chaîne JSON, essayer de la parser
-      if (responseData && responseData.Traduction) {
-        if (typeof responseData.Traduction === 'string' && 
-            (responseData.Traduction.startsWith('{') || responseData.Traduction.startsWith('['))) {
+      // Extraire la traduction à partir de la réponse, en se concentrant sur le champ Traduction
+      let translationText = "";
+      
+      if (responseData && responseData.Traduction !== undefined) {
+        const traduction = responseData.Traduction;
+        console.log("Champ Traduction trouvé:", traduction);
+        
+        // Si Traduction est une chaîne JSON, essayer de la parser
+        if (typeof traduction === 'string' && 
+            (traduction.trim().startsWith('{') || traduction.trim().startsWith('['))) {
           try {
-            console.log("Tentative de parse du JSON dans Traduction:", responseData.Traduction);
-            const parsedTraduction = JSON.parse(responseData.Traduction);
-            // Remplacer le champ Traduction par sa version parsée
-            responseData.Traduction = parsedTraduction;
-            console.log("JSON parsé avec succès:", responseData.Traduction);
-          } catch (parseErr) {
-            console.log("Échec du parsing JSON de Traduction, utilisation comme chaîne:", parseErr);
-            // On garde responseData.Traduction comme une chaîne
+            const parsedTraduction = JSON.parse(traduction);
+            translationText = typeof parsedTraduction === 'string' 
+              ? parsedTraduction 
+              : JSON.stringify(parsedTraduction, null, 2);
+            console.log("JSON parsé:", translationText);
+          } catch (e) {
+            console.log("Échec du parsing JSON, utilisation de la chaîne brute:", e);
+            translationText = traduction;
           }
+        } else {
+          // Utiliser directement si ce n'est pas du JSON
+          translationText = typeof traduction === 'string' 
+            ? traduction 
+            : JSON.stringify(traduction, null, 2);
         }
+      } else {
+        // Fallback au formateur existant si Traduction n'est pas présent
+        translationText = formatTranslationResult(responseData);
       }
       
-      // Extraction du texte de traduction à partir de la réponse
-      const translationText = formatTranslationResult(responseData);
-      console.log("Traduction extraite:", translationText);
-      
+      console.log("Traduction finale à afficher:", translationText);
       setResult(translationText);
       
       toast({

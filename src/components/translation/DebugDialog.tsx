@@ -13,7 +13,7 @@ const DebugDialog: React.FC<DebugDialogProps> = ({
   onOpenChange, 
   debugData
 }) => {
-  // Fonction pour extraire et afficher le champ Traduction séparément
+  // Fonction améliorée pour afficher le champ Traduction séparément
   const getTraductionField = () => {
     if (!debugData || !debugData.Traduction) return null;
     
