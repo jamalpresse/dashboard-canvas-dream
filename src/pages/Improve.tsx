@@ -110,7 +110,7 @@ export default function Improve() {
       toast({
         title: "Attention",
         description: "Copie non disponible. Sélectionnez et copiez manuellement",
-        variant: "warning",
+        variant: "default", // Changed from "warning" to "default"
       });
       return;
     }
