@@ -26,6 +26,7 @@ const DebugDialog: React.FC<DebugDialogProps> = ({
       try {
         traductionContent = JSON.parse(traductionContent);
         isParsed = true;
+        console.log("Champ Traduction parsé dans DebugDialog:", traductionContent);
       } catch (e) {
         console.log("Échec du parsing du champ Traduction dans le dialog de debug");
       }

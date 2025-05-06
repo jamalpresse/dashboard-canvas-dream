@@ -64,6 +64,11 @@ export const formatTranslationResult = (data: any): string => {
             return extractedText;
           }
           
+          // Si c'est juste une chaîne dans un format JSON
+          if (typeof parsedJson === 'string') {
+            return parsedJson;
+          }
+          
           // Sinon, retourner le JSON formaté
           return JSON.stringify(parsedJson, null, 2);
         } catch (e) {

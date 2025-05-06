@@ -23,7 +23,7 @@ const DirectTranslationResult: React.FC<DirectTranslationResultProps> = ({ conte
         // Si c'est un objet simple avec une propriété texte, l'extraire
         if (typeof jsonContent === 'object' && !Array.isArray(jsonContent)) {
           // Propriétés de texte courantes à rechercher
-          const textProps = ['translated_text', 'translation', 'text', 'content', 'message'];
+          const textProps = ['translated_text', 'translation', 'text', 'content', 'message', 'output'];
           
           for (const prop of textProps) {
             if (jsonContent[prop] && typeof jsonContent[prop] === 'string') {
