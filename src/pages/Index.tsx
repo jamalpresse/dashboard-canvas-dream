@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 
@@ -78,14 +77,12 @@ const Index = () => {
             {t.search}
           </Link>
 
-          <a
-            href="https://chatgpt.com/canvas/shared/681900fead808191b5d57f557500076a"
-            target="_blank"
-            rel="noopener noreferrer"
+          <Link
+            to="/improve"
             className="flex-1 bg-red-600 hover:bg-red-700 text-white font-semibold text-lg py-6 rounded-2xl shadow-lg text-center transition duration-300"
           >
             {t.improve}
-          </a>
+          </Link>
 
           <a
             href="https://chatgpt.com/canvas/shared/6818c0edd7e481919a1164e5a76036e5"
