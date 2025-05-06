@@ -1,5 +1,6 @@
 
 import React, { useState, useEffect } from "react";
+import { Link } from "react-router-dom";
 
 const Index = () => {
   const [lang, setLang] = useState("ar"); // 'ar' ou 'fr'
@@ -70,14 +71,12 @@ const Index = () => {
 
         {/* Boutons */}
         <div className="flex flex-col md:flex-row gap-6 w-full max-w-2xl">
-          <a
-            href="https://chatgpt.com/canvas/shared/6818b820c4488191aee7abb6f183b7c1"
-            target="_blank"
-            rel="noopener noreferrer"
+          <Link
+            to="/search"
             className="flex-1 bg-red-600 hover:bg-red-700 text-white font-semibold text-lg py-6 rounded-2xl shadow-lg text-center transition duration-300"
           >
             {t.search}
-          </a>
+          </Link>
 
           <a
             href="https://chatgpt.com/canvas/shared/681900fead808191b5d57f557500076a"
