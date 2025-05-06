@@ -12,6 +12,8 @@ const DirectTranslationResult: React.FC<DirectTranslationResultProps> = ({ conte
     // Traitement différent selon le type de contenu
     let displayContent = content;
     
+    console.log("DirectTranslationResult received content type:", typeof content);
+    
     // Si c'est une chaîne JSON valide, essayer de l'analyser
     if (typeof content === 'string' && (content.trim().startsWith('{') || content.trim().startsWith('['))) {
       try {
@@ -22,8 +24,8 @@ const DirectTranslationResult: React.FC<DirectTranslationResultProps> = ({ conte
         if (typeof jsonContent === 'object' && !Array.isArray(jsonContent)) {
           // Priorité d'extraction du texte (du plus spécifique au plus générique)
           const textProperties = [
-            'Traduction', 'translation', 'translated_text', 'text', 
-            'content', 'body', 'main_content', 'output'
+            'translated_text', 'translation', 'text', 'content', 
+            'body', 'message', 'output', 'result', 'value'
           ];
           
           for (const prop of textProperties) {
@@ -48,15 +50,18 @@ const DirectTranslationResult: React.FC<DirectTranslationResultProps> = ({ conte
         } else if (Array.isArray(jsonContent) && jsonContent.length === 1 && typeof jsonContent[0] === 'string') {
           // Si c'est un tableau avec une seule entrée qui est une chaîne
           displayContent = jsonContent[0];
+          console.log("Extracted text from single array item:", displayContent);
         } else {
           // Pour les tableaux ou autres structures JSON, on garde le format JSON
           displayContent = JSON.stringify(jsonContent, null, 2);
         }
       } catch (e) {
         // Si le parsing JSON échoue, on garde le contenu tel quel
-        console.log("Erreur de parsing JSON:", e);
+        console.log("Erreur de parsing JSON, utilisation du contenu brut:", e);
       }
     }
+    
+    console.log("Final display content:", displayContent);
     
     return (
       <div>

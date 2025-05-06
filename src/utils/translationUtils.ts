@@ -66,6 +66,40 @@ const filterTemplateVariables = (obj: any): any => {
 };
 
 /**
+ * Extrait de manière intelligente le texte à partir de différents formats d'objets
+ */
+const extractTextFromObject = (obj: any): string | null => {
+  if (!obj || typeof obj !== 'object') return null;
+  
+  // Propriétés communes contenant du texte
+  const textProperties = [
+    'text', 'content', 'body', 'message', 'translated_text', 
+    'translation', 'output', 'result', 'value'
+  ];
+  
+  // Essayer d'abord les propriétés de texte connues
+  for (const prop of textProperties) {
+    if (obj[prop] !== undefined) {
+      if (typeof obj[prop] === 'string') {
+        return obj[prop];
+      } else if (typeof obj[prop] === 'object' && obj[prop] !== null) {
+        // Récursion pour les objets imbriqués
+        const nestedText = extractTextFromObject(obj[prop]);
+        if (nestedText) return nestedText;
+      }
+    }
+  }
+  
+  // Si l'objet a une seule propriété qui est une chaîne
+  const keys = Object.keys(obj);
+  if (keys.length === 1 && typeof obj[keys[0]] === 'string') {
+    return obj[keys[0]];
+  }
+  
+  return null;
+}
+
+/**
  * Formats translation data into a readable structure
  * Prioritizes the "Traduction" field from the webhook response
  */
@@ -82,18 +116,38 @@ export const formatTranslationResult = (data: any): string => {
     
     // Cas 1: Traduction est une chaîne directe
     if (typeof data.Traduction === 'string') {
+      // Si c'est une chaîne qui ressemble à du JSON, essayer de la parser
+      if (data.Traduction.trim().startsWith('{') || data.Traduction.trim().startsWith('[')) {
+        try {
+          const parsedJson = JSON.parse(data.Traduction);
+          console.log("Successfully parsed JSON from Traduction string:", parsedJson);
+          
+          // Extraire le texte de l'objet JSON parsé
+          const extractedText = extractTextFromObject(parsedJson);
+          if (extractedText) {
+            console.log("Extracted text from parsed JSON:", extractedText);
+            return extractedText;
+          }
+          
+          // Si on n'a pas pu extraire de texte, renvoyer le JSON formaté
+          return JSON.stringify(parsedJson, null, 2);
+        } catch (e) {
+          // Si le parsing échoue, utiliser la chaîne telle quelle
+          console.log("Failed to parse JSON, using string as is:", e);
+        }
+      }
       return data.Traduction;
     } 
     // Cas 2: Traduction est un objet
     else if (data.Traduction && typeof data.Traduction === 'object') {
-      // Si l'objet a des propriétés communes de texte, les extraire
-      if (data.Traduction.body) return data.Traduction.body;
-      if (data.Traduction.content) return data.Traduction.content;
-      if (data.Traduction.text) return data.Traduction.text;
-      if (data.Traduction.output) return data.Traduction.output;
-      if (data.Traduction.translated_text) return data.Traduction.translated_text;
+      // Essayer d'extraire du texte de l'objet
+      const extractedText = extractTextFromObject(data.Traduction);
+      if (extractedText) {
+        console.log("Extracted text from Traduction object:", extractedText);
+        return extractedText;
+      }
       
-      // Si c'est un objet sans ces propriétés, le convertir en JSON formaté
+      // Si c'est un objet sans propriétés communes, le convertir en JSON formaté
       return JSON.stringify(data.Traduction, null, 2);
     }
   }
@@ -102,19 +156,11 @@ export const formatTranslationResult = (data: any): string => {
   const cleanedData = filterTemplateVariables(data);
   console.log("Cleaned data after filtering template variables:", cleanedData);
   
-  // Priorité 2: Champs communs de traduction directe
-  if (cleanedData && typeof cleanedData === 'object') {
-    if (cleanedData.translation) return cleanedData.translation;
-    if (cleanedData.translated_text) return cleanedData.translated_text;
-    if (cleanedData.text) return cleanedData.text;
-    if (cleanedData.output && typeof cleanedData.output === 'string') return cleanedData.output;
-  }
-  
-  // Priorité 3: Champs de contenu
-  if (cleanedData && typeof cleanedData === 'object') {
-    if (cleanedData.body) return cleanedData.body;
-    if (cleanedData.content) return cleanedData.content;
-    if (cleanedData.main_content) return cleanedData.main_content;
+  // Essayer d'extraire du texte de l'objet complet
+  const extractedText = extractTextFromObject(cleanedData);
+  if (extractedText) {
+    console.log("Extracted text from whole response:", extractedText);
+    return extractedText;
   }
   
   // Vérifier si nous avons encore des données utiles après le filtrage
@@ -133,45 +179,6 @@ export const formatTranslationResult = (data: any): string => {
   } else {
     return JSON.stringify(cleanedData, null, 2);
   }
-};
-
-/**
- * Extract the most appropriate translation result from API response
- */
-export const extractTranslationFromResponse = (data: any): any => {
-  console.log("Extracting translation from response:", data);
-  
-  if (!data) {
-    return { error: "Pas de données reçues" };
-  }
-  
-  // Priorité absolue: champ "Traduction" spécifique du webhook
-  if (data && typeof data === 'object' && data.Traduction !== undefined) {
-    console.log("Found 'Traduction' field directly:", data.Traduction);
-    return data.Traduction;
-  }
-  
-  // Filter out template variables
-  const cleanedData = filterTemplateVariables(data);
-  
-  // Check standard translation fields
-  if (cleanedData && typeof cleanedData === 'object') {
-    if (cleanedData.translation) return cleanedData.translation;
-    if (cleanedData.translated_text) return cleanedData.translated_text;
-    if (cleanedData.text) return cleanedData.text;
-    if (cleanedData.output) return cleanedData.output;
-    if (cleanedData.body) return cleanedData.body;
-    if (cleanedData.content) return cleanedData.content;
-    if (cleanedData.main_content) return cleanedData.main_content;
-    
-    // If we have cleaned data without template variables, return that
-    if (Object.keys(cleanedData).length > 0) {
-      return cleanedData;
-    }
-  }
-  
-  // If no useful content could be extracted, return a simplified message
-  return { error: "Impossible d'extraire une traduction des données reçues" };
 };
 
 /**
