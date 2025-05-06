@@ -3,7 +3,6 @@ import React, { useState } from "react";
 import { Link } from "react-router-dom";
 import { Search, ArrowUp, MessageSquare, Users } from "lucide-react";
 import { StatCard } from "@/components/dashboard/StatCard";
-import { LineChart } from "@/components/dashboard/LineChart";
 import { ActivityTimeline } from "@/components/dashboard/ActivityTimeline";
 import { WeatherWidget } from "@/components/dashboard/WeatherWidget";
 
@@ -90,32 +89,6 @@ const Index = () => {
     icon: <Users className="h-4 w-4" />
   }];
 
-  // Mock data for the chart
-  const chartData = [{
-    name: "Jan",
-    visits: 1000,
-    articles: 40
-  }, {
-    name: "Fev",
-    visits: 1200,
-    articles: 42
-  }, {
-    name: "Mar",
-    visits: 1500,
-    articles: 45
-  }, {
-    name: "Avr",
-    visits: 1800,
-    articles: 48
-  }, {
-    name: "Mai",
-    visits: 2000,
-    articles: 50
-  }, {
-    name: "Jui",
-    visits: 2400,
-    articles: 52
-  }];
   return <div className="space-y-6">
       <div dir={dir} className="min-h-[80vh] bg-gradient-to-br from-purple-50 to-pink-50 flex flex-col px-4 relative animate-fade-in">
         {/* Language Switcher */}
@@ -135,19 +108,7 @@ const Index = () => {
 
         {/* Weather Widget and Activities Section */}
         <div className="w-full max-w-5xl mx-auto grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
-          <div className="lg:col-span-2 grid grid-cols-1 md:grid-cols-2 gap-6">
-            <LineChart className="col-span-full shadow-md hover:shadow-lg transition-shadow duration-300" 
-              data={chartData} title={isArabic ? "متابعة النشاط" : "Suivi d'activité"} 
-              lines={[{
-              dataKey: "visits",
-              stroke: "#9b87f5",
-              name: isArabic ? "الزيارات" : "Visites"
-            }, {
-              dataKey: "articles",
-              stroke: "#D946EF",
-              name: isArabic ? "المقالات" : "Articles"
-            }]} 
-            />
+          <div className="lg:col-span-2 grid grid-cols-1 md:grid-cols-1 gap-6">
             <WeatherWidget city="Casablanca" className="shadow-md hover:shadow-lg transition-shadow duration-300" />
           </div>
           
