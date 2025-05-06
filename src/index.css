@@ -76,6 +76,19 @@
     @apply bg-background text-foreground;
     font-feature-settings: "rlig" 1, "calt" 1;
   }
+
+  /* RTL Support */
+  [dir="rtl"] .rtl\:space-x-reverse {
+    --tw-space-x-reverse: 1;
+  }
+
+  [dir="rtl"] .rtl\:mr-0 {
+    margin-right: 0;
+  }
+
+  [dir="rtl"] .rtl\:ml-12 {
+    margin-left: 3rem;
+  }
 }
 
 .scrollbar-hide::-webkit-scrollbar {
@@ -85,4 +98,19 @@
 .scrollbar-hide {
   -ms-overflow-style: none;
   scrollbar-width: none;
+}
+
+/* Marquee Animation */
+@keyframes marquee {
+  0% { transform: translateX(100%); }
+  100% { transform: translateX(-100%); }
+}
+
+.marquee {
+  display: inline-block;
+  animation: marquee 30s linear infinite;
+}
+
+[dir="rtl"] .marquee {
+  animation-direction: reverse;
 }

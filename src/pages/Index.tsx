@@ -1,165 +1,141 @@
 
-import { StatCard } from "@/components/dashboard/StatCard";
-import { ActivityTimeline } from "@/components/dashboard/ActivityTimeline";
-import { OverviewChart } from "@/components/dashboard/OverviewChart";
-import { LineChart } from "@/components/dashboard/LineChart";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { 
-  Users, 
-  DollarSign, 
-  ShoppingCart, 
-  ArrowUpRight,
-  MessageSquare,
-  FileText,
-  Clock,
-  Settings
-} from "lucide-react";
-
-const revenueData = [
-  { name: "Jan", total: 18000 },
-  { name: "Feb", total: 22000 },
-  { name: "Mar", total: 32000 },
-  { name: "Apr", total: 28000 },
-  { name: "May", total: 42000 },
-  { name: "Jun", total: 38000 },
-];
-
-const growthData = [
-  { name: "Jan", users: 400, revenue: 2400, orders: 240 },
-  { name: "Feb", users: 600, revenue: 1398, orders: 310 },
-  { name: "Mar", users: 800, revenue: 9800, orders: 290 },
-  { name: "Apr", users: 1000, revenue: 3908, orders: 350 },
-  { name: "May", users: 1300, revenue: 4800, orders: 480 },
-  { name: "Jun", users: 1600, revenue: 3800, orders: 600 },
-];
-
-const activityItems = [
-  {
-    id: "1",
-    title: "New user registered",
-    description: "Sophie Moore has registered with email sophie.moore@example.com",
-    time: "2 hours ago",
-    icon: <Users className="h-4 w-4" />,
-    type: "success" as const,
-  },
-  {
-    id: "2",
-    title: "New order placed",
-    description: "Order #4912 was placed for $320",
-    time: "4 hours ago",
-    icon: <ShoppingCart className="h-4 w-4" />,
-  },
-  {
-    id: "3",
-    title: "Payment received",
-    description: "Payment of $1,200 received from customer #40498",
-    time: "Yesterday",
-    icon: <DollarSign className="h-4 w-4" />,
-    type: "success" as const,
-  },
-  {
-    id: "4",
-    title: "System update scheduled",
-    description: "The system will be updated at 2:00 AM tomorrow",
-    time: "2 days ago",
-    icon: <Settings className="h-4 w-4" />,
-    type: "warning" as const,
-  },
-  {
-    id: "5",
-    title: "Report generated",
-    description: "Monthly report has been generated and is ready for review",
-    time: "3 days ago",
-    icon: <FileText className="h-4 w-4" />,
-  },
-];
+import React, { useState, useEffect } from "react";
 
 const Index = () => {
+  const [lang, setLang] = useState("ar"); // 'ar' ou 'fr'
+  const [rssItems, setRssItems] = useState([]);
+
+  const isArabic = lang === "ar";
+  const dir = isArabic ? "rtl" : "ltr";
+
+  const labels = {
+    ar: {
+      title: "لوحة تحكم الصحفيين",
+      subtitle: "اختر إحدى الوظائف التالية:",
+      search: "🔍 البحث (بالعربية / الفرنسية)",
+      improve: "🛠️ تحسين النص وتهيئة محركات البحث",
+      translate: "🌍 الترجمة التلقائية",
+      switchTo: "Français",
+    },
+    fr: {
+      title: "Dashboard Journalistes",
+      subtitle: "Choisissez une fonctionnalité ci-dessous :",
+      search: "🔍 Recherche (AR / FR)",
+      improve: "🛠️ Améliorer texte & SEO",
+      translate: "🌍 Traduction multilingue",
+      switchTo: "عربية",
+    },
+  };
+
+  const t = labels[lang];
+
+  useEffect(() => {
+    async function fetchRSS() {
+      try {
+        const res = await fetch("https://api.rss2json.com/v1/api.json?rss_url=https://snrtnews.com/rss.xml");
+        const data = await res.json();
+        if (data.items) setRssItems(data.items.slice(0, 5));
+      } catch (err) {
+        console.error("Erreur de récupération du flux RSS:", err);
+      }
+    }
+    fetchRSS();
+  }, []);
+
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-3xl font-bold tracking-tight">Dashboard</h1>
-        <p className="text-muted-foreground">
-          Overview of your business analytics and performance
-        </p>
-      </div>
+      <div dir={dir} className="min-h-[80vh] bg-white flex flex-col items-center justify-center px-4 relative">
+        {/* Language Switcher */}
+        <div className="w-full max-w-5xl flex justify-end pt-2">
+          <button
+            onClick={() => setLang(isArabic ? "fr" : "ar")}
+            className="text-sm text-gray-700 hover:underline"
+          >
+            {t.switchTo}
+          </button>
+        </div>
 
-      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
-        <StatCard
-          title="Total Revenue"
-          value="$45,231.89"
-          icon={<DollarSign className="h-5 w-5" />}
-          trend={{ value: 12, positive: true }}
-          variant="primary"
+        {/* Logo */}
+        <img 
+          src="/placeholder.svg" 
+          alt="SNRTnews" 
+          className="w-40 mb-8 mt-4" 
         />
-        <StatCard
-          title="New Customers"
-          value="2,350"
-          icon={<Users className="h-5 w-5" />}
-          trend={{ value: 5.2, positive: true }}
-        />
-        <StatCard
-          title="Orders"
-          value="1,245"
-          icon={<ShoppingCart className="h-5 w-5" />}
-          trend={{ value: 2.3, positive: false }}
-          variant="warning"
-        />
-        <StatCard
-          title="Conversion Rate"
-          value="3.2%"
-          icon={<ArrowUpRight className="h-5 w-5" />}
-          trend={{ value: 4.1, positive: true }}
-          variant="success"
-        />
-      </div>
 
-      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-7">
-        <OverviewChart data={revenueData} title="Revenue Overview" className="lg:col-span-4" />
-        <ActivityTimeline items={activityItems} className="lg:col-span-3" />
-      </div>
+        {/* Titre et sous-titre */}
+        <div className="text-center mb-8">
+          <h1 className="text-3xl font-bold">{t.title}</h1>
+          <p className="text-muted-foreground mt-2">{t.subtitle}</p>
+        </div>
 
-      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-7">
-        <LineChart
-          data={growthData}
-          title="Growth Metrics"
-          className="lg:col-span-4"
-          lines={[
-            { dataKey: "users", stroke: "#3B82F6", name: "Users" },
-            { dataKey: "revenue", stroke: "#10B981", name: "Revenue" },
-            { dataKey: "orders", stroke: "#F59E0B", name: "Orders" },
-          ]}
-        />
-        <Card className="lg:col-span-3">
-          <CardHeader>
-            <CardTitle>Recent Messages</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-4">
-              {[1, 2, 3, 4].map((i) => (
-                <div key={i} className="flex items-start gap-4">
-                  <Avatar>
-                    <AvatarFallback>{`U${i}`}</AvatarFallback>
-                  </Avatar>
-                  <div>
-                    <p className="text-sm font-medium">User {i}</p>
-                    <p className="text-sm text-muted-foreground">
-                      Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nulla vitae...
-                    </p>
-                    <div className="mt-1 flex items-center gap-2 text-xs text-muted-foreground">
-                      <MessageSquare className="h-3 w-3" />
-                      <span>3 replies</span>
-                      <Clock className="ml-2 h-3 w-3" />
-                      <span>{i} hour{i !== 1 ? "s" : ""} ago</span>
-                    </div>
-                  </div>
-                </div>
-              ))}
+        {/* Boutons */}
+        <div className="flex flex-col md:flex-row gap-6 w-full max-w-2xl">
+          <a
+            href="https://chatgpt.com/canvas/shared/6818b820c4488191aee7abb6f183b7c1"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex-1 bg-red-600 hover:bg-red-700 text-white font-semibold text-lg py-6 rounded-2xl shadow-lg text-center transition duration-300"
+          >
+            {t.search}
+          </a>
+
+          <a
+            href="https://chatgpt.com/canvas/shared/681900fead808191b5d57f557500076a"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex-1 bg-red-600 hover:bg-red-700 text-white font-semibold text-lg py-6 rounded-2xl shadow-lg text-center transition duration-300"
+          >
+            {t.improve}
+          </a>
+
+          <a
+            href="https://chatgpt.com/canvas/shared/6818c0edd7e481919a1164e5a76036e5"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex-1 bg-red-600 hover:bg-red-700 text-white font-semibold text-lg py-6 rounded-2xl shadow-lg text-center transition duration-300"
+          >
+            {t.translate}
+          </a>
+        </div>
+
+        {/* RSS Ticker - Fixed to the bottom of content area, not page */}
+        <div className="w-full bg-red-50 border-t border-red-300 text-base overflow-hidden shadow-inner mt-8">
+          <div className="flex items-center space-x-4 rtl:space-x-reverse px-6 py-3">
+            <span className="text-red-700 font-semibold whitespace-nowrap">📰 {isArabic ? 'آخر الأخبار' : 'Dernières actualités'} :</span>
+            <div className="flex-1 overflow-hidden">
+              <div className="marquee whitespace-nowrap">
+                {rssItems.length > 0 ? (
+                  rssItems.map((item, index) => (
+                    <a 
+                      key={index} 
+                      href={item.link} 
+                      target="_blank" 
+                      rel="noopener noreferrer" 
+                      className="inline-block mr-12 rtl:ml-12 rtl:mr-0 text-blue-700 hover:underline"
+                    >
+                      {item.title}
+                    </a>
+                  ))
+                ) : (
+                  <span className="text-gray-500">Chargement des actualités...</span>
+                )}
+              </div>
             </div>
-          </CardContent>
-        </Card>
+          </div>
+        </div>
       </div>
+
+      {/* Add the CSS for the marquee animation */}
+      <style jsx>{`
+        .marquee {
+          display: inline-block;
+          animation: marquee 30s linear infinite;
+        }
+        @keyframes marquee {
+          0% { transform: translateX(${isArabic ? '-100%' : '100%'}); }
+          100% { transform: translateX(${isArabic ? '100%' : '-100%'}); }
+        }
+      `}</style>
     </div>
   );
 };
