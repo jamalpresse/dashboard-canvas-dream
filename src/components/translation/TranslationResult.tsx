@@ -31,24 +31,61 @@ const TranslationResult: React.FC<TranslationResultProps> = ({ result, isRTL, on
         const parsedJson = JSON.parse(text);
         return (
           <div>
-            <pre className="whitespace-pre-wrap break-words bg-gray-50 p-4 rounded-md text-sm overflow-auto">
-              {JSON.stringify(parsedJson, null, 2)}
-            </pre>
-            {parsedJson.translation || parsedJson.texte || parsedJson.text ? (
-              <div className="mt-4 p-4 border rounded-md bg-white">
-                <h3 className="font-medium mb-2 text-purple-700">Texte traduit:</h3>
-                <p className="text-gray-800">{parsedJson.translation || parsedJson.texte || parsedJson.text}</p>
+            {parsedJson.main_title && (
+              <h2 className="text-xl font-bold mb-3 text-purple-800">{parsedJson.main_title}</h2>
+            )}
+            
+            {parsedJson.body && (
+              <div className="mt-2 mb-4 whitespace-pre-wrap">{parsedJson.body}</div>
+            )}
+            
+            {parsedJson.translation && (
+              <div className="mt-2 mb-4">{parsedJson.translation}</div>
+            )}
+            
+            {parsedJson.text && (
+              <div className="mt-2 mb-4">{parsedJson.text}</div>
+            )}
+            
+            {parsedJson.seo_titles && Array.isArray(parsedJson.seo_titles) && parsedJson.seo_titles.length > 0 && (
+              <div className="mt-4 p-3 border-t pt-3">
+                <h3 className="font-medium mb-2 text-purple-700">Titres SEO:</h3>
+                <ul className="list-disc pl-5">
+                  {parsedJson.seo_titles.map((title: string, i: number) => (
+                    <li key={i} className="mb-1">{title}</li>
+                  ))}
+                </ul>
               </div>
-            ) : null}
+            )}
+            
+            {parsedJson.hashtags && Array.isArray(parsedJson.hashtags) && parsedJson.hashtags.length > 0 && (
+              <div className="mt-4">
+                <h3 className="font-medium mb-2 text-purple-700">Hashtags:</h3>
+                <div className="flex flex-wrap gap-2">
+                  {parsedJson.hashtags.map((tag: string, i: number) => (
+                    <span key={i} className="text-purple-600 bg-purple-50 px-2 py-1 rounded-md text-sm">
+                      {tag}
+                    </span>
+                  ))}
+                </div>
+              </div>
+            )}
+            
+            {/* Afficher les données brutes lorsqu'il n'y a pas de champs reconnus */}
+            {!parsedJson.main_title && !parsedJson.body && !parsedJson.translation && !parsedJson.text && !parsedJson.seo_titles && (
+              <pre className="whitespace-pre-wrap break-words bg-gray-50 p-4 rounded-md text-sm overflow-auto">
+                {JSON.stringify(parsedJson, null, 2)}
+              </pre>
+            )}
           </div>
         );
       } catch (e) {
-        // If it's not valid JSON, continue with normal rendering
+        // Si ce n'est pas du JSON valide, continuer avec le rendu normal
         console.log("Format JSON détecté mais non valide, traitement comme texte");
       }
     }
     
-    // Split by lines to process headers and lists
+    // Split par lignes pour traiter les en-têtes et les listes
     return text.split('\n').map((line, index) => {
       // Headers
       if (line.startsWith('# ')) {

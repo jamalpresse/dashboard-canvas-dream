@@ -57,15 +57,14 @@ export const useTranslation = (
     
     setLoading(true);
     console.log(`Envoi de la requête au webhook ${WEBHOOK_URL}`);
-    console.log(`Données: texte=${text.substring(0, 50)}..., paire de langues=${langPair}`);
     
-    // Préparer les données à envoyer - utiliser l'URL fixe du webhook
+    // Préparer les données à envoyer - toujours utiliser l'URL fixe du webhook
     const payload = { 
       text: text.trim(), 
       langPair
     };
     
-    console.log("Payload complet:", payload);
+    console.log("Payload envoyé:", payload);
     
     try {
       const response = await fetch(WEBHOOK_URL, {
@@ -77,35 +76,31 @@ export const useTranslation = (
         body: JSON.stringify(payload),
       });
       
-      console.log("Réponse brute du serveur:", response);
-      console.log("Statut:", response.status, response.statusText);
+      console.log("Statut de la réponse:", response.status);
       
       if (!response.ok) {
-        throw new Error(`Erreur HTTP: ${response.status} ${response.statusText}`);
+        throw new Error(`Erreur HTTP: ${response.status}`);
       }
 
+      // Traitement de la réponse
       let responseData;
       try {
         responseData = await response.json();
-        console.log("Réponse JSON complète:", JSON.stringify(responseData, null, 2));
+        console.log("Réponse JSON reçue:", responseData);
         setDebugData(responseData);
       } catch (jsonError) {
         const textResponse = await response.text();
         console.log("Réponse texte (non-JSON):", textResponse);
         responseData = textResponse;
-        setDebugData({ textResponse });
+        setDebugData({ rawText: textResponse });
       }
       
       if (!responseData) {
         throw new Error("Réponse vide reçue du serveur");
       }
       
-      // Utilisation des fonctions d'extraction et de formatage
-      const extractedData = extractTranslationFromResponse(responseData);
-      console.log("Données extraites après traitement:", extractedData);
-      
-      const formattedResult = formatTranslationResult(extractedData);
-      console.log("Résultat formaté final:", formattedResult.substring(0, 100) + "...");
+      // Utilisation des données directement sans transformation complexe
+      const formattedResult = responseData.body || responseData.translation || responseData.text || JSON.stringify(responseData);
       
       setResult(formattedResult);
       toast({
