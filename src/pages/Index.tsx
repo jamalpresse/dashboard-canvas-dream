@@ -56,12 +56,7 @@ const Index = () => {
           </button>
         </div>
 
-        {/* Logo */}
-        <img 
-          src="/placeholder.svg" 
-          alt="SNRTnews" 
-          className="w-40 mb-8 mt-4" 
-        />
+        {/* Removed the logo image */}
 
         {/* Titre et sous-titre */}
         <div className="text-center mb-8">
