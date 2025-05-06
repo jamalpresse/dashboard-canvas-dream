@@ -1,6 +1,7 @@
 
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { useToast } from "@/hooks/use-toast";
 
 export default function Translation() {
   const [text, setText] = useState('');
@@ -8,6 +9,7 @@ export default function Translation() {
   const [result, setResult] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+  const { toast } = useToast();
 
   // URL du webhook n8n pour la traduction
   const WEBHOOK_URL = 'https://n8n-jamal-u38598.vm.elestio.app/webhook/4732aeff-7544-4f0e-8554-ebd0f614947b';
@@ -30,8 +32,17 @@ export default function Translation() {
       const clip = await navigator.clipboard.readText();
       setText(clip);
       setError('');
+      toast({
+        title: "Collé avec succès",
+        description: "Le texte a été collé depuis le presse-papier",
+      });
     } catch {
       setError('Impossible de lire le presse-papier.');
+      toast({
+        title: "Erreur",
+        description: "Impossible de lire le presse-papier",
+        variant: "destructive",
+      });
     }
   };
 
@@ -40,6 +51,11 @@ export default function Translation() {
     setResult('');
     if (!text.trim()) {
       setError('Veuillez entrer du texte à traduire.');
+      toast({
+        title: "Attention",
+        description: "Veuillez entrer du texte à traduire",
+        variant: "destructive",
+      });
       return;
     }
     setLoading(true);
@@ -49,14 +65,39 @@ export default function Translation() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ text, langPair }),
       });
+      
       if (!response.ok) throw new Error(`HTTP ${response.status}`);
 
       const data = await response.json();
-      const raw = data.Traduction;
-      const translation = typeof raw === 'string' ? raw : JSON.stringify(raw, null, 2);
+      console.log("Réponse API de traduction:", data);
+      
+      // Extraction du résultat de traduction
+      // Essayer différentes propriétés où le résultat pourrait se trouver
+      let translation = '';
+      if (data.Traduction) {
+        translation = data.Traduction;
+      } else if (data.body) {
+        translation = data.body;
+      } else if (data.main_title) {
+        translation = data.main_title;
+      } else {
+        // Si aucune propriété reconnue n'est trouvée, utiliser l'objet entier
+        translation = JSON.stringify(data, null, 2);
+      }
+      
       setResult(translation);
+      toast({
+        title: "Traduction complétée",
+        description: "Le texte a été traduit avec succès",
+      });
     } catch (err) {
+      console.error("Erreur de traduction:", err);
       setError(err.message || 'Erreur lors de la traduction.');
+      toast({
+        title: "Erreur",
+        description: "Erreur lors de la traduction. Veuillez réessayer.",
+        variant: "destructive",
+      });
     } finally {
       setLoading(false);
     }
@@ -69,7 +110,13 @@ export default function Translation() {
   };
 
   const handleCopy = async () => {
-    if (result) await navigator.clipboard.writeText(result);
+    if (result) {
+      await navigator.clipboard.writeText(result);
+      toast({
+        title: "Copié",
+        description: "Le texte traduit a été copié dans le presse-papier",
+      });
+    }
   };
 
   return (
@@ -89,7 +136,7 @@ export default function Translation() {
                 isSourceRTL ? 'text-right' : 'text-left'
               }`}
             />
-            <div className="mt-2 flex space-x-2">
+            <div className="mt-2 flex flex-wrap gap-2">
               <button
                 type="button"
                 onClick={handlePaste}
@@ -120,7 +167,7 @@ export default function Translation() {
           </section>
 
           <section>
-            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-2">
+            <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
               {langs.map(({ label, value }) => (
                 <button
                   key={value}
@@ -148,11 +195,12 @@ export default function Translation() {
             >
               {result || <span className="text-gray-400">Le résultat apparaîtra ici</span>}
             </div>
-            <div className="mt-2 flex space-x-2">
+            <div className="mt-2 flex flex-wrap gap-2">
               <button
                 type="button"
                 onClick={handleCopy}
-                className="px-4 py-2 bg-gradient-to-r from-purple-500 to-pink-500 text-white rounded-md hover:from-purple-600 hover:to-pink-600 transition-colors shadow-sm"
+                disabled={!result}
+                className={`px-4 py-2 bg-gradient-to-r from-purple-500 to-pink-500 text-white rounded-md hover:from-purple-600 hover:to-pink-600 transition-colors shadow-sm ${!result ? 'opacity-50 cursor-not-allowed' : ''}`}
               >
                 COPIER
               </button>
