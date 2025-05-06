@@ -7,6 +7,7 @@ import { Languages, Clipboard, AlertCircle } from "lucide-react";
 import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
 import { extractTranslationFromResponse, formatTranslationResult } from "@/utils/translationUtils";
 import TranslationResult from "@/components/translation/TranslationResult";
+import LanguageSelector from "@/components/translation/LanguageSelector";
 
 interface TranslationFormProps {
   onDebugToggle: () => void;
