@@ -1,10 +1,9 @@
-
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
-import { Language, Clipboard, ClipboardCheck, AlertCircle } from "lucide-react";
+import { Languages, Clipboard, ClipboardCheck, AlertCircle } from "lucide-react";
 import { extractTranslationFromResponse, formatTranslationResult } from "@/utils/translationUtils";
 import TranslationResult from "@/components/translation/TranslationResult";
 import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
@@ -129,7 +128,7 @@ export default function Translation() {
       <Card className="w-full max-w-4xl mx-auto shadow-md hover:shadow-lg transition-all duration-300">
         <CardHeader>
           <CardTitle className="text-2xl font-semibold text-gray-800 flex items-center gap-2">
-            <Language className="h-6 w-6 text-purple-500" />
+            <Languages className="h-6 w-6 text-purple-500" />
             Traduction Multilingue
           </CardTitle>
         </CardHeader>
@@ -168,7 +167,7 @@ export default function Translation() {
                     : 'bg-gradient-to-r from-purple-600 to-pink-500 hover:from-purple-700 hover:to-pink-600 transition-colors'
                 }`}
               >
-                <Language className="mr-1 h-4 w-4" />
+                <Languages className="mr-1 h-4 w-4" />
                 {loading ? 'TRADUCTION...' : 'TRADUIRE'}
               </Button>
               <Button
