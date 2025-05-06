@@ -1,8 +1,7 @@
 
 import React from 'react';
 import { Card, CardContent } from "@/components/ui/card";
-import { Separator } from "@/components/ui/separator";
-import { ClipboardCopy, Languages } from "lucide-react";
+import { ClipboardCopy } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 interface TranslationResultProps {
