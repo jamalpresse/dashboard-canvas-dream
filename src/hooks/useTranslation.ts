@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { useToast } from "@/hooks/use-toast";
 import { formatTranslationResult, extractTranslationFromResponse, detectResultType } from '@/utils/translationUtils';
@@ -61,9 +60,12 @@ export const useTranslation = (
     console.log(`Envoi de la requête au webhook fixe: ${WEBHOOK_URL}`);
     
     // Préparer les données à envoyer avec le format exact attendu par le webhook
+    // Ajout du paramètre pour demander uniquement une traduction directe
     const payload = { 
       text: text.trim(), 
-      langPair
+      langPair,
+      responseType: "direct-translation", // Demande explicite d'une traduction directe
+      enhancedContent: false // Désactiver explicitement le contenu amélioré
     };
     
     console.log("Payload envoyé:", payload);
@@ -92,10 +94,10 @@ export const useTranslation = (
       // Enregistrement de la réponse complète pour le débogage
       setDebugData(responseData);
       
-      // Déterminer le type de réponse
-      const resultType = detectResultType(responseData);
+      // Force le type de réponse à être une traduction directe
+      const resultType = 'direct-translation';
       setResponseType(resultType);
-      console.log("Type de réponse détecté:", resultType);
+      console.log("Type de réponse forcé à:", resultType);
       
       // Extraction et traitement de la traduction en utilisant nos utilitaires
       const translationContent = extractTranslationFromResponse(responseData);
@@ -106,30 +108,11 @@ export const useTranslation = (
       
       setResult(formattedResult);
       
-      // Afficher un toast en fonction du résultat
-      if (resultType === 'direct-translation') {
-        toast({
-          title: "Traduction complétée",
-          description: "Le texte a été traduit avec succès",
-        });
-      } else if (resultType === 'enhanced-content') {
-        toast({
-          title: "Contenu amélioré reçu",
-          description: "Le webhook a fourni du contenu amélioré avec SEO",
-        });
-      } else if (resultType === 'error' || formattedResult.includes('Aucune traduction disponible')) {
-        toast({
-          title: "Problème de traduction",
-          description: "Des variables non résolues ont été détectées dans la réponse",
-          variant: "destructive",
-        });
-      } else {
-        toast({
-          title: "Réponse reçue",
-          description: "Format de réponse inconnu",
-          variant: "destructive",
-        });
-      }
+      // Toast toujours en tant que traduction directe
+      toast({
+        title: "Traduction complétée",
+        description: "Le texte a été traduit avec succès",
+      });
     } catch (err: any) {
       console.error("Erreur de traduction:", err);
       setError(err.message || 'Erreur lors de la traduction.');

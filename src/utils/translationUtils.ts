@@ -75,6 +75,19 @@ export const formatTranslationResult = (data: any): string => {
   const cleanedData = filterTemplateVariables(data);
   console.log("Cleaned data after filtering template variables:", cleanedData);
   
+  // Extract direct translation if it's enhanced content
+  if (cleanedData && typeof cleanedData === 'object') {
+    // Prioritize direct translation fields
+    if (cleanedData.translation) return cleanedData.translation;
+    if (cleanedData.translated_text) return cleanedData.translated_text;
+    if (cleanedData.text) return cleanedData.text;
+    
+    // If it's enhanced content, extract the main text
+    if (cleanedData.body) return cleanedData.body;
+    if (cleanedData.content) return cleanedData.content;
+    if (cleanedData.main_content) return cleanedData.main_content;
+  }
+  
   // Check if we still have useful data after filtering
   const hasUsefulData = cleanedData && 
     Object.keys(cleanedData).length > 0 && 
@@ -85,8 +98,12 @@ export const formatTranslationResult = (data: any): string => {
     return "Aucune traduction disponible dans la réponse du webhook.";
   }
   
-  // Return the cleaned data as formatted JSON
-  return JSON.stringify(cleanedData, null, 2);
+  // Return the cleaned data as a simple string if possible, otherwise formatted JSON
+  if (typeof cleanedData === 'string') {
+    return cleanedData;
+  } else {
+    return JSON.stringify(cleanedData, null, 2);
+  }
 };
 
 /**
@@ -103,6 +120,19 @@ export const extractTranslationFromResponse = (data: any): any => {
     // If we have a "translation" or "translated_text" field, prioritize that
     if (cleanedData.translation || cleanedData.translated_text || cleanedData.text) {
       return cleanedData.translation || cleanedData.translated_text || cleanedData.text;
+    }
+    
+    // For enhanced content, extract just the textual part
+    if (cleanedData.body) {
+      return cleanedData.body;
+    }
+    
+    if (cleanedData.content) {
+      return cleanedData.content;
+    }
+    
+    if (cleanedData.main_content || cleanedData.main_title) {
+      return cleanedData.main_content || cleanedData.main_title;
     }
     
     // If we have cleaned data without template variables, return that
@@ -122,6 +152,7 @@ export const extractTranslationFromResponse = (data: any): any => {
 
 /**
  * Detects the type of translation result based on the data structure
+ * Always return direct-translation as we want to force simple translations
  */
 export const detectResultType = (data: any): 'direct-translation' | 'enhanced-content' | 'error' | 'unknown' => {
   if (!data) return 'error';
@@ -129,18 +160,6 @@ export const detectResultType = (data: any): 'direct-translation' | 'enhanced-co
   // Check for error state
   if (data.error || data.erreur) return 'error';
   
-  // Check if it's a simple translation string
-  if (typeof data === 'string') return 'direct-translation';
-  
-  // Check if it's an enhanced content object with structure (main_title, body, etc.)
-  if (data.main_title || data.body || data.content || data.seo_titles || data.hashtags) {
-    return 'enhanced-content';
-  }
-  
-  // Check for direct translation fields
-  if (data.translation || data.translated_text || data.text) {
-    return 'direct-translation';
-  }
-  
-  return 'unknown';
+  // Force direct translation for all successful responses
+  return 'direct-translation';
 };

@@ -34,16 +34,8 @@ const TranslationResult: React.FC<TranslationResultProps> = ({
       return <ErrorResult message={result} />;
     }
     
-    // Render based on response type
-    switch (responseType) {
-      case 'enhanced-content':
-        return <EnhancedContentResult content={result} />;
-      case 'direct-translation':
-        return <DirectTranslationResult content={result} />;
-      case 'unknown':
-      default:
-        return <UnknownResult content={result} />;
-    }
+    // Always use DirectTranslationResult to ensure we get plain translations
+    return <DirectTranslationResult content={result} />;
   };
 
   return (
