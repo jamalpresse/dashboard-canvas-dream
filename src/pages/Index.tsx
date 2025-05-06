@@ -1,6 +1,5 @@
 
 import React, { useState, useEffect } from "react";
-import { Link } from "react-router-dom";
 import { Search, ArrowUp, MessageSquare, Users } from "lucide-react";
 import { StatCard } from "@/components/dashboard/StatCard";
 import { LineChart } from "@/components/dashboard/LineChart";
@@ -17,10 +16,6 @@ const Index = () => {
   const labels = {
     ar: {
       title: "لوحة تحكم الصحفيين",
-      subtitle: "اختر إحدى الوظائف التالية:",
-      search: "🔍 البحث (بالعربية / الفرنسية)",
-      improve: "🛠️ تحسين النص وتهيئة محركات البحث",
-      translate: "🌍 الترجمة التلقائية",
       switchTo: "Français",
       welcome: "مرحباً بك في لوحة تحكم الصحفيين",
       greeting: "أهلاً بك في نظام المعلومات الصحفية",
@@ -30,10 +25,6 @@ const Index = () => {
     },
     fr: {
       title: "Dashboard Journalistes",
-      subtitle: "Choisissez une fonctionnalité ci-dessous :",
-      search: "🔍 Recherche (AR / FR)",
-      improve: "🛠️ Améliorer texte & SEO",
-      translate: "🌍 Traduction multilingue",
       switchTo: "عربية",
       welcome: "Bienvenue au Dashboard Journalistes",
       greeting: "Bienvenue dans votre système d'information journalistique",
@@ -137,34 +128,6 @@ const Index = () => {
             items={activities} 
             className="col-span-1 shadow-md hover:shadow-lg transition-shadow duration-300"
           />
-        </div>
-
-        {/* Features Buttons */}
-        <div className="w-full max-w-5xl mx-auto mb-8">
-          <h2 className="text-xl font-semibold mb-4 text-gray-800">{t.subtitle}</h2>
-          <div className="flex flex-col md:flex-row gap-6">
-            <Link
-              to="/search"
-              className="flex-1 bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-700 hover:to-purple-800 text-white font-semibold text-lg py-6 px-4 rounded-xl shadow-lg text-center transition duration-300 flex items-center justify-center gap-3"
-            >
-              <Search className="h-5 w-5" />
-              <span>{t.search}</span>
-            </Link>
-
-            <Link
-              to="/improve"
-              className="flex-1 bg-gradient-to-r from-pink-500 to-purple-600 hover:from-pink-600 hover:to-purple-700 text-white font-semibold text-lg py-6 px-4 rounded-xl shadow-lg text-center transition duration-300 flex items-center justify-center gap-3"
-            >
-              {t.improve}
-            </Link>
-
-            <Link
-              to="/translation"
-              className="flex-1 bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white font-semibold text-lg py-6 px-4 rounded-xl shadow-lg text-center transition duration-300 flex items-center justify-center gap-3"
-            >
-              {t.translate}
-            </Link>
-          </div>
         </div>
 
         {/* RSS Ticker */}
