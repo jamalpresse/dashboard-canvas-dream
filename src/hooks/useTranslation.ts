@@ -60,10 +60,11 @@ export const useTranslation = (
     console.log(`Envoi de la requête au webhook fixe: ${WEBHOOK_URL}`);
     
     // Préparer les données à envoyer avec le format exact attendu par le webhook
-    // Ajout du paramètre pour demander uniquement une traduction directe
+    // Spécifier clairement que nous voulons une traduction (pas de contenu amélioré)
     const payload = { 
       text: text.trim(), 
       langPair,
+      type: "translation", // Indiquer clairement que nous demandons une traduction
       responseType: "direct-translation", // Demande explicite d'une traduction directe
       enhancedContent: false // Désactiver explicitement le contenu amélioré
     };
@@ -100,9 +101,6 @@ export const useTranslation = (
       console.log("Type de réponse forcé à:", resultType);
       
       // Extraction et traitement de la traduction en utilisant nos utilitaires
-      const translationContent = extractTranslationFromResponse(responseData);
-      console.log("Contenu de traduction extrait:", translationContent);
-      
       const formattedResult = formatTranslationResult(responseData);
       console.log("Résultat formaté:", formattedResult);
       

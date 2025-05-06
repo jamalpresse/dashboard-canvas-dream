@@ -1,4 +1,3 @@
-
 /**
  * Utility functions for handling translation data
  */
@@ -75,6 +74,13 @@ export const formatTranslationResult = (data: any): string => {
   const cleanedData = filterTemplateVariables(data);
   console.log("Cleaned data after filtering template variables:", cleanedData);
   
+  // Check for the specific "Traduction" field from the webhook
+  if (cleanedData && typeof cleanedData === 'object' && cleanedData.Traduction) {
+    return typeof cleanedData.Traduction === 'string' 
+      ? cleanedData.Traduction
+      : JSON.stringify(cleanedData.Traduction);
+  }
+  
   // Extract direct translation if it's enhanced content
   if (cleanedData && typeof cleanedData === 'object') {
     // Prioritize direct translation fields
@@ -86,6 +92,11 @@ export const formatTranslationResult = (data: any): string => {
     if (cleanedData.body) return cleanedData.body;
     if (cleanedData.content) return cleanedData.content;
     if (cleanedData.main_content) return cleanedData.main_content;
+    
+    // For output format that was specified in the user's examples
+    if (cleanedData.output) return typeof cleanedData.output === 'string' 
+      ? cleanedData.output 
+      : JSON.stringify(cleanedData.output);
   }
   
   // Check if we still have useful data after filtering
@@ -112,11 +123,16 @@ export const formatTranslationResult = (data: any): string => {
 export const extractTranslationFromResponse = (data: any): any => {
   console.log("Extracting translation from response:", data);
   
-  // First pass: Look for direct translation fields
-  if (data && typeof data === 'object') {
-    // Filter out template variables
-    const cleanedData = filterTemplateVariables(data);
-    
+  // First check for the specific "Traduction" field from the webhook
+  if (data && typeof data === 'object' && data.Traduction) {
+    return data.Traduction;
+  }
+  
+  // Filter out template variables
+  const cleanedData = filterTemplateVariables(data);
+  
+  // Check common translation fields
+  if (cleanedData && typeof cleanedData === 'object') {
     // If we have a "translation" or "translated_text" field, prioritize that
     if (cleanedData.translation || cleanedData.translated_text || cleanedData.text) {
       return cleanedData.translation || cleanedData.translated_text || cleanedData.text;
@@ -133,6 +149,11 @@ export const extractTranslationFromResponse = (data: any): any => {
     
     if (cleanedData.main_content || cleanedData.main_title) {
       return cleanedData.main_content || cleanedData.main_title;
+    }
+    
+    // Check for output field format from the webhook
+    if (cleanedData.output) {
+      return cleanedData.output;
     }
     
     // If we have cleaned data without template variables, return that

@@ -4,9 +4,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import ResultHeader from './ResultHeader';
 import EmptyResult from './EmptyResult';
 import ErrorResult from './ErrorResult';
-import EnhancedContentResult from './EnhancedContentResult';
 import DirectTranslationResult from './DirectTranslationResult';
-import UnknownResult from './UnknownResult';
 
 interface TranslationResultProps {
   result: string;
@@ -34,7 +32,8 @@ const TranslationResult: React.FC<TranslationResultProps> = ({
       return <ErrorResult message={result} />;
     }
     
-    // Always use DirectTranslationResult to ensure we get plain translations
+    // Always use DirectTranslationResult regardless of the responseType
+    // This ensures we always get a simple translation display
     return <DirectTranslationResult content={result} />;
   };
 
