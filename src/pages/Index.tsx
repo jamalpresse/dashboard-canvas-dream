@@ -125,17 +125,19 @@ const Index = () => {
         </div>
       </div>
 
-      {/* Add the CSS for the marquee animation */}
-      <style jsx>{`
-        .marquee {
-          display: inline-block;
-          animation: marquee 30s linear infinite;
-        }
-        @keyframes marquee {
-          0% { transform: translateX(${isArabic ? '-100%' : '100%'}); }
-          100% { transform: translateX(${isArabic ? '100%' : '-100%'}); }
-        }
-      `}</style>
+      {/* Corrected: Removed the 'jsx: true' prop from the style tag */}
+      <style>
+        {`
+          .marquee {
+            display: inline-block;
+            animation: marquee 30s linear infinite;
+          }
+          @keyframes marquee {
+            0% { transform: translateX(${isArabic ? '-100%' : '100%'}); }
+            100% { transform: translateX(${isArabic ? '100%' : '-100%'}); }
+          }
+        `}
+      </style>
     </div>
   );
 };
