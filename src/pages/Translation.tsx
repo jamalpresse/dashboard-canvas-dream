@@ -5,6 +5,15 @@ import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 
+// Define interface for the relevantData object to fix TypeScript errors
+interface RelevantData {
+  titre?: string;
+  texte?: string;
+  titresSEO?: string[];
+  hashtags?: string[];
+  [key: string]: any; // Allow for any additional properties
+}
+
 export default function Translation() {
   const [text, setText] = useState('');
   const [langPair, setLangPair] = useState('fr-ar');
@@ -91,7 +100,7 @@ export default function Translation() {
       // Si on a un objet mais pas de propriété reconnue, on convertit tout l'objet en JSON formaté
       else if (typeof data === 'object' && data !== null) {
         // Filtrer les propriétés non vides et pertinentes
-        const relevantData = {};
+        const relevantData: RelevantData = {};
         if (data.main_title) relevantData.titre = data.main_title;
         if (data.body) relevantData.texte = data.body;
         if (data.seo_titles) relevantData.titresSEO = data.seo_titles;
@@ -112,7 +121,7 @@ export default function Translation() {
         title: "Traduction complétée",
         description: "Le texte a été traduit avec succès",
       });
-    } catch (err) {
+    } catch (err: any) {
       console.error("Erreur de traduction:", err);
       setError(err.message || 'Erreur lors de la traduction.');
       toast({
