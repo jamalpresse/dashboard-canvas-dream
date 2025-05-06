@@ -2,6 +2,8 @@
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
+import { Button } from "@/components/ui/button";
+import { Textarea } from "@/components/ui/textarea";
 
 export default function Translation() {
   const [text, setText] = useState('');
@@ -71,18 +73,38 @@ export default function Translation() {
       const data = await response.json();
       console.log("Réponse API de traduction:", data);
       
-      // Extraction du résultat de traduction
-      // Essayer différentes propriétés où le résultat pourrait se trouver
+      // Amélioration de l'extraction du résultat de traduction
       let translation = '';
-      if (data.Traduction) {
-        translation = data.Traduction;
-      } else if (data.body) {
+      
+      // Si data.body existe et semble être un texte valide, on l'utilise
+      if (data.body && typeof data.body === 'string' && data.body.length > 0) {
         translation = data.body;
-      } else if (data.main_title) {
+      } 
+      // Sinon, si main_title existe, on l'utilise
+      else if (data.main_title && typeof data.main_title === 'string' && data.main_title.length > 0) {
         translation = data.main_title;
-      } else {
-        // Si aucune propriété reconnue n'est trouvée, utiliser l'objet entier
-        translation = JSON.stringify(data, null, 2);
+      }
+      // Sinon, on essaie d'autres propriétés possibles
+      else if (data.Traduction && typeof data.Traduction === 'string') {
+        translation = data.Traduction;
+      }
+      // Si on a un objet mais pas de propriété reconnue, on convertit tout l'objet en JSON formaté
+      else if (typeof data === 'object' && data !== null) {
+        // Filtrer les propriétés non vides et pertinentes
+        const relevantData = {};
+        if (data.main_title) relevantData.titre = data.main_title;
+        if (data.body) relevantData.texte = data.body;
+        if (data.seo_titles) relevantData.titresSEO = data.seo_titles;
+        if (data.hashtags) relevantData.hashtags = data.hashtags;
+        
+        translation = Object.keys(relevantData).length > 0 
+          ? Object.entries(relevantData).map(([key, value]) => {
+              if (Array.isArray(value)) {
+                return `${key}:\n${value.map(item => `- ${item}`).join('\n')}`;
+              }
+              return `${key}: ${value}`;
+            }).join('\n\n')
+          : JSON.stringify(data, null, 2);
       }
       
       setResult(translation);
@@ -120,14 +142,14 @@ export default function Translation() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-50 to-pink-50 p-6 animate-fade-in">
+    <div className="min-h-screen bg-gradient-to-br from-purple-50 to-pink-50 p-4 sm:p-6 animate-fade-in">
       <Card className="w-full max-w-4xl mx-auto shadow-md hover:shadow-lg transition-all duration-300">
         <CardHeader>
           <CardTitle className="text-2xl font-semibold text-gray-800">Traduction Multilingue</CardTitle>
         </CardHeader>
         <CardContent className="space-y-6">
           <section>
-            <textarea
+            <Textarea
               placeholder="Collez ici votre texte à traduire"
               value={text}
               onChange={e => setText(e.target.value)}
@@ -137,80 +159,80 @@ export default function Translation() {
               }`}
             />
             <div className="mt-2 flex flex-wrap gap-2">
-              <button
-                type="button"
+              <Button
                 onClick={handlePaste}
-                className="px-4 py-2 bg-gradient-to-r from-purple-600 to-purple-700 text-white rounded-md hover:from-purple-700 hover:to-purple-800 transition-colors shadow-sm"
+                className="bg-gradient-to-r from-purple-600 to-purple-700 text-white rounded-md hover:from-purple-700 hover:to-purple-800 transition-colors shadow-sm"
               >
                 COLLER
-              </button>
-              <button
-                type="button"
+              </Button>
+              <Button
                 onClick={handleTranslate}
                 disabled={loading}
-                className={`px-4 py-2 text-white rounded-md shadow-sm ${
+                className={`${
                   loading 
                     ? 'bg-gray-400' 
                     : 'bg-gradient-to-r from-purple-600 to-pink-500 hover:from-purple-700 hover:to-pink-600 transition-colors'
                 }`}
               >
                 {loading ? 'TRADUCTION...' : 'TRADUIRE'}
-              </button>
-              <button
-                type="button"
+              </Button>
+              <Button
                 onClick={handleClear}
-                className="px-4 py-2 bg-gray-200 text-black rounded-md hover:bg-gray-300 transition-colors shadow-sm"
+                variant="outline"
+                className="bg-gray-200 text-black rounded-md hover:bg-gray-300 transition-colors shadow-sm"
               >
                 EFFACER
-              </button>
+              </Button>
             </div>
           </section>
 
           <section>
             <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
               {langs.map(({ label, value }) => (
-                <button
+                <Button
                   key={value}
-                  type="button"
                   onClick={() => setLangPair(value)}
                   className={`py-2 rounded-md border shadow-sm transition-all duration-200 ${
                     langPair === value
                       ? 'bg-gradient-to-r from-purple-600 to-pink-500 text-white ring-2 ring-purple-600'
                       : 'bg-white text-black border-gray-300 hover:bg-purple-50'
                   }`}
+                  variant={langPair === value ? "default" : "outline"}
                 >
                   {label}
-                </button>
+                </Button>
               ))}
             </div>
           </section>
 
           <section>
             {error && <p className="text-red-600 mb-2">{error}</p>}
-            <div
+            <div 
               dir={isTargetRTL ? 'rtl' : 'ltr'}
-              className={`w-full min-h-[8rem] p-4 border rounded-lg bg-white/80 backdrop-blur-sm shadow-inner ${
+              className={`w-full min-h-[12rem] p-4 border rounded-lg bg-white/90 backdrop-blur-sm shadow-inner overflow-auto whitespace-pre-wrap ${
                 isTargetRTL ? 'text-right' : 'text-left'
               }`}
             >
-              {result || <span className="text-gray-400">Le résultat apparaîtra ici</span>}
+              {result ? 
+                <div className="font-medium">{result}</div> : 
+                <span className="text-gray-400">Le résultat apparaîtra ici</span>
+              }
             </div>
             <div className="mt-2 flex flex-wrap gap-2">
-              <button
-                type="button"
+              <Button
                 onClick={handleCopy}
                 disabled={!result}
-                className={`px-4 py-2 bg-gradient-to-r from-purple-500 to-pink-500 text-white rounded-md hover:from-purple-600 hover:to-pink-600 transition-colors shadow-sm ${!result ? 'opacity-50 cursor-not-allowed' : ''}`}
+                className={`bg-gradient-to-r from-purple-500 to-pink-500 text-white rounded-md hover:from-purple-600 hover:to-pink-600 transition-colors shadow-sm ${!result ? 'opacity-50 cursor-not-allowed' : ''}`}
               >
                 COPIER
-              </button>
-              <button
-                type="button"
+              </Button>
+              <Button
                 onClick={handleClear}
-                className="px-4 py-2 bg-gray-200 text-black rounded-md hover:bg-gray-300 transition-colors shadow-sm"
+                variant="outline"
+                className="bg-gray-200 text-black rounded-md hover:bg-gray-300 transition-colors shadow-sm"
               >
                 EFFACER
-              </button>
+              </Button>
             </div>
           </section>
         </CardContent>
