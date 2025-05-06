@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 
@@ -84,14 +85,12 @@ const Index = () => {
             {t.improve}
           </Link>
 
-          <a
-            href="https://chatgpt.com/canvas/shared/6818c0edd7e481919a1164e5a76036e5"
-            target="_blank"
-            rel="noopener noreferrer"
+          <Link
+            to="/translation"
             className="flex-1 bg-red-600 hover:bg-red-700 text-white font-semibold text-lg py-6 rounded-2xl shadow-lg text-center transition duration-300"
           >
             {t.translate}
-          </a>
+          </Link>
         </div>
 
         {/* RSS Ticker - Fixed to the bottom of content area, not page */}

@@ -12,7 +12,8 @@ import Users from "./pages/Users";
 import Settings from "./pages/Settings";
 import NotFound from "./pages/NotFound";
 import Search from "./pages/Search";
-import Improve from "./pages/Improve"; // Import the new Improve page
+import Improve from "./pages/Improve";
+import Translation from "./pages/Translation"; // Import the new Translation page
 
 const queryClient = new QueryClient();
 
@@ -29,7 +30,8 @@ const App = () => (
             <Route path="/users" element={<Users />} />
             <Route path="/settings" element={<Settings />} />
             <Route path="/search" element={<Search />} />
-            <Route path="/improve" element={<Improve />} /> {/* Add the Improve route */}
+            <Route path="/improve" element={<Improve />} />
+            <Route path="/translation" element={<Translation />} /> {/* Add the Translation route */}
           </Route>
           <Route path="*" element={<NotFound />} />
         </Routes>
