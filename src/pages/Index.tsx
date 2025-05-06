@@ -61,7 +61,7 @@ const Index = () => {
   // Mock data for statistics
   const statsData = [
     { title: isArabic ? "المقالات" : "Articles", value: "125", icon: <MessageSquare className="h-5 w-5 text-white" />, trend: { value: 12, positive: true } },
-    { title: isArabic ? "الزيارات" : "Visites", value: "2.5K", icon: <Users className="h-5 w-5 text-white" />, trend: { value: 8, positive: true }, variant: "primary" },
+    { title: isArabic ? "الزيارات" : "Visites", value: "2.5K", icon: <Users className="h-5 w-5 text-white" />, trend: { value: 8, positive: true }, variant: "primary" as const },
     { title: isArabic ? "الترجمات" : "Traductions", value: "84", icon: <ArrowUp className="h-5 w-5 text-white" />, trend: { value: 5, positive: false } },
   ];
 
