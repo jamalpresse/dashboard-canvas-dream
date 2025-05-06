@@ -1,3 +1,4 @@
+
 import { useState } from 'react';
 import { useToast } from "@/hooks/use-toast";
 import { formatTranslationResult, extractTranslationFromResponse } from '@/utils/translationUtils';
@@ -57,7 +58,7 @@ export const useTranslation = (
     setLoading(true);
     console.log(`Envoi de la requête au webhook fixe: ${WEBHOOK_URL}`);
     
-    // Préparer les données à envoyer
+    // Préparer les données à envoyer avec le format exact attendu par le webhook
     const payload = { 
       text: text.trim(), 
       langPair
@@ -71,6 +72,7 @@ export const useTranslation = (
         headers: { 
           'Content-Type': 'application/json',
           'Accept': 'application/json',
+          'Access-Control-Allow-Origin': '*'
         },
         body: JSON.stringify(payload),
       });
@@ -88,6 +90,20 @@ export const useTranslation = (
       // Enregistrement de la réponse complète pour le débogage
       setDebugData(responseData);
       
+      // Vérification du format de la réponse pour détecter les variables non résolues
+      if (responseData && 
+          responseData.Traduction && 
+          typeof responseData.Traduction === 'string' && 
+          responseData.Traduction.includes('{{') && 
+          responseData.Traduction.includes('}}')) {
+        console.log("Détection de variables non résolues dans la réponse:", responseData.Traduction);
+        toast({
+          title: "Attention",
+          description: "La réponse contient des variables non résolues",
+          variant: "destructive",
+        });
+      }
+      
       // Extraction et traitement de la traduction en utilisant nos utilitaires
       const translationContent = extractTranslationFromResponse(responseData);
       console.log("Contenu de traduction extrait:", translationContent);
@@ -97,10 +113,19 @@ export const useTranslation = (
       
       setResult(formattedResult);
       
-      toast({
-        title: "Traduction complétée",
-        description: "Le texte a été traduit avec succès",
-      });
+      // Afficher un toast en fonction du résultat
+      if (formattedResult && !formattedResult.includes('variables non résolues')) {
+        toast({
+          title: "Traduction complétée",
+          description: "Le texte a été traduit avec succès",
+        });
+      } else {
+        toast({
+          title: "Traduction partielle",
+          description: "Certaines parties n'ont pas pu être traduites correctement",
+          variant: "destructive",
+        });
+      }
     } catch (err: any) {
       console.error("Erreur de traduction:", err);
       setError(err.message || 'Erreur lors de la traduction.');

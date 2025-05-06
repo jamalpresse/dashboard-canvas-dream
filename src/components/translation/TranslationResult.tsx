@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { Card, CardContent } from "@/components/ui/card";
-import { ClipboardCopy } from "lucide-react";
+import { ClipboardCopy, AlertCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 interface TranslationResultProps {
@@ -22,19 +22,53 @@ const TranslationResult: React.FC<TranslationResultProps> = ({ result, isRTL, on
     }
   };
 
+  // Function to check if text contains template variables
+  const containsTemplateVariables = (text: string): boolean => {
+    return typeof text === 'string' && text.includes('{{') && text.includes('}}');
+  };
+
   // Function to render formatted text with markdown-like syntax
   const renderFormattedText = (text: string) => {
     if (!text) return <span className="text-gray-400">Le résultat apparaîtra ici</span>;
     
     console.log("Rendering text:", text);
     
+    // Check if the text is an error message about unresolved variables
+    if (text.includes('variables non résolues')) {
+      return (
+        <div className="bg-yellow-50 p-4 rounded-md border border-yellow-200">
+          <div className="flex items-center mb-2">
+            <AlertCircle className="h-5 w-5 text-yellow-600 mr-2" />
+            <h3 className="font-medium text-yellow-700">Problème de traduction</h3>
+          </div>
+          <p className="text-yellow-600">
+            La traduction n'a pas pu être complétée car le webhook a retourné des variables non résolues.
+            Veuillez réessayer ou contacter l'administrateur.
+          </p>
+        </div>
+      );
+    }
+    
     // Check if the text has unresolved template variables
-    if (text.includes('{{') && text.includes('}}')) {
-      console.log("Text contains template variables, displaying raw");
-      return <div className="bg-yellow-50 p-3 border border-yellow-200 rounded">
-        <p className="text-yellow-700 mb-2 font-semibold">Réponse brute du webhook (contient des variables non résolues):</p>
-        <code className="whitespace-pre-wrap block text-sm">{text}</code>
-      </div>;
+    if (containsTemplateVariables(text)) {
+      console.log("Text contains template variables, displaying modified version");
+      return (
+        <div className="bg-yellow-50 p-4 rounded-md border border-yellow-200">
+          <div className="flex items-center mb-2">
+            <AlertCircle className="h-5 w-5 text-yellow-600 mr-2" />
+            <h3 className="font-medium text-yellow-700">Variables non résolues</h3>
+          </div>
+          <p className="text-yellow-600 mb-2">
+            La réponse contient des variables qui n'ont pas été résolues par le webhook.
+          </p>
+          <div className="bg-white p-3 rounded border border-yellow-100">
+            <p className="text-sm text-gray-700 font-medium mb-1">Réponse reçue:</p>
+            <code className="text-xs bg-gray-50 p-2 block rounded whitespace-pre-wrap overflow-auto max-h-40">
+              {text}
+            </code>
+          </div>
+        </div>
+      );
     }
     
     // Handle JSON strings
@@ -42,6 +76,19 @@ const TranslationResult: React.FC<TranslationResultProps> = ({ result, isRTL, on
       try {
         const parsedJson = JSON.parse(text);
         console.log("JSON parsed:", parsedJson);
+        
+        // Check for error field
+        if (parsedJson.error) {
+          return (
+            <div className="bg-yellow-50 p-4 rounded-md border border-yellow-200">
+              <div className="flex items-center mb-2">
+                <AlertCircle className="h-5 w-5 text-yellow-600 mr-2" />
+                <h3 className="font-medium text-yellow-700">Erreur de traduction</h3>
+              </div>
+              <p className="text-yellow-600">{parsedJson.error}</p>
+            </div>
+          );
+        }
         
         // Check for Traduction field first (response wrapper)
         const contentToRender = parsedJson.Traduction ? 
@@ -146,6 +193,7 @@ const TranslationResult: React.FC<TranslationResultProps> = ({ result, isRTL, on
               size="sm" 
               className="text-purple-600 hover:text-purple-800 hover:bg-purple-50"
               onClick={onCopy}
+              disabled={!result || result.includes('variables non résolues')}
             >
               <ClipboardCopy className="h-4 w-4 mr-1" /> 
               Copier

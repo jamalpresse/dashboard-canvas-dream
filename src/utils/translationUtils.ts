@@ -4,6 +4,46 @@
  */
 
 /**
+ * Checks if a string contains unresolved template variables
+ */
+const containsTemplateVariables = (text: string): boolean => {
+  return typeof text === 'string' && text.includes('{{') && text.includes('}}');
+};
+
+/**
+ * Extracts valid content from text containing template variables
+ * If possible, returns the parts that don't contain variables
+ */
+const extractValidContent = (text: string): string | null => {
+  if (!containsTemplateVariables(text)) return text;
+  
+  console.log("Extracting valid content from text with template variables:", text);
+  
+  // Try to extract JSON parts that might be valid
+  try {
+    // If it looks like a JSON object with some valid parts
+    if (text.includes('{') && text.includes('}') && text.includes(':')) {
+      // Simple attempt to clean and parse - this may need refinement based on actual data
+      const cleanedText = text.replace(/\{\{\s*.*?\s*\}\}/g, '"[Template Variable]"');
+      console.log("Cleaned text for parsing:", cleanedText);
+      
+      try {
+        const parsed = JSON.parse(cleanedText);
+        console.log("Successfully parsed cleaned JSON:", parsed);
+        return JSON.stringify(parsed, null, 2);
+      } catch (e) {
+        console.log("Failed to parse cleaned JSON, returning original text");
+      }
+    }
+  } catch (e) {
+    console.log("Error extracting valid content:", e);
+  }
+  
+  // If we can't extract valid JSON, return a user-friendly message
+  return null;
+};
+
+/**
  * Formats translation data into a readable structure
  */
 export const formatTranslationResult = (data: any): string => {
@@ -14,9 +54,18 @@ export const formatTranslationResult = (data: any): string => {
     console.log("Traduction field found:", data.Traduction);
     
     // If Traduction is a string that contains unresolved template variables
-    if (typeof data.Traduction === 'string' && data.Traduction.includes('{{') && data.Traduction.includes('}}')) {
+    if (typeof data.Traduction === 'string' && containsTemplateVariables(data.Traduction)) {
       console.log("Traduction contains template variables:", data.Traduction);
-      return data.Traduction; // Return as is - will be displayed as raw text
+      
+      // Try to extract valid content
+      const validContent = extractValidContent(data.Traduction);
+      if (validContent) {
+        console.log("Valid content extracted:", validContent);
+        return validContent;
+      }
+      
+      // If we couldn't extract valid content, return a user-friendly message
+      return "La réponse contient des variables non résolues. Veuillez réessayer ou contacter l'administrateur.";
     }
     
     // If Traduction is a string that looks like JSON, try to parse it
@@ -56,6 +105,27 @@ export const extractTranslationFromResponse = (data: any): any => {
   // Check for Traduction field first
   if (data && data.Traduction !== undefined) {
     console.log("Found Traduction field:", data.Traduction);
+    
+    // Check if Traduction contains template variables
+    if (typeof data.Traduction === 'string' && containsTemplateVariables(data.Traduction)) {
+      console.log("Traduction contains template variables, attempting to extract valid parts");
+      
+      // Try to extract valid content
+      const validContent = extractValidContent(data.Traduction);
+      if (validContent) {
+        try {
+          const parsed = JSON.parse(validContent);
+          console.log("Successfully parsed extracted valid content:", parsed);
+          return parsed;
+        } catch (e) {
+          console.log("Extracted content is not valid JSON, using as string");
+          return validContent;
+        }
+      }
+      
+      // If we couldn't extract valid content, return a simplified message
+      return { error: "Variables non résolues dans la réponse du webhook" };
+    }
     
     // If Traduction is a string that might be JSON, try to parse it
     if (typeof data.Traduction === 'string') {
