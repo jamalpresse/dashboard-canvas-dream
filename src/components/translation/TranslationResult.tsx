@@ -25,28 +25,29 @@ const TranslationResult: React.FC<TranslationResultProps> = ({ result, isRTL, on
   const renderFormattedText = (text: string) => {
     if (!text) return <span className="text-gray-400">Le résultat apparaîtra ici</span>;
     
-    // Handle JSON strings that might be returned
-    if (text.trim().startsWith('{') && text.trim().endsWith('}') && isJsonString(text)) {
+    // Handle JSON strings
+    if (isJsonString(text)) {
       try {
         const parsedJson = JSON.parse(text);
+        console.log("JSON parsé dans le composant:", parsedJson);
+        
         return (
           <div>
-            {parsedJson.main_title && (
-              <h2 className="text-xl font-bold mb-3 text-purple-800">{parsedJson.main_title}</h2>
+            {/* Titre principal ou équivalent */}
+            {(parsedJson.main_title || parsedJson.titre || parsedJson.title) && (
+              <h2 className="text-xl font-bold mb-3 text-purple-800">
+                {parsedJson.main_title || parsedJson.titre || parsedJson.title}
+              </h2>
             )}
             
-            {parsedJson.body && (
-              <div className="mt-2 mb-4 whitespace-pre-wrap">{parsedJson.body}</div>
+            {/* Corps du texte ou équivalent */}
+            {(parsedJson.body || parsedJson.texte || parsedJson.content || parsedJson.translation || parsedJson.text) && (
+              <div className="mt-2 mb-4 whitespace-pre-wrap">
+                {parsedJson.body || parsedJson.texte || parsedJson.content || parsedJson.translation || parsedJson.text}
+              </div>
             )}
             
-            {parsedJson.translation && (
-              <div className="mt-2 mb-4">{parsedJson.translation}</div>
-            )}
-            
-            {parsedJson.text && (
-              <div className="mt-2 mb-4">{parsedJson.text}</div>
-            )}
-            
+            {/* Titres SEO ou équivalent */}
             {parsedJson.seo_titles && Array.isArray(parsedJson.seo_titles) && parsedJson.seo_titles.length > 0 && (
               <div className="mt-4 p-3 border-t pt-3">
                 <h3 className="font-medium mb-2 text-purple-700">Titres SEO:</h3>
@@ -58,6 +59,7 @@ const TranslationResult: React.FC<TranslationResultProps> = ({ result, isRTL, on
               </div>
             )}
             
+            {/* Hashtags ou équivalent */}
             {parsedJson.hashtags && Array.isArray(parsedJson.hashtags) && parsedJson.hashtags.length > 0 && (
               <div className="mt-4">
                 <h3 className="font-medium mb-2 text-purple-700">Hashtags:</h3>
@@ -71,8 +73,11 @@ const TranslationResult: React.FC<TranslationResultProps> = ({ result, isRTL, on
               </div>
             )}
             
-            {/* Afficher les données brutes lorsqu'il n'y a pas de champs reconnus */}
-            {!parsedJson.main_title && !parsedJson.body && !parsedJson.translation && !parsedJson.text && !parsedJson.seo_titles && (
+            {/* Si aucun des champs reconnus n'est présent, afficher la réponse brute */}
+            {!parsedJson.main_title && !parsedJson.titre && !parsedJson.title && 
+             !parsedJson.body && !parsedJson.texte && !parsedJson.content && !parsedJson.translation && !parsedJson.text &&
+             (!parsedJson.seo_titles || !Array.isArray(parsedJson.seo_titles)) &&
+             (!parsedJson.hashtags || !Array.isArray(parsedJson.hashtags)) && (
               <pre className="whitespace-pre-wrap break-words bg-gray-50 p-4 rounded-md text-sm overflow-auto">
                 {JSON.stringify(parsedJson, null, 2)}
               </pre>
@@ -80,47 +85,16 @@ const TranslationResult: React.FC<TranslationResultProps> = ({ result, isRTL, on
           </div>
         );
       } catch (e) {
-        // Si ce n'est pas du JSON valide, continuer avec le rendu normal
-        console.log("Format JSON détecté mais non valide, traitement comme texte");
+        console.error("Erreur lors du traitement JSON:", e);
+        // En cas d'erreur, afficher le texte brut
       }
     }
     
-    // Split par lignes pour traiter les en-têtes et les listes
+    // Texte brut pour les réponses non-JSON
     return text.split('\n').map((line, index) => {
-      // Headers
-      if (line.startsWith('# ')) {
-        return <h2 key={index} className="text-xl font-bold mb-3 text-purple-800">{line.substring(2)}</h2>;
-      } else if (line.startsWith('## ')) {
-        return <h3 key={index} className="text-lg font-semibold mt-4 mb-2 text-purple-700">{line.substring(3)}</h3>;
-      } else if (line.startsWith('### ')) {
-        return <h4 key={index} className="text-md font-medium mt-3 mb-2 text-purple-600">{line.substring(4)}</h4>;
-      } 
-      // List items
-      else if (line.startsWith('• ')) {
-        return <li key={index} className="ml-4 my-1">{line.substring(2)}</li>;
-      } 
-      // Hashtags
-      else if (line.includes('#')) {
-        const hashtagRegex = /#[\w\u0600-\u06FF]+/g;
-        const parts = line.split(hashtagRegex);
-        const hashtags = line.match(hashtagRegex) || [];
-        
-        return (
-          <p key={index} className="my-1">
-            {parts.map((part, i) => (
-              <React.Fragment key={`part-${i}`}>
-                {part}
-                {hashtags[i] && <span className="text-purple-600 font-medium">{hashtags[i]}</span>}
-              </React.Fragment>
-            ))}
-          </p>
-        );
-      }
-      // Normal paragraph with line breaks
-      else if (line.trim()) {
+      if (line.trim()) {
         return <p key={index} className="my-2">{line}</p>;
       }
-      // Empty lines become breaks
       return <br key={index} />;
     });
   };

@@ -1,7 +1,6 @@
 
 import { useState } from 'react';
 import { useToast } from "@/hooks/use-toast";
-import { extractTranslationFromResponse, formatTranslationResult } from "@/utils/translationUtils";
 
 export const useTranslation = (
   setDebugData: (data: any) => void
@@ -56,9 +55,9 @@ export const useTranslation = (
     }
     
     setLoading(true);
-    console.log(`Envoi de la requête au webhook ${WEBHOOK_URL}`);
+    console.log(`Envoi de la requête au webhook fixe: ${WEBHOOK_URL}`);
     
-    // Préparer les données à envoyer - toujours utiliser l'URL fixe du webhook
+    // Préparer les données à envoyer
     const payload = { 
       text: text.trim(), 
       langPair
@@ -82,27 +81,16 @@ export const useTranslation = (
         throw new Error(`Erreur HTTP: ${response.status}`);
       }
 
-      // Traitement de la réponse
-      let responseData;
-      try {
-        responseData = await response.json();
-        console.log("Réponse JSON reçue:", responseData);
-        setDebugData(responseData);
-      } catch (jsonError) {
-        const textResponse = await response.text();
-        console.log("Réponse texte (non-JSON):", textResponse);
-        responseData = textResponse;
-        setDebugData({ rawText: textResponse });
-      }
+      // Récupération et traitement direct de la réponse JSON
+      const responseData = await response.json();
+      console.log("Réponse complète reçue du webhook:", responseData);
       
-      if (!responseData) {
-        throw new Error("Réponse vide reçue du serveur");
-      }
+      // Enregistrement de la réponse complète pour le débogage
+      setDebugData(responseData);
       
-      // Utilisation des données directement sans transformation complexe
-      const formattedResult = responseData.body || responseData.translation || responseData.text || JSON.stringify(responseData);
+      // Utilisation directe de la réponse JSON sans transformation
+      setResult(JSON.stringify(responseData));
       
-      setResult(formattedResult);
       toast({
         title: "Traduction complétée",
         description: "Le texte a été traduit avec succès",
