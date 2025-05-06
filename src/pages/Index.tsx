@@ -1,13 +1,13 @@
-import React, { useState, useEffect } from "react";
+
+import React, { useState } from "react";
 import { Link } from "react-router-dom";
 import { Search, ArrowUp, MessageSquare, Users } from "lucide-react";
 import { StatCard } from "@/components/dashboard/StatCard";
 import { LineChart } from "@/components/dashboard/LineChart";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ActivityTimeline } from "@/components/dashboard/ActivityTimeline";
+
 const Index = () => {
   const [lang, setLang] = useState("fr");
-  const [rssItems, setRssItems] = useState([]);
   const isArabic = lang === "ar";
   const dir = isArabic ? "rtl" : "ltr";
   const labels = {
@@ -22,7 +22,6 @@ const Index = () => {
       greeting: "أهلاً بك في نظام المعلومات الصحفية",
       stats: "الإحصائيات",
       activity: "النشاطات الأخيرة",
-      latestNews: "آخر الأخبار"
     },
     fr: {
       title: "Dashboard Journalistes",
@@ -35,22 +34,9 @@ const Index = () => {
       greeting: "Bienvenue dans votre système d'information journalistique",
       stats: "Statistiques",
       activity: "Activités récentes",
-      latestNews: "Dernières actualités"
     }
   };
   const t = labels[lang];
-  useEffect(() => {
-    async function fetchRSS() {
-      try {
-        const res = await fetch("https://api.rss2json.com/v1/api.json?rss_url=https://snrtnews.com/rss.xml");
-        const data = await res.json();
-        if (data.items) setRssItems(data.items.slice(0, 5));
-      } catch (err) {
-        console.error("Erreur de récupération du flux RSS:", err);
-      }
-    }
-    fetchRSS();
-  }, []);
 
   // Mock data for statistics
   const statsData = [{
@@ -144,9 +130,6 @@ const Index = () => {
           </div>
         </div>
 
-        {/* Stats Section */}
-        
-
         {/* Chart and Activity Section */}
         <div className="w-full max-w-5xl mx-auto grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
           <LineChart className="col-span-1 lg:col-span-2 shadow-md hover:shadow-lg transition-shadow duration-300" data={chartData} title={isArabic ? "متابعة النشاط" : "Suivi d'activité"} lines={[{
@@ -180,33 +163,10 @@ const Index = () => {
             </Link>
           </div>
         </div>
-
-        {/* RSS Ticker */}
-        <div className="w-full bg-white/80 backdrop-blur-sm border-t border-purple-200 rounded-lg shadow-inner mt-8 mx-auto max-w-5xl overflow-hidden">
-          <div className="flex items-center space-x-4 rtl:space-x-reverse px-6 py-3">
-            <span className="text-purple-700 font-semibold whitespace-nowrap flex-shrink-0">📰 {isArabic ? 'آخر الأخبار' : 'Dernières actualités'} :</span>
-            <div className="flex-1 overflow-hidden">
-              <div className="marquee whitespace-nowrap">
-                {rssItems.length > 0 ? rssItems.map((item, index) => <a key={index} href={item.link} target="_blank" rel="noopener noreferrer" className="inline-block mr-12 rtl:ml-12 rtl:mr-0 text-purple-700 hover:underline hover:text-purple-900">
-                      {item.title}
-                    </a>) : <span className="text-gray-500">Chargement des actualités...</span>}
-              </div>
-            </div>
-          </div>
-        </div>
       </div>
 
       <style>
         {`
-          .marquee {
-            display: inline-block;
-            animation: marquee 30s linear infinite;
-          }
-          @keyframes marquee {
-            0% { transform: translateX(${isArabic ? '-100%' : '100%'}); }
-            100% { transform: translateX(${isArabic ? '100%' : '-100%'}); }
-          }
-          
           @keyframes fadeIn {
             from { opacity: 0; transform: translateY(10px); }
             to { opacity: 1; transform: translateY(0); }

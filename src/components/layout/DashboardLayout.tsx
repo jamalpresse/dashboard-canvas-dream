@@ -1,9 +1,11 @@
+
 import { useState } from "react";
 import { NavLink, Outlet } from "react-router-dom";
 import { LayoutDashboard, Settings, Menu, X } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { RssTickerFloat } from "@/components/common/RssTickerFloat";
 
 const navItems = [
   {
@@ -83,11 +85,14 @@ export default function DashboardLayout() {
       </aside>
 
       {/* Main Content */}
-      <main className={cn("transition-all duration-300", isMobile ? "ml-0" : "ml-64")}>
+      <main className={cn("transition-all duration-300", isMobile ? "ml-0" : "ml-64", "pb-16")}>
         <div className="p-6">
           <Outlet />
         </div>
       </main>
+
+      {/* Floating RSS Ticker */}
+      <RssTickerFloat />
     </div>
   );
 }

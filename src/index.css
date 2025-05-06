@@ -1,4 +1,3 @@
-
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -102,18 +101,24 @@
 }
 
 /* Marquee Animation */
-@keyframes marquee {
+@keyframes marquee-ltr {
   0% { transform: translateX(100%); }
   100% { transform: translateX(-100%); }
 }
 
-.marquee {
-  display: inline-block;
-  animation: marquee 30s linear infinite;
+@keyframes marquee-rtl {
+  0% { transform: translateX(-100%); }
+  100% { transform: translateX(100%); }
 }
 
-[dir="rtl"] .marquee {
-  animation-direction: reverse;
+.marquee-ltr {
+  display: inline-block;
+  animation: marquee-ltr 30s linear infinite;
+}
+
+.marquee-rtl {
+  display: inline-block;
+  animation: marquee-rtl 30s linear infinite;
 }
 
 /* Card hover effect */
