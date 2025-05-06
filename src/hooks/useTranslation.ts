@@ -1,7 +1,7 @@
 
 import { useState } from 'react';
 import { useToast } from "@/hooks/use-toast";
-import { formatTranslationResult, extractTranslationFromResponse, detectResultType } from '@/utils/translationUtils';
+import { formatTranslationResult, extractTranslationFromResponse } from '@/utils/translationUtils';
 
 export const useTranslation = (
   setDebugData: (data: any) => void
@@ -60,11 +60,11 @@ export const useTranslation = (
     setLoading(true);
     console.log(`Envoi de la requête au webhook de traduction: ${WEBHOOK_URL}`);
     
-    // Préparer les données à envoyer avec le format exact attendu par le webhook
+    // Préparer les données avec le format exact attendu par le webhook
     const payload = { 
       text: text.trim(), 
       langPair,
-      type: "translation"  // Paramètre essentiel pour indiquer qu'on veut une traduction
+      type: "translation"  // Paramètre essentiel pour indiquer le type de requête
     };
     
     console.log("Payload envoyé:", payload);
@@ -75,7 +75,6 @@ export const useTranslation = (
         headers: { 
           'Content-Type': 'application/json',
           'Accept': 'application/json',
-          'Access-Control-Allow-Origin': '*'
         },
         body: JSON.stringify(payload),
       });
@@ -93,23 +92,23 @@ export const useTranslation = (
       // Enregistrement de la réponse complète pour le débogage
       setDebugData(responseData);
       
-      // Force le type de réponse à être une traduction directe
+      // Définir le type de réponse comme traduction directe
       setResponseType('direct-translation');
       
-      // Extraction et traitement de la traduction
+      // Extraction du champ Traduction qui est le format standard de la réponse
       let translationText = '';
       
-      // Vérifier si la réponse contient directement le champ "Traduction"
-      if (responseData && responseData.Traduction) {
-        console.log("Champ 'Traduction' trouvé dans la réponse:", responseData.Traduction);
+      if (responseData && responseData.Traduction !== undefined) {
+        console.log("Format de Traduction:", typeof responseData.Traduction);
+        
         if (typeof responseData.Traduction === 'string') {
           translationText = responseData.Traduction;
-        } else {
-          // Si c'est un objet, on le convertit en chaîne JSON
-          translationText = JSON.stringify(responseData.Traduction);
+        } else if (typeof responseData.Traduction === 'object') {
+          // Si c'est un objet ou un tableau, tenter d'extraire du texte ou le formater
+          translationText = formatTranslationResult(responseData);
         }
       } else {
-        // Format alternatif ou fallback
+        // Fallback si le format attendu n'est pas présent
         translationText = formatTranslationResult(responseData);
       }
       

@@ -32,8 +32,7 @@ const TranslationResult: React.FC<TranslationResultProps> = ({
       return <ErrorResult message={result} />;
     }
     
-    // Utiliser DirectTranslationResult pour tous les types de réponses
-    // pour garantir un affichage simple de la traduction
+    // Toujours utiliser DirectTranslationResult pour garantir un affichage simple et constant
     return <DirectTranslationResult content={result} />;
   };
 

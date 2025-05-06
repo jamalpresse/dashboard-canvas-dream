@@ -16,6 +16,7 @@ const DirectTranslationResult: React.FC<DirectTranslationResultProps> = ({ conte
     if (typeof content === 'string' && (content.trim().startsWith('{') || content.trim().startsWith('['))) {
       try {
         const jsonContent = JSON.parse(content);
+        console.log("JSON content parsed:", jsonContent);
         
         // Extraction de texte à partir d'un objet JSON
         if (typeof jsonContent === 'object' && !Array.isArray(jsonContent)) {
@@ -33,10 +34,20 @@ const DirectTranslationResult: React.FC<DirectTranslationResultProps> = ({ conte
             }
           }
           
-          // Si on n'a pas trouvé de propriété texte, on utilise le JSON formaté
+          // Si on n'a pas trouvé de propriété texte, mais que l'objet a une seule propriété qui est une chaîne
           if (displayContent === content) {
-            displayContent = JSON.stringify(jsonContent, null, 2);
+            const objectKeys = Object.keys(jsonContent);
+            if (objectKeys.length === 1 && typeof jsonContent[objectKeys[0]] === 'string') {
+              displayContent = jsonContent[objectKeys[0]];
+              console.log(`Extracted text from single object property '${objectKeys[0]}':`, displayContent);
+            } else {
+              // Sinon on utilise le JSON formaté
+              displayContent = JSON.stringify(jsonContent, null, 2);
+            }
           }
+        } else if (Array.isArray(jsonContent) && jsonContent.length === 1 && typeof jsonContent[0] === 'string') {
+          // Si c'est un tableau avec une seule entrée qui est une chaîne
+          displayContent = jsonContent[0];
         } else {
           // Pour les tableaux ou autres structures JSON, on garde le format JSON
           displayContent = JSON.stringify(jsonContent, null, 2);

@@ -76,18 +76,24 @@ export const formatTranslationResult = (data: any): string => {
     return "Aucune traduction disponible.";
   }
   
-  // Vérifier en priorité le champ "Traduction" qui est le format standard de la réponse
+  // Vérifier en priorité absolue le champ "Traduction" du format standard de la réponse
   if (data && typeof data === 'object' && data.Traduction !== undefined) {
-    console.log("Found 'Traduction' field directly in data:", data.Traduction);
+    console.log("Traduction field found:", data.Traduction);
+    
+    // Cas 1: Traduction est une chaîne directe
     if (typeof data.Traduction === 'string') {
       return data.Traduction;
-    } else if (data.Traduction && typeof data.Traduction === 'object') {
-      // Si Traduction est un objet avec une sous-propriété body ou content, l'extraire
+    } 
+    // Cas 2: Traduction est un objet
+    else if (data.Traduction && typeof data.Traduction === 'object') {
+      // Si l'objet a des propriétés communes de texte, les extraire
       if (data.Traduction.body) return data.Traduction.body;
       if (data.Traduction.content) return data.Traduction.content;
       if (data.Traduction.text) return data.Traduction.text;
+      if (data.Traduction.output) return data.Traduction.output;
+      if (data.Traduction.translated_text) return data.Traduction.translated_text;
       
-      // Sinon, convertir l'objet en JSON formaté
+      // Si c'est un objet sans ces propriétés, le convertir en JSON formaté
       return JSON.stringify(data.Traduction, null, 2);
     }
   }
@@ -96,7 +102,7 @@ export const formatTranslationResult = (data: any): string => {
   const cleanedData = filterTemplateVariables(data);
   console.log("Cleaned data after filtering template variables:", cleanedData);
   
-  // Priorité 2: Champs communs de traduction
+  // Priorité 2: Champs communs de traduction directe
   if (cleanedData && typeof cleanedData === 'object') {
     if (cleanedData.translation) return cleanedData.translation;
     if (cleanedData.translated_text) return cleanedData.translated_text;
@@ -104,7 +110,7 @@ export const formatTranslationResult = (data: any): string => {
     if (cleanedData.output && typeof cleanedData.output === 'string') return cleanedData.output;
   }
   
-  // Priorité 3: Champs de contenu (pour le contenu amélioré)
+  // Priorité 3: Champs de contenu
   if (cleanedData && typeof cleanedData === 'object') {
     if (cleanedData.body) return cleanedData.body;
     if (cleanedData.content) return cleanedData.content;
