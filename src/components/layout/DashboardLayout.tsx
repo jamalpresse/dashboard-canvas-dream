@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { RssTickerFloat } from "@/components/common/RssTickerFloat";
 import { WeatherWidget } from "@/components/dashboard/WeatherWidget";
+import { SNRTNewsFrame } from "@/components/common/SNRTNewsFrame";
 
 const navItems = [
   {
@@ -18,10 +19,15 @@ const navItems = [
 
 export default function DashboardLayout() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [showNewsFrame, setShowNewsFrame] = useState(false);
   const isMobile = useIsMobile();
   
   const toggleSidebar = () => {
     setSidebarOpen(!sidebarOpen);
+  };
+
+  const toggleNewsFrame = () => {
+    setShowNewsFrame(!showNewsFrame);
   };
   
   return (
@@ -60,16 +66,25 @@ export default function DashboardLayout() {
                 to={item.href}
                 onClick={() => isMobile && setSidebarOpen(false)}
                 className={({isActive}) => cn(
-                  "flex items-center gap-4 rounded-lg px-4 py-3 text-lg font-medium transition-all duration-200 ease-in-out", // Increased size, padding, font weight and gap
+                  "flex items-center gap-4 rounded-lg px-4 py-3 text-lg font-medium transition-all duration-200 ease-in-out", 
                   isActive
                     ? "bg-gradient-to-r from-purple-500 to-pink-500 text-white shadow-md"
-                    : "text-gray-700 hover:bg-purple-50 hover:text-purple-700 hover:shadow-sm" // Added subtle shadow on hover
+                    : "text-gray-700 hover:bg-purple-50 hover:text-purple-700 hover:shadow-sm" 
                 )}
               >
                 <span className="flex-shrink-0">{item.icon}</span>
                 <span>{item.title}</span>
               </NavLink>
             ))}
+            
+            {/* SNRT News button */}
+            <button 
+              onClick={toggleNewsFrame}
+              className="flex items-center gap-4 rounded-lg px-4 py-3 text-lg font-medium transition-all duration-200 ease-in-out w-full text-left text-gray-700 hover:bg-purple-50 hover:text-purple-700 hover:shadow-sm"
+            >
+              <span className="flex-shrink-0">📰</span>
+              <span>SNRT News</span>
+            </button>
             
             {/* Weather Widget under Dashboard button */}
             <div className="mt-4 px-2">
@@ -96,6 +111,15 @@ export default function DashboardLayout() {
           <Outlet />
         </div>
       </main>
+
+      {/* SNRT News Frame Modal */}
+      {showNewsFrame && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
+          <div className="w-full max-w-4xl">
+            <SNRTNewsFrame onClose={toggleNewsFrame} />
+          </div>
+        </div>
+      )}
 
       {/* Floating RSS Ticker */}
       <RssTickerFloat />
