@@ -10,6 +10,7 @@ export default function Improve() {
     inputText,
     setInputText,
     loading,
+    requestSent,
     result,
     handlePaste,
     handleImprove,
@@ -29,6 +30,7 @@ export default function Improve() {
             handlePaste={handlePaste}
             handleImprove={handleImprove}
             loading={loading}
+            requestSent={requestSent}
           />
 
           {result && (

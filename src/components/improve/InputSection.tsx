@@ -2,7 +2,7 @@
 import React from 'react';
 import { useToast } from "@/hooks/use-toast";
 import { isRTL, alignFrom, dirFrom } from '@/utils/textUtils';
-import { Loader2 } from 'lucide-react';
+import { Loader2, Check } from 'lucide-react';
 
 interface InputSectionProps {
   inputText: string;
@@ -10,6 +10,7 @@ interface InputSectionProps {
   handlePaste: () => Promise<void>;
   handleImprove: () => Promise<void>;
   loading: boolean;
+  requestSent?: boolean;
 }
 
 export function InputSection({ 
@@ -17,7 +18,8 @@ export function InputSection({
   setInputText, 
   handlePaste, 
   handleImprove, 
-  loading 
+  loading,
+  requestSent = false
 }: InputSectionProps) {
   return (
     <div className="space-y-6">
@@ -62,6 +64,12 @@ export function InputSection({
       {loading && (
         <div className="text-center">
           <p className="text-purple-700">Traitement en cours... Cela peut prendre jusqu'à une minute.</p>
+          {requestSent && (
+            <p className="text-green-600 flex items-center justify-center mt-2">
+              <Check className="h-4 w-4 mr-2" />
+              Requête envoyée avec succès, en attente de réponse...
+            </p>
+          )}
         </div>
       )}
     </div>

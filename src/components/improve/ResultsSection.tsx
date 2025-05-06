@@ -19,7 +19,31 @@ export function ResultsSection({ result, handleCopy }: ResultsSectionProps) {
     } catch (err) {
       console.log("Result is a string but not valid JSON, using as is");
       // If it's not valid JSON, we'll keep it as a string and display it directly
+      return (
+        <div className="grid gap-6">
+          <ResultCard 
+            title="Résultat" 
+            content={result} 
+            handleCopy={handleCopy} 
+          />
+        </div>
+      );
     }
+  }
+
+  // Handle simple body text result - common fallback format
+  if (typeof processedResult === 'object' && processedResult !== null && 
+      processedResult.body && Object.keys(processedResult).length === 1) {
+    console.log("Simple body result detected");
+    return (
+      <div className="grid gap-6">
+        <ResultCard 
+          title="Contenu Amélioré" 
+          content={processedResult.body} 
+          handleCopy={handleCopy} 
+        />
+      </div>
+    );
   }
 
   // Handle case where the result is not in expected format
@@ -46,8 +70,17 @@ export function ResultsSection({ result, handleCopy }: ResultsSectionProps) {
     processedResult.youtube_thumbnail_title !== undefined;
 
   if (!hasExpectedFields) {
-    console.log("Result doesn't have expected fields, showing error");
-    return <ErrorResult message="Format de réponse inattendu. Veuillez réessayer ou contacter l'administrateur." />;
+    // Display as raw JSON if we can't interpret it
+    console.log("Result doesn't have expected fields, showing raw JSON");
+    return (
+      <div className="grid gap-6">
+        <ResultCard 
+          title="Résultat (Format Brut)" 
+          content={JSON.stringify(processedResult, null, 2)} 
+          handleCopy={(value) => handleCopy(value)} 
+        />
+      </div>
+    );
   }
 
   // Display the result with the expected format
@@ -55,7 +88,7 @@ export function ResultsSection({ result, handleCopy }: ResultsSectionProps) {
     <div className="grid gap-6">
       {processedResult.main_title !== undefined && (
         <ResultCard 
-          title="Main Title" 
+          title="Titre Principal" 
           content={processedResult.main_title} 
           handleCopy={handleCopy} 
         />
@@ -63,31 +96,31 @@ export function ResultsSection({ result, handleCopy }: ResultsSectionProps) {
       
       {processedResult.body !== undefined && (
         <ResultCard 
-          title="Body" 
+          title="Corps du Texte" 
           content={processedResult.body} 
           handleCopy={handleCopy} 
         />
       )}
       
-      {Array.isArray(processedResult.seo_titles) && (
+      {Array.isArray(processedResult.seo_titles) && processedResult.seo_titles.length > 0 && (
         <ResultCard 
-          title="SEO Titles" 
+          title="Titres SEO" 
           content={processedResult.seo_titles} 
           handleCopy={handleCopy} 
           isArrayContent={true} 
         />
       )}
       
-      {Array.isArray(processedResult.keywords) && (
+      {Array.isArray(processedResult.keywords) && processedResult.keywords.length > 0 && (
         <ResultCard 
-          title="Keywords" 
+          title="Mots-clés" 
           content={processedResult.keywords} 
           handleCopy={handleCopy}
           isArrayContent={true} 
         />
       )}
       
-      {Array.isArray(processedResult.hashtags) && (
+      {Array.isArray(processedResult.hashtags) && processedResult.hashtags.length > 0 && (
         <ResultCard 
           title="Hashtags" 
           content={processedResult.hashtags} 
@@ -98,7 +131,7 @@ export function ResultsSection({ result, handleCopy }: ResultsSectionProps) {
       
       {processedResult.youtube_thumbnail_title !== undefined && (
         <ResultCard 
-          title="YouTube Thumbnail Title" 
+          title="Titre Miniature YouTube" 
           content={processedResult.youtube_thumbnail_title} 
           handleCopy={handleCopy} 
         />

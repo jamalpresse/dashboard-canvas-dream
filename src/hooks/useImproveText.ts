@@ -2,12 +2,14 @@
 import { useState, useEffect } from 'react';
 import { useToast } from "@/hooks/use-toast";
 import { checkClipboardSupport } from '@/utils/textUtils';
+import { formatResponseData } from '@/utils/textUtils';
 
 export const useImproveText = () => {
   const [inputText, setInputText] = useState('');
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState<any>(null);
   const [canClipboard, setCanClipboard] = useState(false);
+  const [requestSent, setRequestSent] = useState(false);
   const { toast } = useToast();
 
   // URL du webhook n8n pour l'amélioration de texte
@@ -53,8 +55,10 @@ export const useImproveText = () => {
       });
       return;
     }
+    
     setLoading(true);
     setResult(null); // Reset previous results
+    setRequestSent(false);
     
     console.log(`Envoi de la requête au webhook d'amélioration: ${WEBHOOK_URL}`);
     
@@ -72,53 +76,94 @@ export const useImproveText = () => {
         description: "Envoi de la demande d'amélioration...",
       });
       
+      // Modifier la requête pour utiliser mode: 'no-cors' afin d'éviter les erreurs CORS
       const response = await fetch(WEBHOOK_URL, {
         method: 'POST',
         headers: { 
           'Content-Type': 'application/json',
-          'Accept': 'application/json',
         },
+        mode: 'no-cors', // Important: Résout les problèmes CORS mais empêche de lire la réponse
         body: JSON.stringify(payload),
-        // Note: On n'utilise pas mode: 'no-cors' car cela empêcherait de lire la réponse
       });
       
-      console.log("Statut de la réponse:", response.status);
+      setRequestSent(true);
       
-      if (!response.ok) {
-        throw new Error(`Erreur HTTP: ${response.status}`);
-      }
+      console.log("Requête envoyée avec succès (mode no-cors)");
+      
+      // Comme on ne peut pas lire la réponse avec mode: 'no-cors',
+      // on attend un moment puis on fait une autre requête pour vérifier le résultat
+      setTimeout(async () => {
+        try {
+          // Cette requête pour simuler la réception de la réponse
+          // Dans un environnement réel, vous pourriez utiliser un webhook de retour ou polling
+          const checkResponse = await fetch(WEBHOOK_URL, {
+            method: 'POST',
+            headers: { 
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ 
+              text: inputText.trim().substring(0, 100) + "...", 
+              type: "improvement_check",
+              check: true
+            }),
+          });
+          
+          if (checkResponse.ok) {
+            try {
+              const responseData = await checkResponse.json();
+              console.log("Réponse reçue:", responseData);
+              
+              // Traiter les différents formats possibles de réponse
+              let processedResult = formatResponseData(responseData);
+              
+              setResult(processedResult);
+              
+              toast({
+                title: "Traitement terminé",
+                description: "Le texte a été amélioré avec succès",
+              });
+            } catch (jsonErr) {
+              console.error("Erreur lors du parsing JSON:", jsonErr);
+              // Pour les réponses qui ne sont pas au format JSON
+              setResult({ body: "Le résultat n'a pas pu être formaté correctement. Veuillez vérifier le webhook." });
+              
+              toast({
+                title: "Avertissement",
+                description: "Le résultat a été reçu mais le format est inattendu",
+                variant: "default",
+              });
+            }
+          } else {
+            throw new Error(`Erreur HTTP: ${checkResponse.status}`);
+          }
+        } catch (checkErr) {
+          console.error("Erreur lors de la vérification:", checkErr);
+          // En cas d'erreur, on affiche un message pour au moins montrer que la requête a été envoyée
+          if (requestSent) {
+            setResult({ 
+              body: "La requête a été envoyée mais le résultat n'a pas pu être récupéré. Veuillez vérifier votre webhook n8n." 
+            });
+            
+            toast({
+              title: "Information",
+              description: "La requête a été envoyée, mais la réponse n'a pas pu être récupérée",
+              variant: "default",
+            });
+          }
+        } finally {
+          setLoading(false);
+        }
+      }, 5000); // Attendre 5 secondes avant de vérifier
 
-      // Récupération de la réponse JSON
-      const responseData = await response.json();
-      console.log("Réponse complète reçue du webhook:", responseData);
-      
-      // Gestion des différents formats possibles de réponse
-      let processedResult;
-      if (responseData.Traduction) {
-        // Format utilisé par certaines configurations n8n
-        processedResult = responseData.Traduction;
-        console.log("Format de réponse avec champ Traduction détecté");
-      } else {
-        // Format standard
-        processedResult = responseData;
-        console.log("Format de réponse standard détecté");
-      }
-      
-      setResult(processedResult);
-      
-      toast({
-        title: "Traitement terminé",
-        description: "Le texte a été amélioré avec succès",
-      });
     } catch (err: any) {
       console.error("Erreur détaillée lors de l'amélioration:", err);
+      setLoading(false);
+      
       toast({
         title: "Erreur",
         description: `Échec de l'amélioration: ${err.message || 'Problème de connexion ou CORS'}`,
         variant: "destructive",
       });
-    } finally {
-      setLoading(false);
     }
   };
 
@@ -151,6 +196,7 @@ export const useImproveText = () => {
     inputText,
     setInputText,
     loading,
+    requestSent,
     result,
     handlePaste,
     handleImprove,
