@@ -4,6 +4,7 @@ import { ActivityTimeline } from "@/components/dashboard/ActivityTimeline";
 import { OverviewChart } from "@/components/dashboard/OverviewChart";
 import { LineChart } from "@/components/dashboard/LineChart";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { 
   Users, 
   DollarSign, 
@@ -40,7 +41,7 @@ const activityItems = [
     description: "Sophie Moore has registered with email sophie.moore@example.com",
     time: "2 hours ago",
     icon: <Users className="h-4 w-4" />,
-    type: "success",
+    type: "success" as const,
   },
   {
     id: "2",
@@ -55,7 +56,7 @@ const activityItems = [
     description: "Payment of $1,200 received from customer #40498",
     time: "Yesterday",
     icon: <DollarSign className="h-4 w-4" />,
-    type: "success",
+    type: "success" as const,
   },
   {
     id: "4",
@@ -63,7 +64,7 @@ const activityItems = [
     description: "The system will be updated at 2:00 AM tomorrow",
     time: "2 days ago",
     icon: <Settings className="h-4 w-4" />,
-    type: "warning",
+    type: "warning" as const,
   },
   {
     id: "5",
