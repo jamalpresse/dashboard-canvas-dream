@@ -7,6 +7,8 @@
  * Formats translation data into a readable structure
  */
 export const formatTranslationResult = (data: any): string => {
+  console.log("Formatting translation data:", data);
+  
   // If data is a simple string, return it directly
   if (typeof data === 'string') {
     return data;
@@ -20,6 +22,8 @@ export const formatTranslationResult = (data: any): string => {
     formattedParts.push(`# ${data.main_title}\n`);
   } else if (data.titre) {
     formattedParts.push(`# ${data.titre}\n`);
+  } else if (data.title) {
+    formattedParts.push(`# ${data.title}\n`);
   }
   
   // Handle body text - check for additional possible field names
@@ -41,6 +45,8 @@ export const formatTranslationResult = (data: any): string => {
     formattedParts.push(data.result);
   } else if (data.text) {
     formattedParts.push(data.text);
+  } else if (data.content) {
+    formattedParts.push(data.content);
   }
   
   // Handle SEO titles
@@ -56,9 +62,14 @@ export const formatTranslationResult = (data: any): string => {
   }
   
   // Handle other relevant fields that might be in the data
+  const excludedFields = [
+    'main_title', 'body', 'seo_titles', 'hashtags', 'titre', 'texte', 'titresSEO', 
+    'Traduction', 'translation', 'translatedText', 'translated_text', 'target_text', 
+    'result', 'text', 'title', 'content'
+  ];
+  
   const otherFields = Object.entries(data).filter(([key]) => 
-    !['main_title', 'body', 'seo_titles', 'hashtags', 'titre', 'texte', 'titresSEO', 'Traduction', 'translation',
-      'translatedText', 'translated_text', 'target_text', 'result', 'text'].includes(key) && 
+    !excludedFields.includes(key) && 
     typeof data[key] !== 'undefined' && 
     data[key] !== null
   );
@@ -88,7 +99,7 @@ export const formatTranslationResult = (data: any): string => {
  * Extract the most appropriate translation result from API response
  */
 export const extractTranslationFromResponse = (data: any): any => {
-  console.log("Données brutes de la réponse:", data);
+  console.log("Extracting translation from response:", data);
   
   // If data is a string, return it directly
   if (typeof data === 'string') {
@@ -115,7 +126,16 @@ export const extractTranslationFromResponse = (data: any): any => {
   if (data.choices && Array.isArray(data.choices) && data.choices.length > 0) {
     console.log("Format OpenAI détecté:", data.choices[0]);
     if (data.choices[0].message && data.choices[0].message.content) {
-      return data.choices[0].message.content;
+      const content = data.choices[0].message.content;
+      
+      // Check if content is JSON
+      try {
+        const jsonContent = JSON.parse(content);
+        return jsonContent;
+      } catch (e) {
+        // Not JSON, return as is
+        return content;
+      }
     } else if (data.choices[0].text) {
       return data.choices[0].text;
     }
@@ -144,8 +164,15 @@ export const extractTranslationFromResponse = (data: any): any => {
   
   // If there's a string result field, use that
   if (data.result && typeof data.result === 'string') {
-    console.log("Résultat sous forme de chaîne détecté");
-    return data.result;
+    // Try to parse JSON string in result
+    try {
+      const jsonResult = JSON.parse(data.result);
+      console.log("Résultat JSON parsé:", jsonResult);
+      return jsonResult;
+    } catch (e) {
+      console.log("Résultat sous forme de chaîne détecté (non-JSON)");
+      return data.result;
+    }
   }
   
   // For very simple responses with just text
