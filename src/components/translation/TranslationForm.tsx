@@ -2,9 +2,9 @@
 import React from 'react';
 import SourceTextInput from '@/components/translation/SourceTextInput';
 import ErrorDisplay from '@/components/translation/ErrorDisplay';
-import TranslationResult from '@/components/translation/TranslationResult';
-import ResultActions from '@/components/translation/ResultActions';
+import TranslationOutput from '@/components/translation/TranslationOutput';
 import LanguageSelector from '@/components/translation/LanguageSelector';
+import TranslationControls from '@/components/translation/TranslationControls';
 import useTranslation from '@/hooks/useTranslation';
 
 interface TranslationFormProps {
@@ -38,9 +38,13 @@ const TranslationForm: React.FC<TranslationFormProps> = ({ onDebugToggle, setDeb
         setText={setText}
         isRTL={isSourceRTL}
         handlePaste={handlePaste}
+      />
+
+      {/* Translation Controls */}
+      <TranslationControls
+        loading={loading}
         handleTranslate={handleTranslate}
         handleClear={handleClear}
-        loading={loading}
       />
 
       {/* Language Selector Component */}
@@ -55,30 +59,14 @@ const TranslationForm: React.FC<TranslationFormProps> = ({ onDebugToggle, setDeb
       <ErrorDisplay error={error} />
 
       {/* Translation Results */}
-      <section>
-        <div className="mb-2 flex items-center justify-between">
-          <span className="text-sm font-medium">
-            Résultat de la traduction:
-          </span>
-          <span className="text-sm text-gray-500">
-            {isTargetRTL ? 'RTL' : 'LTR'}
-          </span>
-        </div>
-        
-        <TranslationResult 
-          result={result} 
-          isRTL={isTargetRTL} 
-          onCopy={handleCopy}
-          responseType={responseType}
-        />
-        
-        <ResultActions 
-          result={result}
-          handleCopy={handleCopy}
-          handleClear={handleClear}
-          onDebugToggle={onDebugToggle}
-        />
-      </section>
+      <TranslationOutput
+        result={result}
+        isTargetRTL={isTargetRTL}
+        responseType={responseType}
+        handleCopy={handleCopy}
+        handleClear={handleClear}
+        onDebugToggle={onDebugToggle}
+      />
     </>
   );
 };
