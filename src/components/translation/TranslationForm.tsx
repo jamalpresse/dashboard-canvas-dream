@@ -4,7 +4,7 @@ import SourceTextInput from '@/components/translation/SourceTextInput';
 import ErrorDisplay from '@/components/translation/ErrorDisplay';
 import TranslationOutput from '@/components/translation/TranslationOutput';
 import LanguageSelector from '@/components/translation/LanguageSelector';
-import TranslationControls from '@/components/translation/TranslationControls';
+import TranslationActions from '@/components/translation/TranslationActions';
 import useTranslation from '@/hooks/useTranslation';
 
 interface TranslationFormProps {
@@ -32,17 +32,18 @@ const TranslationForm: React.FC<TranslationFormProps> = ({ onDebugToggle, setDeb
 
   return (
     <>
-      {/* Source Text Input Section */}
+      {/* Source Text Input Section without paste button */}
       <SourceTextInput
         text={text}
         setText={setText}
         isRTL={isSourceRTL}
-        handlePaste={handlePaste}
       />
 
-      {/* Translation Controls */}
-      <TranslationControls
+      {/* Translation Actions - All three buttons in one row */}
+      <TranslationActions 
+        text={text}
         loading={loading}
+        handlePaste={handlePaste}
         handleTranslate={handleTranslate}
         handleClear={handleClear}
       />

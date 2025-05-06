@@ -1,21 +1,17 @@
 
 import React from 'react';
-import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
-import { Clipboard } from "lucide-react";
 
 interface SourceTextInputProps {
   text: string;
   setText: (text: string) => void;
   isRTL: boolean;
-  handlePaste: () => void;
 }
 
 const SourceTextInput: React.FC<SourceTextInputProps> = ({
   text,
   setText,
-  isRTL,
-  handlePaste
+  isRTL
 }) => {
   return (
     <section>
@@ -34,15 +30,6 @@ const SourceTextInput: React.FC<SourceTextInputProps> = ({
           isRTL ? 'text-right' : 'text-left'
         }`}
       />
-      <div className="mt-2">
-        <Button
-          onClick={handlePaste}
-          className="bg-gradient-to-r from-purple-600 to-purple-700 text-white rounded-md hover:from-purple-700 hover:to-purple-800 transition-colors shadow-sm"
-        >
-          <Clipboard className="mr-1 h-4 w-4" />
-          COLLER
-        </Button>
-      </div>
     </section>
   );
 };
