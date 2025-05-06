@@ -13,6 +13,7 @@ interface TranslationResultProps {
 const TranslationResult: React.FC<TranslationResultProps> = ({ result, isRTL, onCopy }) => {
   // Function to check if string is JSON
   const isJsonString = (str: string): boolean => {
+    if (!str) return false;
     try {
       const json = JSON.parse(str);
       return typeof json === 'object' && json !== null;
@@ -25,11 +26,22 @@ const TranslationResult: React.FC<TranslationResultProps> = ({ result, isRTL, on
   const renderFormattedText = (text: string) => {
     if (!text) return <span className="text-gray-400">Le résultat apparaîtra ici</span>;
     
+    console.log("Rendering text:", text);
+    
+    // Check if the text has unresolved template variables
+    if (text.includes('{{') && text.includes('}}')) {
+      console.log("Text contains template variables, displaying raw");
+      return <div className="bg-yellow-50 p-3 border border-yellow-200 rounded">
+        <p className="text-yellow-700 mb-2 font-semibold">Réponse brute du webhook (contient des variables non résolues):</p>
+        <code className="whitespace-pre-wrap block text-sm">{text}</code>
+      </div>;
+    }
+    
     // Handle JSON strings
     if (isJsonString(text)) {
       try {
         const parsedJson = JSON.parse(text);
-        console.log("JSON parsé dans le composant:", parsedJson);
+        console.log("JSON parsed:", parsedJson);
         
         // Check for Traduction field first (response wrapper)
         const contentToRender = parsedJson.Traduction ? 
@@ -37,11 +49,16 @@ const TranslationResult: React.FC<TranslationResultProps> = ({ result, isRTL, on
             JSON.parse(parsedJson.Traduction) : parsedJson.Traduction) : 
           parsedJson;
         
-        console.log("Contenu à afficher:", contentToRender);
+        console.log("Content to render:", contentToRender);
         
         // Si c'est une chaîne simple, l'afficher directement
         if (typeof contentToRender === 'string') {
           return <div className="whitespace-pre-wrap">{contentToRender}</div>;
+        }
+        
+        // Si contentToRender est null ou undefined
+        if (contentToRender == null) {
+          return <div className="text-gray-500">Aucun contenu disponible</div>;
         }
         
         return (
@@ -101,7 +118,7 @@ const TranslationResult: React.FC<TranslationResultProps> = ({ result, isRTL, on
           </div>
         );
       } catch (e) {
-        console.error("Erreur lors du traitement JSON:", e);
+        console.error("Error processing JSON:", e);
         // En cas d'erreur, afficher le texte brut
         return <div className="whitespace-pre-wrap">{text}</div>;
       }
