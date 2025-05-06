@@ -1,29 +1,19 @@
 import { useState } from "react";
 import { NavLink, Outlet } from "react-router-dom";
-import { BarChart3, Settings, Users, LayoutDashboard, LogOut, BellIcon, ChevronDown, Search } from "lucide-react";
+import { LayoutDashboard, BellIcon, ChevronDown, Search } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { useIsMobile } from "@/hooks/use-mobile";
+
 const navItems = [{
   title: "Dashboard",
   href: "/",
   icon: <LayoutDashboard className="h-5 w-5" />
-}, {
-  title: "Analytics",
-  href: "/analytics",
-  icon: <BarChart3 className="h-5 w-5" />
-}, {
-  title: "Users",
-  href: "/users",
-  icon: <Users className="h-5 w-5" />
-}, {
-  title: "Settings",
-  href: "/settings",
-  icon: <Settings className="h-5 w-5" />
 }];
+
 export default function DashboardLayout() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const isMobile = useIsMobile();
