@@ -18,10 +18,5 @@ export function LineChart({
   lines,
   yAxisFormatter = value => `${value}`
 }: LineChartProps) {
-  return <Card className={className}>
-      {title && <CardHeader>
-          <CardTitle>{title}</CardTitle>
-        </CardHeader>}
-      
-    </Card>;
+  return;
 }
