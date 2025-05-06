@@ -11,7 +11,7 @@ const navItems = [
   {
     title: "Dashboard",
     href: "/",
-    icon: <LayoutDashboard className="h-5 w-5" />
+    icon: <LayoutDashboard className="h-6 w-6" /> // Increased icon size from h-5 w-5
   }
 ];
 
@@ -59,10 +59,10 @@ export default function DashboardLayout() {
                 to={item.href}
                 onClick={() => isMobile && setSidebarOpen(false)}
                 className={({isActive}) => cn(
-                  "flex items-center gap-3 rounded-lg px-3 py-2 text-sm transition-all duration-150 ease-in-out",
+                  "flex items-center gap-4 rounded-lg px-4 py-3 text-lg font-medium transition-all duration-200 ease-in-out", // Increased size, padding, font weight and gap
                   isActive
-                    ? "bg-gradient-to-r from-purple-500 to-pink-500 text-white font-medium shadow-md"
-                    : "text-gray-700 hover:bg-purple-50 hover:text-purple-700"
+                    ? "bg-gradient-to-r from-purple-500 to-pink-500 text-white shadow-md"
+                    : "text-gray-700 hover:bg-purple-50 hover:text-purple-700 hover:shadow-sm" // Added subtle shadow on hover
                 )}
               >
                 <span className="flex-shrink-0">{item.icon}</span>
