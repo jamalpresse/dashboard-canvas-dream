@@ -29,7 +29,7 @@ export default function Translation() {
   const [debugData, setDebugData] = useState<any>(null);
   const { toast } = useToast();
 
-  // URL du webhook n8n pour la traduction
+  // URL fixe du webhook n8n pour la traduction
   const WEBHOOK_URL = 'https://n8n-jamal-u38598.vm.elestio.app/webhook/4732aeff-7544-4f0e-8554-ebd0f614947b';
 
   const langs = [
@@ -84,7 +84,7 @@ export default function Translation() {
     console.log(`Envoi de la requête au webhook ${WEBHOOK_URL}`);
     console.log(`Données: texte=${text.substring(0, 50)}..., paire de langues=${langPair}`);
     
-    // Préparer les données à envoyer
+    // Préparer les données à envoyer - utiliser l'URL fixe du webhook
     const payload = { 
       text: text.trim(), 
       langPair
