@@ -4,7 +4,6 @@ import { Link } from "react-router-dom";
 import { Search, ArrowUp, MessageSquare, Users } from "lucide-react";
 import { StatCard } from "@/components/dashboard/StatCard";
 import { ActivityTimeline } from "@/components/dashboard/ActivityTimeline";
-import { WeatherWidget } from "@/components/dashboard/WeatherWidget";
 
 const Index = () => {
   const [lang, setLang] = useState("fr");
@@ -106,13 +105,9 @@ const Index = () => {
           </div>
         </div>
 
-        {/* Weather Widget and Activities Section */}
-        <div className="w-full max-w-5xl mx-auto grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
-          <div className="lg:col-span-2 grid grid-cols-1 md:grid-cols-1 gap-6">
-            <WeatherWidget city="Casablanca" className="shadow-md hover:shadow-lg transition-shadow duration-300" />
-          </div>
-          
-          <ActivityTimeline items={activities} className="col-span-1 shadow-md hover:shadow-lg transition-shadow duration-300" />
+        {/* Activities Section */}
+        <div className="w-full max-w-5xl mx-auto mb-8">
+          <ActivityTimeline items={activities} className="shadow-md hover:shadow-lg transition-shadow duration-300" />
         </div>
 
         {/* Features Buttons */}

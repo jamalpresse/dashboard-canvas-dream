@@ -6,6 +6,7 @@ import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { RssTickerFloat } from "@/components/common/RssTickerFloat";
+import { WeatherWidget } from "@/components/dashboard/WeatherWidget";
 
 const navItems = [
   {
@@ -69,6 +70,11 @@ export default function DashboardLayout() {
                 <span>{item.title}</span>
               </NavLink>
             ))}
+            
+            {/* Weather Widget under Dashboard button */}
+            <div className="mt-4 px-2">
+              <WeatherWidget city="Casablanca" className="w-full shadow-sm border border-purple-100" />
+            </div>
           </div>
         </nav>
         
