@@ -1,7 +1,5 @@
-
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { LineChart as RechartsLineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from "recharts";
-
 interface LineChartProps {
   data: any[];
   title?: string;
@@ -13,7 +11,6 @@ interface LineChartProps {
   }[];
   yAxisFormatter?: (value: number) => string;
 }
-
 export function LineChart({
   data,
   title,
@@ -21,42 +18,5 @@ export function LineChart({
   lines,
   yAxisFormatter = value => `${value}`
 }: LineChartProps) {
-  return (
-    <Card className={className}>
-      {title && (
-        <CardHeader>
-          <CardTitle>{title}</CardTitle>
-        </CardHeader>
-      )}
-      <CardContent className="p-2">
-        <div className="h-[300px]">
-          <ResponsiveContainer width="100%" height="100%">
-            <RechartsLineChart 
-              data={data}
-              margin={{ top: 5, right: 30, left: 20, bottom: 5 }}
-            >
-              <CartesianGrid strokeDasharray="3 3" stroke="#eee" />
-              <XAxis dataKey="name" tick={{ fontSize: 12 }} />
-              <YAxis 
-                tick={{ fontSize: 12 }}
-                tickFormatter={yAxisFormatter}
-              />
-              <Tooltip />
-              <Legend />
-              {lines.map((line, index) => (
-                <Line
-                  key={`line-${index}`}
-                  type="monotone"
-                  dataKey={line.dataKey}
-                  stroke={line.stroke}
-                  name={line.name || line.dataKey}
-                  activeDot={{ r: 6 }}
-                />
-              ))}
-            </RechartsLineChart>
-          </ResponsiveContainer>
-        </div>
-      </CardContent>
-    </Card>
-  );
+  return;
 }

@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { Search, ArrowUp, MessageSquare, Users } from "lucide-react";
@@ -8,6 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ActivityTimeline } from "@/components/dashboard/ActivityTimeline";
 const Index = () => {
   const [lang, setLang] = useState("fr");
+  const [rssItems, setRssItems] = useState([]);
   const isArabic = lang === "ar";
   const dir = isArabic ? "rtl" : "ltr";
   const labels = {
@@ -39,6 +39,18 @@ const Index = () => {
     }
   };
   const t = labels[lang];
+  useEffect(() => {
+    async function fetchRSS() {
+      try {
+        const res = await fetch("https://api.rss2json.com/v1/api.json?rss_url=https://snrtnews.com/rss.xml");
+        const data = await res.json();
+        if (data.items) setRssItems(data.items.slice(0, 5));
+      } catch (err) {
+        console.error("Erreur de récupération du flux RSS:", err);
+      }
+    }
+    fetchRSS();
+  }, []);
 
   // Mock data for statistics
   const statsData = [{
@@ -149,10 +161,52 @@ const Index = () => {
           
           <ActivityTimeline items={activities} className="col-span-1 shadow-md hover:shadow-lg transition-shadow duration-300" />
         </div>
+
+        {/* Features Buttons */}
+        <div className="w-full max-w-5xl mx-auto mb-8">
+          <h2 className="text-xl font-semibold mb-4 text-gray-800">{t.subtitle}</h2>
+          <div className="flex flex-col md:flex-row gap-6">
+            <Link to="/search" className="flex-1 bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-700 hover:to-purple-800 text-white font-semibold text-lg py-6 px-4 rounded-xl shadow-lg text-center transition duration-300 flex items-center justify-center gap-3">
+              <Search className="h-5 w-5" />
+              <span>{t.search}</span>
+            </Link>
+
+            <Link to="/improve" className="flex-1 bg-gradient-to-r from-pink-500 to-purple-600 hover:from-pink-600 hover:to-purple-700 text-white font-semibold text-lg py-6 px-4 rounded-xl shadow-lg text-center transition duration-300 flex items-center justify-center gap-3">
+              {t.improve}
+            </Link>
+
+            <Link to="/translation" className="flex-1 bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white font-semibold text-lg py-6 px-4 rounded-xl shadow-lg text-center transition duration-300 flex items-center justify-center gap-3">
+              {t.translate}
+            </Link>
+          </div>
+        </div>
+
+        {/* RSS Ticker */}
+        <div className="w-full bg-white/80 backdrop-blur-sm border-t border-purple-200 rounded-lg shadow-inner mt-8 mx-auto max-w-5xl overflow-hidden">
+          <div className="flex items-center space-x-4 rtl:space-x-reverse px-6 py-3">
+            <span className="text-purple-700 font-semibold whitespace-nowrap flex-shrink-0">📰 {isArabic ? 'آخر الأخبار' : 'Dernières actualités'} :</span>
+            <div className="flex-1 overflow-hidden">
+              <div className="marquee whitespace-nowrap">
+                {rssItems.length > 0 ? rssItems.map((item, index) => <a key={index} href={item.link} target="_blank" rel="noopener noreferrer" className="inline-block mr-12 rtl:ml-12 rtl:mr-0 text-purple-700 hover:underline hover:text-purple-900">
+                      {item.title}
+                    </a>) : <span className="text-gray-500">Chargement des actualités...</span>}
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
 
       <style>
         {`
+          .marquee {
+            display: inline-block;
+            animation: marquee 30s linear infinite;
+          }
+          @keyframes marquee {
+            0% { transform: translateX(${isArabic ? '-100%' : '100%'}); }
+            100% { transform: translateX(${isArabic ? '100%' : '-100%'}); }
+          }
+          
           @keyframes fadeIn {
             from { opacity: 0; transform: translateY(10px); }
             to { opacity: 1; transform: translateY(0); }
