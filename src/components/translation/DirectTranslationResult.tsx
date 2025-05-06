@@ -1,21 +1,13 @@
 
 import React from 'react';
 import { FileText } from "lucide-react";
+import { createTextResponseElements } from "./utils/resultUtils";
 
 interface DirectTranslationResultProps {
   content: any;
 }
 
 const DirectTranslationResult: React.FC<DirectTranslationResultProps> = ({ content }) => {
-  const renderTextContent = (text: string) => {
-    return text.split('\n').map((line, index) => {
-      if (line.trim()) {
-        return <p key={index} className="my-2">{line}</p>;
-      }
-      return <br key={index} />;
-    });
-  };
-
   try {
     // Handle JSON content
     if (typeof content === 'string' && content.startsWith('{')) {
@@ -29,7 +21,7 @@ const DirectTranslationResult: React.FC<DirectTranslationResultProps> = ({ conte
             </div>
             <div className="whitespace-pre-wrap">
               {typeof jsonContent === 'string' ? 
-                renderTextContent(jsonContent) : 
+                createTextResponseElements(jsonContent) : 
                 JSON.stringify(jsonContent, null, 2)}
             </div>
           </div>
@@ -43,7 +35,7 @@ const DirectTranslationResult: React.FC<DirectTranslationResultProps> = ({ conte
               <span className="font-medium text-blue-700">Traduction</span>
             </div>
             <div className="whitespace-pre-wrap">
-              {renderTextContent(content)}
+              {createTextResponseElements(content)}
             </div>
           </div>
         );
@@ -58,7 +50,7 @@ const DirectTranslationResult: React.FC<DirectTranslationResultProps> = ({ conte
           <span className="font-medium text-blue-700">Traduction</span>
         </div>
         <div className="whitespace-pre-wrap">
-          {renderTextContent(content)}
+          {createTextResponseElements(content)}
         </div>
       </div>
     );

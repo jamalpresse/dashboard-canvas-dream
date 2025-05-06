@@ -1,4 +1,6 @@
 
+import React from 'react';
+
 /**
  * Utility functions for TranslationResult components
  */
@@ -14,8 +16,8 @@ export const isJsonString = (str: string): boolean => {
   }
 };
 
-// Function to render a non-JSON text response
-export const renderTextResponse = (text: string) => {
+// Function to create React elements for text response
+export const createTextResponseElements = (text: string): React.ReactNode => {
   if (!text) return <span className="text-gray-400">Le résultat apparaîtra ici</span>;
   
   return text.split('\n').map((line, index) => {
@@ -24,4 +26,9 @@ export const renderTextResponse = (text: string) => {
     }
     return <br key={index} />;
   });
+};
+
+// Function to create a placeholder element
+export const createPlaceholder = (): React.ReactNode => {
+  return <span className="text-gray-400">Le résultat apparaîtra ici</span>;
 };

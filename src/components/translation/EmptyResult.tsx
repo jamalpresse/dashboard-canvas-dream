@@ -1,8 +1,9 @@
 
 import React from 'react';
+import { createPlaceholder } from './utils/resultUtils';
 
 const EmptyResult: React.FC = () => {
-  return <span className="text-gray-400">Le résultat apparaîtra ici</span>;
+  return createPlaceholder();
 };
 
 export default EmptyResult;
