@@ -5,6 +5,7 @@ import { Search, ArrowUp, MessageSquare, Users } from "lucide-react";
 import { StatCard } from "@/components/dashboard/StatCard";
 import { LineChart } from "@/components/dashboard/LineChart";
 import { ActivityTimeline } from "@/components/dashboard/ActivityTimeline";
+import { WeatherWidget } from "@/components/dashboard/WeatherWidget";
 
 const Index = () => {
   const [lang, setLang] = useState("fr");
@@ -22,6 +23,7 @@ const Index = () => {
       greeting: "أهلاً بك في نظام المعلومات الصحفية",
       stats: "الإحصائيات",
       activity: "النشاطات الأخيرة",
+      weather: "الطقس",
     },
     fr: {
       title: "Dashboard Journalistes",
@@ -34,6 +36,7 @@ const Index = () => {
       greeting: "Bienvenue dans votre système d'information journalistique",
       stats: "Statistiques",
       activity: "Activités récentes",
+      weather: "Météo",
     }
   };
   const t = labels[lang];
@@ -130,17 +133,23 @@ const Index = () => {
           </div>
         </div>
 
-        {/* Chart and Activity Section */}
+        {/* Weather Widget and Activities Section */}
         <div className="w-full max-w-5xl mx-auto grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
-          <LineChart className="col-span-1 lg:col-span-2 shadow-md hover:shadow-lg transition-shadow duration-300" data={chartData} title={isArabic ? "متابعة النشاط" : "Suivi d'activité"} lines={[{
-          dataKey: "visits",
-          stroke: "#9b87f5",
-          name: isArabic ? "الزيارات" : "Visites"
-        }, {
-          dataKey: "articles",
-          stroke: "#D946EF",
-          name: isArabic ? "المقالات" : "Articles"
-        }]} />
+          <div className="lg:col-span-2 grid grid-cols-1 md:grid-cols-2 gap-6">
+            <LineChart className="col-span-full shadow-md hover:shadow-lg transition-shadow duration-300" 
+              data={chartData} title={isArabic ? "متابعة النشاط" : "Suivi d'activité"} 
+              lines={[{
+              dataKey: "visits",
+              stroke: "#9b87f5",
+              name: isArabic ? "الزيارات" : "Visites"
+            }, {
+              dataKey: "articles",
+              stroke: "#D946EF",
+              name: isArabic ? "المقالات" : "Articles"
+            }]} 
+            />
+            <WeatherWidget city="Casablanca" className="shadow-md hover:shadow-lg transition-shadow duration-300" />
+          </div>
           
           <ActivityTimeline items={activities} className="col-span-1 shadow-md hover:shadow-lg transition-shadow duration-300" />
         </div>

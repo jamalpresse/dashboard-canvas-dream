@@ -1,5 +1,7 @@
+
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { LineChart as RechartsLineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from "recharts";
+
 interface LineChartProps {
   data: any[];
   title?: string;
@@ -11,6 +13,7 @@ interface LineChartProps {
   }[];
   yAxisFormatter?: (value: number) => string;
 }
+
 export function LineChart({
   data,
   title,
@@ -18,8 +21,54 @@ export function LineChart({
   lines,
   yAxisFormatter = value => `${value}`
 }: LineChartProps) {
-  return <Card className={className}>
-      {title}
-      
-    </Card>;
+  return (
+    <Card className={className}>
+      {title && (
+        <CardHeader>
+          <CardTitle>{title}</CardTitle>
+        </CardHeader>
+      )}
+      <CardContent>
+        <ResponsiveContainer width="100%" height={300}>
+          <RechartsLineChart data={data} margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
+            <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
+            <XAxis 
+              dataKey="name" 
+              stroke="#888888"
+              fontSize={12}
+              tickLine={false}
+              axisLine={false}
+            />
+            <YAxis 
+              stroke="#888888"
+              fontSize={12}
+              tickLine={false}
+              axisLine={false}
+              tickFormatter={yAxisFormatter}
+            />
+            <Tooltip
+              contentStyle={{
+                backgroundColor: "white",
+                border: "1px solid #e2e8f0",
+                borderRadius: "0.5rem",
+                boxShadow: "0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)",
+              }}
+            />
+            <Legend />
+            {lines.map((line, index) => (
+              <Line
+                key={index}
+                type="monotone"
+                dataKey={line.dataKey}
+                stroke={line.stroke}
+                strokeWidth={2}
+                name={line.name || line.dataKey}
+                activeDot={{ r: 6 }}
+              />
+            ))}
+          </RechartsLineChart>
+        </ResponsiveContainer>
+      </CardContent>
+    </Card>
+  );
 }
