@@ -81,15 +81,43 @@ export const useTranslation = (
         throw new Error(`Erreur HTTP: ${response.status}`);
       }
 
-      // Récupération et traitement direct de la réponse JSON
+      // Récupération et traitement de la réponse JSON
       const responseData = await response.json();
       console.log("Réponse complète reçue du webhook:", responseData);
       
       // Enregistrement de la réponse complète pour le débogage
       setDebugData(responseData);
       
-      // Utilisation directe de la réponse JSON sans transformation
-      setResult(JSON.stringify(responseData));
+      // Extraction de la donnée de traduction depuis le champ "Traduction"
+      if (responseData && responseData.Traduction) {
+        console.log("Données de traduction trouvées dans le champ 'Traduction':", responseData.Traduction);
+        
+        try {
+          // Essayer de parser le contenu de Traduction si c'est une chaîne JSON
+          let translationData = responseData.Traduction;
+          
+          if (typeof translationData === 'string') {
+            try {
+              translationData = JSON.parse(translationData);
+              console.log("Traduction parsée avec succès:", translationData);
+            } catch (parseErr) {
+              console.log("La traduction n'est pas au format JSON, utilisation comme texte brut");
+            }
+          }
+          
+          // Définir le résultat comme le contenu du champ Traduction (parsé ou brut)
+          setResult(typeof translationData === 'object' ? 
+            JSON.stringify(translationData, null, 2) : 
+            String(translationData));
+        } catch (parseErr) {
+          console.error("Erreur lors du traitement de la traduction:", parseErr);
+          setResult(JSON.stringify(responseData.Traduction));
+        }
+      } else {
+        // Fallback si le format de réponse est différent
+        console.log("Format de réponse différent, utilisation de la réponse complète");
+        setResult(JSON.stringify(responseData, null, 2));
+      }
       
       toast({
         title: "Traduction complétée",

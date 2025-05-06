@@ -31,28 +31,43 @@ const TranslationResult: React.FC<TranslationResultProps> = ({ result, isRTL, on
         const parsedJson = JSON.parse(text);
         console.log("JSON parsé dans le composant:", parsedJson);
         
+        // Check for Traduction field first (response wrapper)
+        const contentToRender = parsedJson.Traduction ? 
+          (typeof parsedJson.Traduction === 'string' && isJsonString(parsedJson.Traduction) ? 
+            JSON.parse(parsedJson.Traduction) : parsedJson.Traduction) : 
+          parsedJson;
+        
+        console.log("Contenu à afficher:", contentToRender);
+        
+        // Si c'est une chaîne simple, l'afficher directement
+        if (typeof contentToRender === 'string') {
+          return <div className="whitespace-pre-wrap">{contentToRender}</div>;
+        }
+        
         return (
           <div>
             {/* Titre principal ou équivalent */}
-            {(parsedJson.main_title || parsedJson.titre || parsedJson.title) && (
+            {(contentToRender.main_title || contentToRender.titre || contentToRender.title) && (
               <h2 className="text-xl font-bold mb-3 text-purple-800">
-                {parsedJson.main_title || parsedJson.titre || parsedJson.title}
+                {contentToRender.main_title || contentToRender.titre || contentToRender.title}
               </h2>
             )}
             
             {/* Corps du texte ou équivalent */}
-            {(parsedJson.body || parsedJson.texte || parsedJson.content || parsedJson.translation || parsedJson.text) && (
+            {(contentToRender.body || contentToRender.texte || contentToRender.content || 
+              contentToRender.translation || contentToRender.text || contentToRender.output) && (
               <div className="mt-2 mb-4 whitespace-pre-wrap">
-                {parsedJson.body || parsedJson.texte || parsedJson.content || parsedJson.translation || parsedJson.text}
+                {contentToRender.body || contentToRender.texte || contentToRender.content || 
+                 contentToRender.translation || contentToRender.text || contentToRender.output}
               </div>
             )}
             
             {/* Titres SEO ou équivalent */}
-            {parsedJson.seo_titles && Array.isArray(parsedJson.seo_titles) && parsedJson.seo_titles.length > 0 && (
+            {contentToRender.seo_titles && Array.isArray(contentToRender.seo_titles) && contentToRender.seo_titles.length > 0 && (
               <div className="mt-4 p-3 border-t pt-3">
                 <h3 className="font-medium mb-2 text-purple-700">Titres SEO:</h3>
                 <ul className="list-disc pl-5">
-                  {parsedJson.seo_titles.map((title: string, i: number) => (
+                  {contentToRender.seo_titles.map((title: string, i: number) => (
                     <li key={i} className="mb-1">{title}</li>
                   ))}
                 </ul>
@@ -60,11 +75,11 @@ const TranslationResult: React.FC<TranslationResultProps> = ({ result, isRTL, on
             )}
             
             {/* Hashtags ou équivalent */}
-            {parsedJson.hashtags && Array.isArray(parsedJson.hashtags) && parsedJson.hashtags.length > 0 && (
+            {contentToRender.hashtags && Array.isArray(contentToRender.hashtags) && contentToRender.hashtags.length > 0 && (
               <div className="mt-4">
                 <h3 className="font-medium mb-2 text-purple-700">Hashtags:</h3>
                 <div className="flex flex-wrap gap-2">
-                  {parsedJson.hashtags.map((tag: string, i: number) => (
+                  {contentToRender.hashtags.map((tag: string, i: number) => (
                     <span key={i} className="text-purple-600 bg-purple-50 px-2 py-1 rounded-md text-sm">
                       {tag}
                     </span>
@@ -73,13 +88,14 @@ const TranslationResult: React.FC<TranslationResultProps> = ({ result, isRTL, on
               </div>
             )}
             
-            {/* Si aucun des champs reconnus n'est présent, afficher la réponse brute */}
-            {!parsedJson.main_title && !parsedJson.titre && !parsedJson.title && 
-             !parsedJson.body && !parsedJson.texte && !parsedJson.content && !parsedJson.translation && !parsedJson.text &&
-             (!parsedJson.seo_titles || !Array.isArray(parsedJson.seo_titles)) &&
-             (!parsedJson.hashtags || !Array.isArray(parsedJson.hashtags)) && (
+            {/* Si aucun des champs reconnus n'est présent ou si c'est un objet simple, afficher proprement */}
+            {!contentToRender.main_title && !contentToRender.titre && !contentToRender.title && 
+             !contentToRender.body && !contentToRender.texte && !contentToRender.content && 
+             !contentToRender.translation && !contentToRender.text && !contentToRender.output &&
+             (!contentToRender.seo_titles || !Array.isArray(contentToRender.seo_titles)) &&
+             (!contentToRender.hashtags || !Array.isArray(contentToRender.hashtags)) && (
               <pre className="whitespace-pre-wrap break-words bg-gray-50 p-4 rounded-md text-sm overflow-auto">
-                {JSON.stringify(parsedJson, null, 2)}
+                {JSON.stringify(contentToRender, null, 2)}
               </pre>
             )}
           </div>
@@ -87,6 +103,7 @@ const TranslationResult: React.FC<TranslationResultProps> = ({ result, isRTL, on
       } catch (e) {
         console.error("Erreur lors du traitement JSON:", e);
         // En cas d'erreur, afficher le texte brut
+        return <div className="whitespace-pre-wrap">{text}</div>;
       }
     }
     
