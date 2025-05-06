@@ -76,18 +76,25 @@ export const formatTranslationResult = (data: any): string => {
     return "Aucune traduction disponible.";
   }
   
+  // Vérifier en priorité le champ "Traduction" qui est le format standard de la réponse
+  if (data && typeof data === 'object' && data.Traduction !== undefined) {
+    console.log("Found 'Traduction' field directly in data:", data.Traduction);
+    if (typeof data.Traduction === 'string') {
+      return data.Traduction;
+    } else if (data.Traduction && typeof data.Traduction === 'object') {
+      // Si Traduction est un objet avec une sous-propriété body ou content, l'extraire
+      if (data.Traduction.body) return data.Traduction.body;
+      if (data.Traduction.content) return data.Traduction.content;
+      if (data.Traduction.text) return data.Traduction.text;
+      
+      // Sinon, convertir l'objet en JSON formaté
+      return JSON.stringify(data.Traduction, null, 2);
+    }
+  }
+  
   // Filter out template variables
   const cleanedData = filterTemplateVariables(data);
   console.log("Cleaned data after filtering template variables:", cleanedData);
-  
-  // Priorité 1: Champ "Traduction" spécifique au webhook de traduction
-  if (cleanedData && typeof cleanedData === 'object' && cleanedData.Traduction !== undefined) {
-    console.log("Found 'Traduction' field:", cleanedData.Traduction);
-    if (typeof cleanedData.Traduction === 'string') {
-      return cleanedData.Traduction;
-    }
-    return JSON.stringify(cleanedData.Traduction);
-  }
   
   // Priorité 2: Champs communs de traduction
   if (cleanedData && typeof cleanedData === 'object') {

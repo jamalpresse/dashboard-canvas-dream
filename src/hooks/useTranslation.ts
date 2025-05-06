@@ -97,10 +97,24 @@ export const useTranslation = (
       setResponseType('direct-translation');
       
       // Extraction et traitement de la traduction
-      const formattedResult = formatTranslationResult(responseData);
-      console.log("Résultat formaté:", formattedResult);
+      let translationText = '';
       
-      setResult(formattedResult);
+      // Vérifier si la réponse contient directement le champ "Traduction"
+      if (responseData && responseData.Traduction) {
+        console.log("Champ 'Traduction' trouvé dans la réponse:", responseData.Traduction);
+        if (typeof responseData.Traduction === 'string') {
+          translationText = responseData.Traduction;
+        } else {
+          // Si c'est un objet, on le convertit en chaîne JSON
+          translationText = JSON.stringify(responseData.Traduction);
+        }
+      } else {
+        // Format alternatif ou fallback
+        translationText = formatTranslationResult(responseData);
+      }
+      
+      console.log("Traduction extraite:", translationText);
+      setResult(translationText);
       
       toast({
         title: "Traduction complétée",
