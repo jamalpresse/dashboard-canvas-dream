@@ -39,8 +39,6 @@ export default function Translation() {
         open={showDebugInfo} 
         onOpenChange={setShowDebugInfo}
         debugData={debugData}
-        text={''} // Remove the text prop as it's no longer needed here
-        langPair={''} // Remove the langPair prop as it's no longer needed here
       />
     </div>
   );
