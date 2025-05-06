@@ -1,7 +1,6 @@
-
 import { useState } from "react";
 import { NavLink, Outlet } from "react-router-dom";
-import { LayoutDashboard, Search, MessageSquare, Users, Settings, Menu, X } from "lucide-react";
+import { LayoutDashboard, Settings, Menu, X } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { useIsMobile } from "@/hooks/use-mobile";
@@ -11,21 +10,6 @@ const navItems = [
     title: "Dashboard",
     href: "/",
     icon: <LayoutDashboard className="h-5 w-5" />
-  },
-  {
-    title: "Recherche",
-    href: "/search",
-    icon: <Search className="h-5 w-5" />
-  },
-  {
-    title: "Amélioration",
-    href: "/improve",
-    icon: <MessageSquare className="h-5 w-5" />
-  },
-  {
-    title: "Traduction",
-    href: "/translation",
-    icon: <Users className="h-5 w-5" />
   }
 ];
 
