@@ -1,5 +1,6 @@
 
 import React, { useState } from 'react';
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 // Détecte la présence de caractères arabes pour alignement RTL
 const usesArabic = (text: string) => /[\u0600-\u06FF]/.test(text);
@@ -54,46 +55,50 @@ export default function Search() {
                      'AgAABAgQIECBAgAABAgQIECBAgAABAgQIECBAgAABAgQIECBAgAABAgQIECBAgAABAgQIECBP/';
 
   return (
-    <div className="w-full max-w-4xl mx-auto bg-white p-6">
-      <div className="w-full bg-gray-50 p-6 rounded-lg shadow-md">
-        <h2 className="text-2xl font-semibold mb-4">Recherche d'information (FR/AR)</h2>
-        <textarea
-          value={query}
-          onChange={(e) => setQuery(e.target.value)}
-          placeholder="Entrez votre question ici en arabe ou en français"
-          dir={isQueryRTL ? 'rtl' : 'ltr'}
-          className={`w-full h-24 border border-gray-300 rounded p-3 resize-none focus:outline-none focus:ring-2 focus:ring-red-600 ${isQueryRTL ? 'text-right' : 'text-left'}`}
-        />
-        <div className="flex space-x-3 mt-4">
-          <button onClick={handlePaste} className="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700">
-            COLLER
-          </button>
-          <button onClick={handleSearch} className="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700" disabled={loading}>
-            {loading ? 'Chargement...' : 'RECHERCHER'}
-          </button>
-        </div>
-        <div className="mt-6">
-          {error && <p className="text-red-500">{error}</p>}
-          {!error && (
-            <>
-              <textarea
-                readOnly
-                value={loading ? '' : result || 'Aucun résultat trouvé.'}
-                dir={isResultRTL ? 'rtl' : 'ltr'}
-                className={`w-full h-48 border border-gray-300 rounded p-3 resize-none bg-white focus:outline-none ${isResultRTL ? 'text-right' : 'text-left'}`}
-              />
-              <div className="flex justify-end space-x-2 mt-2">
-                <button onClick={handleClear} className="px-3 py-1 bg-gray-300 text-black rounded hover:bg-gray-400">
-                  EFFACER
-                </button>
-                <button onClick={handleCopy} className="px-3 py-1 bg-red-600 text-white rounded hover:bg-red-700">
-                  COPIER
-                </button>
-              </div>
-            </>
-          )}
-        </div>
-      </div>
+    <div className="min-h-screen bg-gradient-to-br from-purple-50 to-pink-50 p-6 animate-fade-in">
+      <Card className="w-full max-w-4xl mx-auto shadow-md hover:shadow-lg transition-all duration-300">
+        <CardHeader>
+          <CardTitle className="text-2xl font-semibold text-gray-800">Recherche d'information (FR/AR)</CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-6">
+          <textarea
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+            placeholder="Entrez votre question ici en arabe ou en français"
+            dir={isQueryRTL ? 'rtl' : 'ltr'}
+            className={`w-full h-24 border border-gray-300 rounded-lg p-3 resize-none focus:outline-none focus:ring-2 focus:ring-purple-600 ${isQueryRTL ? 'text-right' : 'text-left'}`}
+          />
+          <div className="flex space-x-3">
+            <button onClick={handlePaste} className="px-4 py-2 bg-gradient-to-r from-purple-600 to-purple-700 text-white rounded-md hover:from-purple-700 hover:to-purple-800 shadow-sm transition-colors">
+              COLLER
+            </button>
+            <button onClick={handleSearch} className="px-4 py-2 bg-gradient-to-r from-purple-600 to-pink-500 text-white rounded-md hover:from-purple-700 hover:to-pink-600 shadow-sm transition-colors" disabled={loading}>
+              {loading ? 'Chargement...' : 'RECHERCHER'}
+            </button>
+          </div>
+          <div>
+            {error && <p className="text-red-500 mb-2">{error}</p>}
+            {!error && (
+              <>
+                <textarea
+                  readOnly
+                  value={loading ? '' : result || 'Aucun résultat trouvé.'}
+                  dir={isResultRTL ? 'rtl' : 'ltr'}
+                  className={`w-full h-48 border border-gray-300 rounded-lg p-3 resize-none bg-white/80 backdrop-blur-sm shadow-inner focus:outline-none ${isResultRTL ? 'text-right' : 'text-left'}`}
+                />
+                <div className="flex justify-end space-x-2 mt-2">
+                  <button onClick={handleClear} className="px-3 py-1 bg-gray-200 text-black rounded-md hover:bg-gray-300 shadow-sm transition-colors">
+                    EFFACER
+                  </button>
+                  <button onClick={handleCopy} className="px-3 py-1 bg-gradient-to-r from-purple-500 to-pink-500 text-white rounded-md hover:from-purple-600 hover:to-pink-600 shadow-sm transition-colors">
+                    COPIER
+                  </button>
+                </div>
+              </>
+            )}
+          </div>
+        </CardContent>
+      </Card>
     </div>
   );
 }

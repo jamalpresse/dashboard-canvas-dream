@@ -1,5 +1,6 @@
 
 import React, { useState } from 'react';
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 export default function Translation() {
   const [text, setText] = useState('');
@@ -72,95 +73,100 @@ export default function Translation() {
   };
 
   return (
-    <div className="min-h-screen bg-white p-6">
-      <header className="flex items-center mb-6">
-        <h1 className="text-2xl font-semibold text-black">Traduction Multilingue</h1>
-      </header>
+    <div className="min-h-screen bg-gradient-to-br from-purple-50 to-pink-50 p-6 animate-fade-in">
+      <Card className="w-full max-w-4xl mx-auto shadow-md hover:shadow-lg transition-all duration-300">
+        <CardHeader>
+          <CardTitle className="text-2xl font-semibold text-gray-800">Traduction Multilingue</CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-6">
+          <section>
+            <textarea
+              placeholder="Collez ici votre texte à traduire"
+              value={text}
+              onChange={e => setText(e.target.value)}
+              dir={isSourceRTL ? 'rtl' : 'ltr'}
+              className={`w-full h-40 p-4 border rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-600 ${
+                isSourceRTL ? 'text-right' : 'text-left'
+              }`}
+            />
+            <div className="mt-2 flex space-x-2">
+              <button
+                type="button"
+                onClick={handlePaste}
+                className="px-4 py-2 bg-gradient-to-r from-purple-600 to-purple-700 text-white rounded-md hover:from-purple-700 hover:to-purple-800 transition-colors shadow-sm"
+              >
+                COLLER
+              </button>
+              <button
+                type="button"
+                onClick={handleTranslate}
+                disabled={loading}
+                className={`px-4 py-2 text-white rounded-md shadow-sm ${
+                  loading 
+                    ? 'bg-gray-400' 
+                    : 'bg-gradient-to-r from-purple-600 to-pink-500 hover:from-purple-700 hover:to-pink-600 transition-colors'
+                }`}
+              >
+                {loading ? 'TRADUCTION...' : 'TRADUIRE'}
+              </button>
+              <button
+                type="button"
+                onClick={handleClear}
+                className="px-4 py-2 bg-gray-200 text-black rounded-md hover:bg-gray-300 transition-colors shadow-sm"
+              >
+                EFFACER
+              </button>
+            </div>
+          </section>
 
-      <section className="mb-6">
-        <textarea
-          placeholder="Collez ici votre texte à traduire"
-          value={text}
-          onChange={e => setText(e.target.value)}
-          dir={isSourceRTL ? 'rtl' : 'ltr'}
-          className={`w-full h-40 p-4 border rounded focus:outline-none focus:ring-2 focus:ring-red-600 ${
-            isSourceRTL ? 'text-right' : 'text-left'
-          }`}
-        />
-        <div className="mt-2 flex space-x-2">
-          <button
-            type="button"
-            onClick={handlePaste}
-            className="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700"
-          >
-            COLLER
-          </button>
-          <button
-            type="button"
-            onClick={handleTranslate}
-            disabled={loading}
-            className={`px-4 py-2 text-white rounded ${
-              loading ? 'bg-gray-400' : 'bg-red-600 hover:bg-red-700'
-            }`}
-          >
-            {loading ? 'TRADUCTION...' : 'TRADUIRE'}
-          </button>
-          <button
-            type="button"
-            onClick={handleClear}
-            className="px-4 py-2 bg-gray-200 text-black rounded hover:bg-gray-300"
-          >
-            EFFACER
-          </button>
-        </div>
-      </section>
+          <section>
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-2">
+              {langs.map(({ label, value }) => (
+                <button
+                  key={value}
+                  type="button"
+                  onClick={() => setLangPair(value)}
+                  className={`py-2 rounded-md border shadow-sm transition-all duration-200 ${
+                    langPair === value
+                      ? 'bg-gradient-to-r from-purple-600 to-pink-500 text-white ring-2 ring-purple-600'
+                      : 'bg-white text-black border-gray-300 hover:bg-purple-50'
+                  }`}
+                >
+                  {label}
+                </button>
+              ))}
+            </div>
+          </section>
 
-      <section className="mb-6">
-        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-2">
-          {langs.map(({ label, value }) => (
-            <button
-              key={value}
-              type="button"
-              onClick={() => setLangPair(value)}
-              className={`py-2 rounded border ${
-                langPair === value
-                  ? 'bg-red-600 text-white ring-2 ring-red-600'
-                  : 'bg-white text-black border-gray-300'
+          <section>
+            {error && <p className="text-red-600 mb-2">{error}</p>}
+            <div
+              dir={isTargetRTL ? 'rtl' : 'ltr'}
+              className={`w-full min-h-[8rem] p-4 border rounded-lg bg-white/80 backdrop-blur-sm shadow-inner ${
+                isTargetRTL ? 'text-right' : 'text-left'
               }`}
             >
-              {label}
-            </button>
-          ))}
-        </div>
-      </section>
-
-      <section>
-        {error && <p className="text-red-600 mb-2">{error}</p>}
-        <div
-          dir={isTargetRTL ? 'rtl' : 'ltr'}
-          className={`w-full min-h-[8rem] p-4 border rounded bg-gray-50 ${
-            isTargetRTL ? 'text-right' : 'text-left'
-          }`}
-        >
-          {result || <span className="text-gray-400">Le résultat apparaîtra ici</span>}
-        </div>
-        <div className="mt-2 flex space-x-2">
-          <button
-            type="button"
-            onClick={handleCopy}
-            className="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700"
-          >
-            COPIER
-          </button>
-          <button
-            type="button"
-            onClick={handleClear}
-            className="px-4 py-2 bg-gray-200 text-black rounded hover:bg-gray-300"
-          >
-            EFFACER
-          </button>
-        </div>
-      </section>
+              {result || <span className="text-gray-400">Le résultat apparaîtra ici</span>}
+            </div>
+            <div className="mt-2 flex space-x-2">
+              <button
+                type="button"
+                onClick={handleCopy}
+                className="px-4 py-2 bg-gradient-to-r from-purple-500 to-pink-500 text-white rounded-md hover:from-purple-600 hover:to-pink-600 transition-colors shadow-sm"
+              >
+                COPIER
+              </button>
+              <button
+                type="button"
+                onClick={handleClear}
+                className="px-4 py-2 bg-gray-200 text-black rounded-md hover:bg-gray-300 transition-colors shadow-sm"
+              >
+                EFFACER
+              </button>
+            </div>
+          </section>
+        </CardContent>
+      </Card>
     </div>
   );
 }
