@@ -8,8 +8,6 @@ import TranslationForm from "@/components/translation/TranslationForm";
 export default function Translation() {
   const [showDebugInfo, setShowDebugInfo] = useState(false);
   const [debugData, setDebugData] = useState<any>(null);
-  const [text, setText] = useState('');
-  const [langPair, setLangPair] = useState('fr-ar');
 
   const toggleDebugInfo = () => {
     setShowDebugInfo(!showDebugInfo);
@@ -41,8 +39,8 @@ export default function Translation() {
         open={showDebugInfo} 
         onOpenChange={setShowDebugInfo}
         debugData={debugData}
-        text={text}
-        langPair={langPair}
+        text={''} // Remove the text prop as it's no longer needed here
+        langPair={''} // Remove the langPair prop as it's no longer needed here
       />
     </div>
   );
