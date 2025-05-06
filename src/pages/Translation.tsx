@@ -1,5 +1,9 @@
 
 import React, { useState } from 'react';
+import { toast } from '@/components/ui/use-toast';
+import LanguageSelector from '@/components/translation/LanguageSelector';
+import ErrorDisplay from '@/components/translation/ErrorDisplay';
+import { formatTranslationResult } from '@/utils/translationUtils';
 
 export default function Translation() {
   const [text, setText] = useState('');
@@ -7,18 +11,10 @@ export default function Translation() {
   const [result, setResult] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+  const [requestDetails, setRequestDetails] = useState<any>(null);
 
   // URL du webhook n8n pour la traduction
   const WEBHOOK_URL = 'https://n8n-jamal-u38598.vm.elestio.app/webhook/4732aeff-7544-4f0e-8554-ebd0f614947b';
-
-  const langs = [
-    { label: 'AR → FR', value: 'ar-fr' },
-    { label: 'FR → AR', value: 'fr-ar' },
-    { label: 'ANG → AR', value: 'en-ar' },
-    { label: 'ANG → FR', value: 'en-fr' },
-    { label: 'ES → AR', value: 'es-ar' },
-    { label: 'ES → FR', value: 'es-fr' },
-  ];
 
   // Détection RTL uniquement pour la langue source ou cible arabe
   const isSourceRTL = langPair.split('-')[0] === 'ar';
@@ -29,7 +25,8 @@ export default function Translation() {
       const clip = await navigator.clipboard.readText();
       setText(clip);
       setError('');
-    } catch {
+    } catch (err) {
+      console.error("Erreur de presse-papier:", err);
       setError('Impossible de lire le presse-papier.');
     }
   };
@@ -41,21 +38,71 @@ export default function Translation() {
       setError('Veuillez entrer du texte à traduire.');
       return;
     }
+    
     setLoading(true);
+
+    // Préparer le payload pour n8n
+    const payload = {
+      text: text.trim(),
+      langPair,
+      type: "translation", // Ajout d'un type pour aider n8n à identifier la requête
+      timestamp: new Date().toISOString()
+    };
+
+    // Enregistrer les détails de la requête pour le débogage
+    setRequestDetails(payload);
+    
+    console.log("Envoi de la requête à n8n:", WEBHOOK_URL);
+    console.log("Payload:", payload);
+    
     try {
       const response = await fetch(WEBHOOK_URL, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ text, langPair }),
+        headers: { 
+          'Content-Type': 'application/json',
+          'Accept': 'application/json'
+        },
+        // MODE IMPORTANT: essayer avec différentes options CORS
+        mode: 'cors', // Essayer avec 'cors' au lieu de 'no-cors'
+        body: JSON.stringify(payload),
       });
-      if (!response.ok) throw new Error(`HTTP ${response.status}`);
+      
+      console.log("Statut de la réponse:", response.status);
+      
+      // Si mode: 'cors', on peut vérifier la réponse
+      if (!response.ok) {
+        console.error("Erreur HTTP:", response.status);
+        throw new Error(`Erreur HTTP ${response.status}`);
+      }
 
-      const data = await response.json();
-      const raw = data.Traduction;
-      const translation = typeof raw === 'string' ? raw : JSON.stringify(raw, null, 2);
-      setResult(translation);
-    } catch (err) {
-      setError(err.message || 'Erreur lors de la traduction.');
+      // Essayer de récupérer la réponse JSON
+      try {
+        const data = await response.json();
+        console.log("Réponse complète:", data);
+        
+        if (data && data.Traduction !== undefined) {
+          const translation = formatTranslationResult(data);
+          setResult(translation);
+          toast({
+            title: "Traduction réussie",
+            description: "Le texte a été traduit avec succès.",
+          });
+        } else {
+          console.error("Format de réponse inattendu:", data);
+          throw new Error("Format de réponse inattendu");
+        }
+      } catch (jsonError) {
+        console.error("Erreur lors du parsing JSON:", jsonError);
+        throw new Error("Erreur lors du traitement de la réponse");
+      }
+    } catch (err: any) {
+      console.error("Erreur complète:", err);
+      setError(err.message || 'Erreur lors de la traduction. Vérifiez la console pour plus de détails.');
+      toast({
+        title: "Erreur de traduction",
+        description: err.message || "Une erreur s'est produite pendant la traduction",
+        variant: "destructive",
+      });
     } finally {
       setLoading(false);
     }
@@ -65,10 +112,17 @@ export default function Translation() {
     setText('');
     setResult('');
     setError('');
+    setRequestDetails(null);
   };
 
   const handleCopy = async () => {
-    if (result) await navigator.clipboard.writeText(result);
+    if (result) {
+      await navigator.clipboard.writeText(result);
+      toast({
+        title: "Copié",
+        description: "Le texte traduit a été copié dans le presse-papier.",
+      });
+    }
   };
 
   return (
@@ -87,7 +141,7 @@ export default function Translation() {
             isSourceRTL ? 'text-right' : 'text-left'
           }`}
         />
-        <div className="mt-2 flex space-x-2">
+        <div className="mt-2 flex flex-wrap gap-2">
           <button
             type="button"
             onClick={handlePaste}
@@ -115,27 +169,14 @@ export default function Translation() {
         </div>
       </section>
 
-      <section className="mb-6">
-        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-2">
-          {langs.map(({ label, value }) => (
-            <button
-              key={value}
-              type="button"
-              onClick={() => setLangPair(value)}
-              className={`py-2 rounded border ${
-                langPair === value
-                  ? 'bg-red-600 text-white ring-2 ring-red-600'
-                  : 'bg-white text-black border-gray-300'
-              }`}
-            >
-              {label}
-            </button>
-          ))}
-        </div>
-      </section>
+      <LanguageSelector 
+        selectedLangPair={langPair}
+        onLangPairChange={setLangPair}
+      />
 
-      <section>
-        {error && <p className="text-red-600 mb-2">{error}</p>}
+      <section className="mt-6">
+        {error && <ErrorDisplay error={error} />}
+        
         <div
           dir={isTargetRTL ? 'rtl' : 'ltr'}
           className={`w-full min-h-[8rem] p-4 border rounded bg-gray-50 ${
@@ -144,11 +185,12 @@ export default function Translation() {
         >
           {result || <span className="text-gray-400">Le résultat apparaîtra ici</span>}
         </div>
-        <div className="mt-2 flex space-x-2">
+        <div className="mt-2 flex flex-wrap gap-2">
           <button
             type="button"
             onClick={handleCopy}
-            className="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700"
+            disabled={!result}
+            className={`px-4 py-2 ${result ? 'bg-red-600 hover:bg-red-700 text-white' : 'bg-gray-300 text-gray-600'} rounded`}
           >
             COPIER
           </button>
@@ -161,6 +203,19 @@ export default function Translation() {
           </button>
         </div>
       </section>
+
+      {/* Section de débogage */}
+      {requestDetails && (
+        <section className="mt-8 p-4 border rounded bg-gray-100">
+          <h3 className="font-medium mb-2">Détails de la dernière requête (pour débogage):</h3>
+          <pre className="text-xs overflow-auto p-2 bg-white border rounded">
+            {JSON.stringify(requestDetails, null, 2)}
+          </pre>
+          <p className="mt-2 text-sm text-gray-600">
+            Si le workflow n8n ne se déclenche pas, vérifiez que l'URL du webhook est correcte et que le format de la requête est attendu par n8n.
+          </p>
+        </section>
+      )}
     </div>
   );
 }
