@@ -9,40 +9,37 @@ interface DirectTranslationResultProps {
 
 const DirectTranslationResult: React.FC<DirectTranslationResultProps> = ({ content }) => {
   try {
-    // Handle JSON content
-    if (typeof content === 'string' && content.startsWith('{')) {
+    // Traitement différent selon le type de contenu
+    let displayContent = content;
+    
+    // Si c'est un objet JSON ou une chaîne JSON
+    if (typeof content === 'string' && (content.startsWith('{') || content.startsWith('['))) {
       try {
         const jsonContent = JSON.parse(content);
-        return (
-          <div>
-            <div className="flex items-center gap-2 mb-2">
-              <FileText className="h-5 w-5 text-blue-600" />
-              <span className="font-medium text-blue-700">Traduction</span>
-            </div>
-            <div className="whitespace-pre-wrap">
-              {typeof jsonContent === 'string' ? 
-                createTextResponseElements(jsonContent) : 
-                JSON.stringify(jsonContent, null, 2)}
-            </div>
-          </div>
-        );
+        
+        // Si c'est un objet simple avec une propriété texte, on l'extrait
+        if (typeof jsonContent === 'object' && !Array.isArray(jsonContent)) {
+          const textProperties = ['text', 'translation', 'content', 'body', 'Traduction'];
+          for (const prop of textProperties) {
+            if (jsonContent[prop] && typeof jsonContent[prop] === 'string') {
+              displayContent = jsonContent[prop];
+              break;
+            }
+          }
+          
+          // Si on n'a pas trouvé de propriété texte, on utilise le JSON formaté
+          if (displayContent === content) {
+            displayContent = JSON.stringify(jsonContent, null, 2);
+          }
+        } else {
+          displayContent = JSON.stringify(jsonContent, null, 2);
+        }
       } catch (e) {
-        // If JSON parsing fails, render as text
-        return (
-          <div>
-            <div className="flex items-center gap-2 mb-2">
-              <FileText className="h-5 w-5 text-blue-600" />
-              <span className="font-medium text-blue-700">Traduction</span>
-            </div>
-            <div className="whitespace-pre-wrap">
-              {createTextResponseElements(content)}
-            </div>
-          </div>
-        );
+        // Si le parsing JSON échoue, on garde le contenu tel quel
+        console.log("Erreur de parsing JSON:", e);
       }
     }
     
-    // For plain text
     return (
       <div>
         <div className="flex items-center gap-2 mb-2">
@@ -50,7 +47,7 @@ const DirectTranslationResult: React.FC<DirectTranslationResultProps> = ({ conte
           <span className="font-medium text-blue-700">Traduction</span>
         </div>
         <div className="whitespace-pre-wrap">
-          {createTextResponseElements(content)}
+          {createTextResponseElements(displayContent)}
         </div>
       </div>
     );

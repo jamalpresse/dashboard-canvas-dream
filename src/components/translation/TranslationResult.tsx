@@ -21,19 +21,19 @@ const TranslationResult: React.FC<TranslationResultProps> = ({
 }) => {
   // Function to render formatted result based on response type
   const renderFormattedResult = () => {
-    if (!result) {
+    if (!result || result.trim() === '') {
       return <EmptyResult />;
     }
     
     console.log("Rendering result with type:", responseType);
     
-    // If there's an explicit error message
+    // Si une erreur est détectée
     if (result.includes('Aucune traduction disponible') || responseType === 'error') {
       return <ErrorResult message={result} />;
     }
     
-    // Always use DirectTranslationResult regardless of the responseType
-    // This ensures we always get a simple translation display
+    // Toujours utiliser DirectTranslationResult pour tous les types de réponses
+    // pour garantir un affichage simple de la traduction
     return <DirectTranslationResult content={result} />;
   };
 

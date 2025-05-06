@@ -1,3 +1,4 @@
+
 import { useState } from 'react';
 import { useToast } from "@/hooks/use-toast";
 import { formatTranslationResult, extractTranslationFromResponse, detectResultType } from '@/utils/translationUtils';
@@ -57,16 +58,13 @@ export const useTranslation = (
     }
     
     setLoading(true);
-    console.log(`Envoi de la requête au webhook fixe: ${WEBHOOK_URL}`);
+    console.log(`Envoi de la requête au webhook de traduction: ${WEBHOOK_URL}`);
     
     // Préparer les données à envoyer avec le format exact attendu par le webhook
-    // Spécifier clairement que nous voulons une traduction (pas de contenu amélioré)
     const payload = { 
       text: text.trim(), 
       langPair,
-      type: "translation", // Indiquer clairement que nous demandons une traduction
-      responseType: "direct-translation", // Demande explicite d'une traduction directe
-      enhancedContent: false // Désactiver explicitement le contenu amélioré
+      type: "translation"  // Paramètre essentiel pour indiquer qu'on veut une traduction
     };
     
     console.log("Payload envoyé:", payload);
@@ -90,23 +88,20 @@ export const useTranslation = (
 
       // Récupération de la réponse JSON
       const responseData = await response.json();
-      console.log("Réponse complète brute reçue du webhook:", responseData);
+      console.log("Réponse complète reçue du webhook:", responseData);
       
       // Enregistrement de la réponse complète pour le débogage
       setDebugData(responseData);
       
       // Force le type de réponse à être une traduction directe
-      const resultType = 'direct-translation';
-      setResponseType(resultType);
-      console.log("Type de réponse forcé à:", resultType);
+      setResponseType('direct-translation');
       
-      // Extraction et traitement de la traduction en utilisant nos utilitaires
+      // Extraction et traitement de la traduction
       const formattedResult = formatTranslationResult(responseData);
       console.log("Résultat formaté:", formattedResult);
       
       setResult(formattedResult);
       
-      // Toast toujours en tant que traduction directe
       toast({
         title: "Traduction complétée",
         description: "Le texte a été traduit avec succès",
@@ -114,6 +109,7 @@ export const useTranslation = (
     } catch (err: any) {
       console.error("Erreur de traduction:", err);
       setError(err.message || 'Erreur lors de la traduction.');
+      setResponseType('error');
       toast({
         title: "Erreur",
         description: `Erreur lors de la traduction: ${err.message || 'Problème de connexion'}`,
