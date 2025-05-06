@@ -1,10 +1,12 @@
 
 import React, { useState, useEffect } from "react";
-import { Search, ArrowUp, MessageSquare, Users } from "lucide-react";
-import { StatCard } from "@/components/dashboard/StatCard";
-import { LineChart } from "@/components/dashboard/LineChart";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { ActivityTimeline } from "@/components/dashboard/ActivityTimeline";
+import { MessageSquare, Users, ArrowUp } from "lucide-react";
+import { LanguageSwitcher } from "@/components/dashboard/LanguageSwitcher";
+import { WelcomeSection } from "@/components/dashboard/WelcomeSection";
+import { StatsSection } from "@/components/dashboard/StatsSection";
+import { ChartsSection } from "@/components/dashboard/ChartsSection";
+import { RssTicker } from "@/components/dashboard/RssTicker";
+import { DashboardStyles } from "@/components/dashboard/DashboardStyles";
 
 const Index = () => {
   const [lang, setLang] = useState("fr");
@@ -73,111 +75,49 @@ const Index = () => {
     { name: "Jui", visits: 2400, articles: 52 },
   ];
 
+  const handleLanguageSwitch = () => setLang(isArabic ? "fr" : "ar");
+
   return (
     <div className="space-y-6">
       <div dir={dir} className="min-h-[80vh] bg-gradient-to-br from-purple-50 to-pink-50 flex flex-col px-4 relative animate-fade-in">
         {/* Language Switcher */}
-        <div className="w-full max-w-5xl mx-auto flex justify-end pt-4">
-          <button
-            onClick={() => setLang(isArabic ? "fr" : "ar")}
-            className="text-sm bg-white/80 backdrop-blur-sm px-4 py-1 rounded-full shadow-sm hover:bg-white transition-all duration-300 text-purple-700"
-          >
-            {t.switchTo}
-          </button>
-        </div>
+        <LanguageSwitcher 
+          isArabic={isArabic} 
+          switchLabel={t.switchTo} 
+          onSwitch={handleLanguageSwitch} 
+        />
 
         {/* Welcome Section */}
-        <div className="w-full max-w-5xl mx-auto mt-8">
-          <div className="bg-gradient-to-r from-purple-600 to-pink-500 rounded-xl p-8 shadow-lg text-white mb-8">
-            <h1 className="text-3xl font-bold">{t.welcome}</h1>
-            <p className="mt-2 opacity-90">{t.greeting}</p>
-          </div>
-        </div>
+        <WelcomeSection 
+          welcomeTitle={t.welcome} 
+          welcomeMessage={t.greeting} 
+        />
 
         {/* Stats Section */}
-        <div className="w-full max-w-5xl mx-auto">
-          <h2 className="text-xl font-semibold mb-4 text-gray-800">{t.stats}</h2>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-            {statsData.map((stat, index) => (
-              <StatCard
-                key={index}
-                title={stat.title}
-                value={stat.value}
-                icon={stat.icon}
-                trend={stat.trend}
-                variant={stat.variant}
-                className="transform transition-transform hover:scale-105 duration-300"
-              />
-            ))}
-          </div>
-        </div>
+        <StatsSection 
+          sectionTitle={t.stats} 
+          stats={statsData} 
+        />
 
         {/* Chart and Activity Section */}
-        <div className="w-full max-w-5xl mx-auto grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
-          <LineChart
-            className="col-span-1 lg:col-span-2 shadow-md hover:shadow-lg transition-shadow duration-300"
-            data={chartData}
-            title={isArabic ? "متابعة النشاط" : "Suivi d'activité"}
-            lines={[
-              { dataKey: "visits", stroke: "#9b87f5", name: isArabic ? "الزيارات" : "Visites" },
-              { dataKey: "articles", stroke: "#D946EF", name: isArabic ? "المقالات" : "Articles" }
-            ]}
-          />
-          
-          <ActivityTimeline 
-            items={activities} 
-            className="col-span-1 shadow-md hover:shadow-lg transition-shadow duration-300"
-          />
-        </div>
+        <ChartsSection 
+          chartData={chartData} 
+          activities={activities} 
+          chartTitle={isArabic ? "متابعة النشاط" : "Suivi d'activité"}
+          visitLabel={isArabic ? "الزيارات" : "Visites"}
+          articlesLabel={isArabic ? "المقالات" : "Articles"}
+        />
 
         {/* RSS Ticker */}
-        <div className="w-full bg-white/80 backdrop-blur-sm border-t border-purple-200 rounded-lg shadow-inner mt-8 mx-auto max-w-5xl overflow-hidden">
-          <div className="flex items-center space-x-4 rtl:space-x-reverse px-6 py-3">
-            <span className="text-purple-700 font-semibold whitespace-nowrap flex-shrink-0">📰 {isArabic ? 'آخر الأخبار' : 'Dernières actualités'} :</span>
-            <div className="flex-1 overflow-hidden">
-              <div className="marquee whitespace-nowrap">
-                {rssItems.length > 0 ? (
-                  rssItems.map((item, index) => (
-                    <a 
-                      key={index} 
-                      href={item.link} 
-                      target="_blank" 
-                      rel="noopener noreferrer" 
-                      className="inline-block mr-12 rtl:ml-12 rtl:mr-0 text-purple-700 hover:underline hover:text-purple-900"
-                    >
-                      {item.title}
-                    </a>
-                  ))
-                ) : (
-                  <span className="text-gray-500">Chargement des actualités...</span>
-                )}
-              </div>
-            </div>
-          </div>
-        </div>
+        <RssTicker 
+          title={isArabic ? 'آخر الأخبار' : 'Dernières actualités'} 
+          rssItems={rssItems} 
+          isArabic={isArabic}
+        />
       </div>
 
-      <style>
-        {`
-          .marquee {
-            display: inline-block;
-            animation: marquee 30s linear infinite;
-          }
-          @keyframes marquee {
-            0% { transform: translateX(${isArabic ? '-100%' : '100%'}); }
-            100% { transform: translateX(${isArabic ? '100%' : '-100%'}); }
-          }
-          
-          @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(10px); }
-            to { opacity: 1; transform: translateY(0); }
-          }
-          
-          .animate-fade-in {
-            animation: fadeIn 0.5s ease-out forwards;
-          }
-        `}
-      </style>
+      {/* Global Styles */}
+      <DashboardStyles isArabic={isArabic} />
     </div>
   );
 };
