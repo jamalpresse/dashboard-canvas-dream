@@ -8,6 +8,7 @@ import { Languages, Clipboard, ClipboardCheck, AlertCircle } from "lucide-react"
 import { extractTranslationFromResponse, formatTranslationResult } from "@/utils/translationUtils";
 import TranslationResult from "@/components/translation/TranslationResult";
 import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 
 // Define interface for the relevantData object to fix TypeScript errors
 interface RelevantData {
@@ -24,6 +25,8 @@ export default function Translation() {
   const [result, setResult] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+  const [showDebugInfo, setShowDebugInfo] = useState(false);
+  const [debugData, setDebugData] = useState<any>(null);
   const { toast } = useToast();
 
   // URL du webhook n8n pour la traduction
@@ -64,6 +67,7 @@ export default function Translation() {
   const handleTranslate = async () => {
     setError('');
     setResult('');
+    setDebugData(null);
     
     // Validation du texte d'entrée
     if (!text.trim()) {
@@ -80,36 +84,53 @@ export default function Translation() {
     console.log(`Envoi de la requête au webhook ${WEBHOOK_URL}`);
     console.log(`Données: texte=${text.substring(0, 50)}..., paire de langues=${langPair}`);
     
+    // Préparer les données à envoyer
+    const payload = { 
+      text: text.trim(), 
+      langPair
+    };
+    
+    console.log("Payload complet:", payload);
+    
     try {
       const response = await fetch(WEBHOOK_URL, {
         method: 'POST',
         headers: { 
           'Content-Type': 'application/json',
-          'Accept': 'application/json'
+          'Accept': 'application/json',
         },
-        body: JSON.stringify({ 
-          text, 
-          langPair 
-        }),
+        body: JSON.stringify(payload),
       });
+      
+      console.log("Réponse brute du serveur:", response);
+      console.log("Statut:", response.status, response.statusText);
       
       if (!response.ok) {
         throw new Error(`Erreur HTTP: ${response.status} ${response.statusText}`);
       }
 
-      const data = await response.json();
-      console.log("Réponse API de traduction:", data);
+      let responseData;
+      try {
+        responseData = await response.json();
+        console.log("Réponse JSON complète:", JSON.stringify(responseData, null, 2));
+        setDebugData(responseData);
+      } catch (jsonError) {
+        const textResponse = await response.text();
+        console.log("Réponse texte (non-JSON):", textResponse);
+        responseData = textResponse;
+        setDebugData({ textResponse });
+      }
       
-      if (!data) {
+      if (!responseData) {
         throw new Error("Réponse vide reçue du serveur");
       }
       
       // Utilisation des fonctions d'extraction et de formatage
-      const extractedData = extractTranslationFromResponse(data);
-      console.log("Données extraites:", extractedData);
+      const extractedData = extractTranslationFromResponse(responseData);
+      console.log("Données extraites après traitement:", extractedData);
       
       const formattedResult = formatTranslationResult(extractedData);
-      console.log("Résultat formaté:", formattedResult.substring(0, 100) + "...");
+      console.log("Résultat formaté final:", formattedResult.substring(0, 100) + "...");
       
       setResult(formattedResult);
       toast({
@@ -133,6 +154,7 @@ export default function Translation() {
     setText('');
     setResult('');
     setError('');
+    setDebugData(null);
   };
 
   const handleCopy = async () => {
@@ -143,6 +165,10 @@ export default function Translation() {
         description: "Le texte traduit a été copié dans le presse-papier",
       });
     }
+  };
+
+  const toggleDebugInfo = () => {
+    setShowDebugInfo(!showDebugInfo);
   };
 
   return (
@@ -265,10 +291,38 @@ export default function Translation() {
               >
                 EFFACER
               </Button>
+              <Button
+                onClick={toggleDebugInfo}
+                variant="outline"
+                className="ml-auto bg-gray-100 text-gray-700 text-xs rounded-md hover:bg-gray-200 transition-colors shadow-sm"
+              >
+                DEBUG
+              </Button>
             </div>
           </section>
         </CardContent>
       </Card>
+
+      {/* Debug Dialog */}
+      <Dialog open={showDebugInfo} onOpenChange={setShowDebugInfo}>
+        <DialogContent className="max-w-4xl max-h-screen overflow-auto">
+          <DialogHeader>
+            <DialogTitle>Informations de débogage</DialogTitle>
+            <DialogDescription>Détails de la dernière traduction</DialogDescription>
+          </DialogHeader>
+          <div className="bg-gray-100 p-4 rounded-md overflow-auto">
+            <h3 className="font-bold mb-2">Paramètres:</h3>
+            <pre>
+              {JSON.stringify({ text: text.substring(0, 100) + "...", langPair }, null, 2)}
+            </pre>
+            
+            <h3 className="font-bold mt-4 mb-2">Réponse brute:</h3>
+            <pre className="text-xs">
+              {debugData ? JSON.stringify(debugData, null, 2) : "Aucune donnée disponible"}
+            </pre>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

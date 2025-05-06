@@ -14,6 +14,21 @@ const TranslationResult: React.FC<TranslationResultProps> = ({ result, isRTL, on
   const renderFormattedText = (text: string) => {
     if (!text) return <span className="text-gray-400">Le résultat apparaîtra ici</span>;
     
+    // Handle JSON strings that might be returned
+    if (text.trim().startsWith('{') && text.trim().endsWith('}')) {
+      try {
+        const parsedJson = JSON.parse(text);
+        return (
+          <pre className="whitespace-pre-wrap break-words bg-gray-50 p-2 rounded text-sm">
+            {JSON.stringify(parsedJson, null, 2)}
+          </pre>
+        );
+      } catch (e) {
+        // If it's not valid JSON, continue with normal rendering
+        console.log("Format JSON détecté mais non valide, traitement comme texte");
+      }
+    }
+    
     // Split by lines to process headers and lists
     return text.split('\n').map((line, index) => {
       // Headers

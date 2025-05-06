@@ -22,7 +22,7 @@ export const formatTranslationResult = (data: any): string => {
     formattedParts.push(`# ${data.titre}\n`);
   }
   
-  // Handle body text
+  // Handle body text - check for additional possible field names
   if (data.body) {
     formattedParts.push(data.body);
   } else if (data.texte) {
@@ -31,6 +31,16 @@ export const formatTranslationResult = (data: any): string => {
     formattedParts.push(data.translation);
   } else if (data.Traduction) {
     formattedParts.push(data.Traduction);
+  } else if (data.translatedText) {
+    formattedParts.push(data.translatedText);
+  } else if (data.translated_text) {
+    formattedParts.push(data.translated_text);
+  } else if (data.target_text) {
+    formattedParts.push(data.target_text);
+  } else if (data.result && typeof data.result === 'string') {
+    formattedParts.push(data.result);
+  } else if (data.text) {
+    formattedParts.push(data.text);
   }
   
   // Handle SEO titles
@@ -47,7 +57,8 @@ export const formatTranslationResult = (data: any): string => {
   
   // Handle other relevant fields that might be in the data
   const otherFields = Object.entries(data).filter(([key]) => 
-    !['main_title', 'body', 'seo_titles', 'hashtags', 'titre', 'texte', 'titresSEO', 'Traduction', 'translation'].includes(key) && 
+    !['main_title', 'body', 'seo_titles', 'hashtags', 'titre', 'texte', 'titresSEO', 'Traduction', 'translation',
+      'translatedText', 'translated_text', 'target_text', 'result', 'text'].includes(key) && 
     typeof data[key] !== 'undefined' && 
     data[key] !== null
   );
@@ -64,8 +75,9 @@ export const formatTranslationResult = (data: any): string => {
     });
   }
   
-  // If no parts were found, provide fallback message
+  // If no parts were found, provide the original data as JSON
   if (formattedParts.length === 0) {
+    console.log("Aucun format reconnu dans la réponse, données brutes:", data);
     return JSON.stringify(data, null, 2);
   }
   
@@ -76,7 +88,7 @@ export const formatTranslationResult = (data: any): string => {
  * Extract the most appropriate translation result from API response
  */
 export const extractTranslationFromResponse = (data: any): any => {
-  console.log("Extracting translation from response data:", data);
+  console.log("Données brutes de la réponse:", data);
   
   // If data is a string, return it directly
   if (typeof data === 'string') {
@@ -88,26 +100,61 @@ export const extractTranslationFromResponse = (data: any): any => {
     return String(data);
   }
 
-  // Check for common translation fields in order of priority
-  if (data.result && typeof data.result === 'object') {
-    // n8n webhook might wrap results in a 'result' field
-    return extractTranslationFromResponse(data.result);
-  } else if (data.data && typeof data.data === 'object') {
-    // Some APIs wrap data in a 'data' field
+  // Check for n8n specific response formats 
+  if (data.data && typeof data.data === 'object') {
+    console.log("Données dans le champ 'data':", data.data);
     return extractTranslationFromResponse(data.data);
-  } else if (data.main_title || data.body || data.titre || data.texte) {
-    // Return complete structured data for formatting
-    return data;
-  } else if (data.Traduction && typeof data.Traduction === 'string') {
-    return data.Traduction;
-  } else if (data.translation && typeof data.translation === 'string') {
-    return data.translation;
-  } else if (data.result && typeof data.result === 'string') {
-    return data.result;
-  } else if (data.texte_traduit && typeof data.texte_traduit === 'string') {
-    return data.texte_traduit;
+  } 
+  
+  if (data.result && typeof data.result === 'object') {
+    console.log("Données dans le champ 'result':", data.result);
+    return extractTranslationFromResponse(data.result);
   }
   
-  // If no recognized fields, return the whole object for formatting
+  // Check common OpenAI format
+  if (data.choices && Array.isArray(data.choices) && data.choices.length > 0) {
+    console.log("Format OpenAI détecté:", data.choices[0]);
+    if (data.choices[0].message && data.choices[0].message.content) {
+      return data.choices[0].message.content;
+    } else if (data.choices[0].text) {
+      return data.choices[0].text;
+    }
+  }
+  
+  // Check for common API formats
+  if (data.translated_text || data.translatedText || data.translation || data.Traduction) {
+    console.log("Format API de traduction standard détecté");
+    return data;
+  }
+  
+  // Check for Google Translate-like format
+  if (data.translations && Array.isArray(data.translations) && data.translations.length > 0) {
+    console.log("Format similaire à Google Translate détecté:", data.translations[0]);
+    if (data.translations[0].translatedText) {
+      return data.translations[0].translatedText;
+    }
+    return data.translations[0];
+  }
+  
+  // Check for main_title or titre or body or texte
+  if (data.main_title || data.body || data.titre || data.texte) {
+    console.log("Structure avec titre/corps détectée");
+    return data;
+  }
+  
+  // If there's a string result field, use that
+  if (data.result && typeof data.result === 'string') {
+    console.log("Résultat sous forme de chaîne détecté");
+    return data.result;
+  }
+  
+  // For very simple responses with just text
+  if (data.text && typeof data.text === 'string') {
+    console.log("Champ texte simple détecté");
+    return data.text;
+  }
+  
+  // Log if we don't recognize the format
+  console.log("Format non reconnu, retour des données brutes");
   return data;
 };
