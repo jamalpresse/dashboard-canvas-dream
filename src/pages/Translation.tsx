@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
@@ -63,6 +64,8 @@ export default function Translation() {
   const handleTranslate = async () => {
     setError('');
     setResult('');
+    
+    // Validation du texte d'entrée
     if (!text.trim()) {
       setError('Veuillez entrer du texte à traduire.');
       toast({
@@ -72,22 +75,41 @@ export default function Translation() {
       });
       return;
     }
+    
     setLoading(true);
+    console.log(`Envoi de la requête au webhook ${WEBHOOK_URL}`);
+    console.log(`Données: texte=${text.substring(0, 50)}..., paire de langues=${langPair}`);
+    
     try {
       const response = await fetch(WEBHOOK_URL, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ text, langPair }),
+        headers: { 
+          'Content-Type': 'application/json',
+          'Accept': 'application/json'
+        },
+        body: JSON.stringify({ 
+          text, 
+          langPair 
+        }),
       });
       
-      if (!response.ok) throw new Error(`HTTP ${response.status}`);
+      if (!response.ok) {
+        throw new Error(`Erreur HTTP: ${response.status} ${response.statusText}`);
+      }
 
       const data = await response.json();
       console.log("Réponse API de traduction:", data);
       
-      // Utilisation des nouvelles fonctions d'extraction et de formatage
+      if (!data) {
+        throw new Error("Réponse vide reçue du serveur");
+      }
+      
+      // Utilisation des fonctions d'extraction et de formatage
       const extractedData = extractTranslationFromResponse(data);
+      console.log("Données extraites:", extractedData);
+      
       const formattedResult = formatTranslationResult(extractedData);
+      console.log("Résultat formaté:", formattedResult.substring(0, 100) + "...");
       
       setResult(formattedResult);
       toast({
@@ -99,7 +121,7 @@ export default function Translation() {
       setError(err.message || 'Erreur lors de la traduction.');
       toast({
         title: "Erreur",
-        description: "Erreur lors de la traduction. Veuillez réessayer.",
+        description: `Erreur lors de la traduction: ${err.message || 'Problème de connexion'}`,
         variant: "destructive",
       });
     } finally {
