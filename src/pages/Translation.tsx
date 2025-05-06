@@ -4,6 +4,10 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
+import { Language, Clipboard, ClipboardCheck, AlertCircle } from "lucide-react";
+import { extractTranslationFromResponse, formatTranslationResult } from "@/utils/translationUtils";
+import TranslationResult from "@/components/translation/TranslationResult";
+import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
 
 // Define interface for the relevantData object to fix TypeScript errors
 interface RelevantData {
@@ -82,41 +86,11 @@ export default function Translation() {
       const data = await response.json();
       console.log("Réponse API de traduction:", data);
       
-      // Amélioration de l'extraction du résultat de traduction
-      let translation = '';
+      // Utilisation des nouvelles fonctions d'extraction et de formatage
+      const extractedData = extractTranslationFromResponse(data);
+      const formattedResult = formatTranslationResult(extractedData);
       
-      // Si data.body existe et semble être un texte valide, on l'utilise
-      if (data.body && typeof data.body === 'string' && data.body.length > 0) {
-        translation = data.body;
-      } 
-      // Sinon, si main_title existe, on l'utilise
-      else if (data.main_title && typeof data.main_title === 'string' && data.main_title.length > 0) {
-        translation = data.main_title;
-      }
-      // Sinon, on essaie d'autres propriétés possibles
-      else if (data.Traduction && typeof data.Traduction === 'string') {
-        translation = data.Traduction;
-      }
-      // Si on a un objet mais pas de propriété reconnue, on convertit tout l'objet en JSON formaté
-      else if (typeof data === 'object' && data !== null) {
-        // Filtrer les propriétés non vides et pertinentes
-        const relevantData: RelevantData = {};
-        if (data.main_title) relevantData.titre = data.main_title;
-        if (data.body) relevantData.texte = data.body;
-        if (data.seo_titles) relevantData.titresSEO = data.seo_titles;
-        if (data.hashtags) relevantData.hashtags = data.hashtags;
-        
-        translation = Object.keys(relevantData).length > 0 
-          ? Object.entries(relevantData).map(([key, value]) => {
-              if (Array.isArray(value)) {
-                return `${key}:\n${value.map(item => `- ${item}`).join('\n')}`;
-              }
-              return `${key}: ${value}`;
-            }).join('\n\n')
-          : JSON.stringify(data, null, 2);
-      }
-      
-      setResult(translation);
+      setResult(formattedResult);
       toast({
         title: "Traduction complétée",
         description: "Le texte a été traduit avec succès",
@@ -154,10 +128,20 @@ export default function Translation() {
     <div className="min-h-screen bg-gradient-to-br from-purple-50 to-pink-50 p-4 sm:p-6 animate-fade-in">
       <Card className="w-full max-w-4xl mx-auto shadow-md hover:shadow-lg transition-all duration-300">
         <CardHeader>
-          <CardTitle className="text-2xl font-semibold text-gray-800">Traduction Multilingue</CardTitle>
+          <CardTitle className="text-2xl font-semibold text-gray-800 flex items-center gap-2">
+            <Language className="h-6 w-6 text-purple-500" />
+            Traduction Multilingue
+          </CardTitle>
         </CardHeader>
         <CardContent className="space-y-6">
+          {/* Source Text Input Section */}
           <section>
+            <div className="mb-2 flex items-center justify-between">
+              <span className="text-sm font-medium">Texte source:</span>
+              <span className="text-sm text-gray-500">
+                {isSourceRTL ? 'RTL' : 'LTR'}
+              </span>
+            </div>
             <Textarea
               placeholder="Collez ici votre texte à traduire"
               value={text}
@@ -172,6 +156,7 @@ export default function Translation() {
                 onClick={handlePaste}
                 className="bg-gradient-to-r from-purple-600 to-purple-700 text-white rounded-md hover:from-purple-700 hover:to-purple-800 transition-colors shadow-sm"
               >
+                <Clipboard className="mr-1 h-4 w-4" />
                 COLLER
               </Button>
               <Button
@@ -183,6 +168,7 @@ export default function Translation() {
                     : 'bg-gradient-to-r from-purple-600 to-pink-500 hover:from-purple-700 hover:to-pink-600 transition-colors'
                 }`}
               >
+                <Language className="mr-1 h-4 w-4" />
                 {loading ? 'TRADUCTION...' : 'TRADUIRE'}
               </Button>
               <Button
@@ -195,7 +181,11 @@ export default function Translation() {
             </div>
           </section>
 
+          {/* Language Pair Selection */}
           <section>
+            <div className="mb-2">
+              <span className="text-sm font-medium">Sélectionner la paire de langues:</span>
+            </div>
             <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
               {langs.map(({ label, value }) => (
                 <Button
@@ -214,25 +204,37 @@ export default function Translation() {
             </div>
           </section>
 
+          {/* Error Messages */}
+          {error && (
+            <Alert variant="destructive">
+              <AlertCircle className="h-4 w-4" />
+              <AlertTitle>Erreur</AlertTitle>
+              <AlertDescription>{error}</AlertDescription>
+            </Alert>
+          )}
+
+          {/* Translation Results */}
           <section>
-            {error && <p className="text-red-600 mb-2">{error}</p>}
-            <div 
-              dir={isTargetRTL ? 'rtl' : 'ltr'}
-              className={`w-full min-h-[12rem] p-4 border rounded-lg bg-white/90 backdrop-blur-sm shadow-inner overflow-auto whitespace-pre-wrap ${
-                isTargetRTL ? 'text-right' : 'text-left'
-              }`}
-            >
-              {result ? 
-                <div className="font-medium">{result}</div> : 
-                <span className="text-gray-400">Le résultat apparaîtra ici</span>
-              }
+            <div className="mb-2 flex items-center justify-between">
+              <span className="text-sm font-medium">Résultat de la traduction:</span>
+              <span className="text-sm text-gray-500">
+                {isTargetRTL ? 'RTL' : 'LTR'}
+              </span>
             </div>
+            
+            <TranslationResult 
+              result={result} 
+              isRTL={isTargetRTL} 
+              onCopy={handleCopy}
+            />
+            
             <div className="mt-2 flex flex-wrap gap-2">
               <Button
                 onClick={handleCopy}
                 disabled={!result}
                 className={`bg-gradient-to-r from-purple-500 to-pink-500 text-white rounded-md hover:from-purple-600 hover:to-pink-600 transition-colors shadow-sm ${!result ? 'opacity-50 cursor-not-allowed' : ''}`}
               >
+                <ClipboardCheck className="mr-1 h-4 w-4" />
                 COPIER
               </Button>
               <Button
