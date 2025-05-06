@@ -3,7 +3,7 @@ import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 
 const Index = () => {
-  const [lang, setLang] = useState("ar"); // 'ar' ou 'fr'
+  const [lang, setLang] = useState("fr"); // Changed default from 'ar' to 'fr'
   const [rssItems, setRssItems] = useState([]);
 
   const isArabic = lang === "ar";
