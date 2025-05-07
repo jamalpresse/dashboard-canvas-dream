@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { useToast } from "@/hooks/use-toast";
 import { formatTranslationResult } from '@/utils/translationUtils';
@@ -60,12 +59,13 @@ export const useTranslation = (
     setLoading(true);
     console.log(`Envoi de la requête au webhook de traduction: ${WEBHOOK_URL}`);
     
-    // Modification importante: s'assurer que le type est "translation" et non "improvement"
+    // Modification importante: s'assurer que le type est explicitement "translation" 
+    // et non "improvement" pour que le workflow n8n traite correctement la requête
     const payload = { 
       text: text.trim(), 
       langPair,
-      type: "translation",  // Paramètre essentiel pour indiquer le type de requête
-      service: "translation" // Ajouter un second indicateur pour être sûr
+      type: "translation",
+      service: "translation"
     };
     
     console.log("Payload envoyé:", payload);
@@ -96,44 +96,36 @@ export const useTranslation = (
       // Définir le type de réponse comme traduction directe
       setResponseType('direct-translation');
       
-      // Extraire la traduction à partir de la réponse, en se concentrant sur le champ Traduction
-      let translationText = "";
-      
+      // Extraction spécifique du champ Traduction qui contient la sortie finale
       if (responseData && responseData.Traduction !== undefined) {
-        const traduction = responseData.Traduction;
-        console.log("Champ Traduction trouvé:", traduction);
+        let translationText = responseData.Traduction;
         
         // Si Traduction est une chaîne JSON, essayer de la parser
-        if (typeof traduction === 'string' && 
-            (traduction.trim().startsWith('{') || traduction.trim().startsWith('['))) {
+        if (typeof translationText === 'string' && 
+            (translationText.trim().startsWith('{') || translationText.trim().startsWith('['))) {
           try {
-            const parsedTraduction = JSON.parse(traduction);
+            const parsedTraduction = JSON.parse(translationText);
             translationText = typeof parsedTraduction === 'string' 
               ? parsedTraduction 
               : JSON.stringify(parsedTraduction, null, 2);
-            console.log("JSON parsé:", translationText);
           } catch (e) {
             console.log("Échec du parsing JSON, utilisation de la chaîne brute:", e);
-            translationText = traduction;
+            // Garder le texte tel quel si le parsing échoue
           }
-        } else {
-          // Utiliser directement si ce n'est pas du JSON
-          translationText = typeof traduction === 'string' 
-            ? traduction 
-            : JSON.stringify(traduction, null, 2);
         }
+        
+        console.log("Traduction finale à afficher:", translationText);
+        setResult(translationText);
+        
+        toast({
+          title: "Traduction complétée",
+          description: "Le texte a été traduit avec succès",
+        });
       } else {
         // Fallback au formateur existant si Traduction n'est pas présent
-        translationText = formatTranslationResult(responseData);
+        const formattedResult = formatTranslationResult(responseData);
+        setResult(formattedResult);
       }
-      
-      console.log("Traduction finale à afficher:", translationText);
-      setResult(translationText);
-      
-      toast({
-        title: "Traduction complétée",
-        description: "Le texte a été traduit avec succès",
-      });
     } catch (err: any) {
       console.error("Erreur de traduction:", err);
       setError(err.message || 'Erreur lors de la traduction.');
