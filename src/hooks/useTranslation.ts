@@ -60,11 +60,12 @@ export const useTranslation = (
     setLoading(true);
     console.log(`Envoi de la requête au webhook de traduction: ${WEBHOOK_URL}`);
     
-    // Simplifier la charge utile selon le format d'origine
+    // Modification importante: s'assurer que le type est "translation" et non "improvement"
     const payload = { 
       text: text.trim(), 
       langPair,
-      type: "translation"  // Paramètre essentiel pour indiquer le type de requête
+      type: "translation",  // Paramètre essentiel pour indiquer le type de requête
+      service: "translation" // Ajouter un second indicateur pour être sûr
     };
     
     console.log("Payload envoyé:", payload);
