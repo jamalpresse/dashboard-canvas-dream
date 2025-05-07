@@ -1,3 +1,4 @@
+
 import { useState } from 'react';
 import { useToast } from "@/hooks/use-toast";
 import { formatTranslationResult } from '@/utils/translationUtils';
@@ -59,16 +60,18 @@ export const useTranslation = (
     setLoading(true);
     console.log(`Envoi de la requête au webhook de traduction: ${WEBHOOK_URL}`);
     
-    // Modification importante: s'assurer que le type est explicitement "translation" 
-    // et non "improvement" pour que le workflow n8n traite correctement la requête
+    // IMPORTANT: Paramètres explicites pour s'assurer que le workflow n8n 
+    // identifie correctement qu'il s'agit d'une requête de traduction
     const payload = { 
       text: text.trim(), 
       langPair,
-      type: "translation",
-      service: "translation"
+      type: "translation",          // Identifiant primaire du type de requête
+      service: "translation",       // Identifiant secondaire pour redondance
+      action: "translate",          // Troisième indicateur pour être absolument sûr
+      request_type: "translation"   // Quatrième indicateur au cas où
     };
     
-    console.log("Payload envoyé:", payload);
+    console.log("Payload envoyé pour la traduction:", payload);
     
     try {
       const response = await fetch(WEBHOOK_URL, {
@@ -125,6 +128,12 @@ export const useTranslation = (
         // Fallback au formateur existant si Traduction n'est pas présent
         const formattedResult = formatTranslationResult(responseData);
         setResult(formattedResult);
+        
+        // Notification spécifique si pas de champ Traduction
+        toast({
+          title: "Attention",
+          description: "Format de réponse inattendu - vérifiez la configuration n8n",
+        });
       }
     } catch (err: any) {
       console.error("Erreur de traduction:", err);
