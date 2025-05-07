@@ -1,3 +1,4 @@
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -100,15 +101,15 @@
   scrollbar-width: none;
 }
 
-/* Marquee Animation */
+/* Updated Marquee Animation - reversed direction */
 @keyframes marquee-ltr {
-  0% { transform: translateX(100%); }
-  100% { transform: translateX(-100%); }
+  0% { transform: translateX(-100%); }
+  100% { transform: translateX(100%); }
 }
 
 @keyframes marquee-rtl {
-  0% { transform: translateX(-100%); }
-  100% { transform: translateX(100%); }
+  0% { transform: translateX(100%); }
+  100% { transform: translateX(-100%); }
 }
 
 .marquee-ltr {
