@@ -2,6 +2,7 @@
 import React, { useState } from 'react';
 import TranslationForm from '@/components/translation/TranslationForm';
 import DebugDialog from '@/components/translation/DebugDialog';
+import NavigationButtons from '@/components/translation/NavigationButtons';
 
 export default function Translation() {
   const [debugDialogOpen, setDebugDialogOpen] = useState(false);
@@ -28,6 +29,8 @@ export default function Translation() {
           onOpenChange={setDebugDialogOpen} 
           debugData={debugData} 
         />
+        
+        <NavigationButtons />
       </div>
     </div>
   );
