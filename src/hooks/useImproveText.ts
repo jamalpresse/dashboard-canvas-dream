@@ -12,9 +12,9 @@ export const useImproveText = () => {
   const [requestSent, setRequestSent] = useState(false);
   const { toast } = useToast();
 
-  // URL du webhook n8n pour l'amélioration de texte
+  // URL du webhook n8n pour l'amélioration de texte - MISE À JOUR
   const WEBHOOK_URL =
-    'https://n8n-jamal-u38598.vm.elestio.app/webhook/4732aeff-7544-4f0e-8554-ebd0f614947b';
+    'https://n8n-jamal-u38598.vm.elestio.app/webhook/d921f535-1665-4217-968c-acf14fdd55ce';
 
   useEffect(() => {
     setCanClipboard(checkClipboardSupport());
