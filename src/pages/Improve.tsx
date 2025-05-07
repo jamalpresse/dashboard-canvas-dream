@@ -4,6 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useImproveText } from '@/hooks/useImproveText';
 import { InputSection } from '@/components/improve/InputSection';
 import { ResultsSection } from '@/components/improve/ResultsSection';
+import ImproveNavigationButtons from '@/components/improve/ImproveNavigationButtons';
 
 export default function Improve() {
   const {
@@ -36,6 +37,9 @@ export default function Improve() {
           {result && (
             <ResultsSection result={result} handleCopy={handleCopy} />
           )}
+          
+          {/* Navigation Buttons */}
+          <ImproveNavigationButtons />
         </CardContent>
       </Card>
     </div>
