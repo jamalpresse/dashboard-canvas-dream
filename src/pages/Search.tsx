@@ -1,6 +1,8 @@
 
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Globe, Wrench } from 'lucide-react';
+import { Link } from 'react-router-dom';
 
 // Détecte la présence de caractères arabes pour alignement RTL
 const usesArabic = (text: string) => /[\u0600-\u06FF]/.test(text);
@@ -96,6 +98,25 @@ export default function Search() {
                 </div>
               </>
             )}
+          </div>
+          
+          {/* Navigation Buttons */}
+          <div className="flex flex-col sm:flex-row gap-4 w-full mt-8">
+            <Link 
+              to="/improve" 
+              className="flex-1 px-6 py-4 bg-gradient-to-r from-purple-600 to-purple-700 text-white rounded-xl shadow hover:shadow-lg transition-all hover:-translate-y-1 flex items-center justify-center gap-3"
+            >
+              <Wrench size={20} />
+              <span className="text-base font-medium">Améliorer texte & SEO</span>
+            </Link>
+            
+            <Link 
+              to="/translation" 
+              className="flex-1 px-6 py-4 bg-gradient-to-r from-purple-600 to-pink-500 text-white rounded-xl shadow hover:shadow-lg transition-all hover:-translate-y-1 flex items-center justify-center gap-3"
+            >
+              <Globe size={20} />
+              <span className="text-base font-medium">Traduction multilingue</span>
+            </Link>
           </div>
         </CardContent>
       </Card>
