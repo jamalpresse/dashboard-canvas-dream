@@ -10,6 +10,7 @@ interface NewsCardProps {
   source: string;
   date: string;
   link: string;
+  compact?: boolean;
 }
 
 export const NewsCard: React.FC<NewsCardProps> = ({
@@ -18,11 +19,12 @@ export const NewsCard: React.FC<NewsCardProps> = ({
   imageUrl,
   source,
   date,
-  link
+  link,
+  compact = false
 }) => {
   return (
     <Card className="overflow-hidden hover:shadow-lg transition-shadow duration-300 h-full flex flex-col">
-      {imageUrl && (
+      {imageUrl && !compact && (
         <div className="h-48 overflow-hidden">
           <img 
             src={imageUrl || '/placeholder.svg'} 
@@ -34,8 +36,8 @@ export const NewsCard: React.FC<NewsCardProps> = ({
           />
         </div>
       )}
-      <CardHeader className="pb-2">
-        <h3 className="font-bold text-lg line-clamp-2 hover:text-purple-700 transition-colors">{title}</h3>
+      <CardHeader className={compact ? "p-4 pb-2" : "pb-2"}>
+        <h3 className={`font-bold ${compact ? "text-base" : "text-lg"} line-clamp-2 hover:text-purple-700 transition-colors`}>{title}</h3>
         <div className="flex items-center text-sm text-gray-500 gap-1">
           <span className="font-medium">{source}</span>
           <span>•</span>
@@ -45,10 +47,10 @@ export const NewsCard: React.FC<NewsCardProps> = ({
           </span>
         </div>
       </CardHeader>
-      <CardContent className="py-2 flex-grow">
-        <p className="text-gray-600 line-clamp-3">{description}</p>
+      <CardContent className={`${compact ? "py-0 px-4" : "py-2"} flex-grow`}>
+        <p className={`text-gray-600 ${compact ? "line-clamp-2 text-sm" : "line-clamp-3"}`}>{description}</p>
       </CardContent>
-      <CardFooter className="pt-2">
+      <CardFooter className={compact ? "pt-0 p-4" : "pt-2"}>
         <a 
           href={link} 
           target="_blank" 

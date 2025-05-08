@@ -1,11 +1,17 @@
+
 import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
-import { Search, ArrowUp, MessageSquare, Users, Newspaper, BarChart } from "lucide-react";
+import { Search, ArrowUp, MessageSquare, Users, Newspaper, BarChart, ArrowRight } from "lucide-react";
 import { StatCard } from "@/components/dashboard/StatCard";
 import { ActivityTimeline } from "@/components/dashboard/ActivityTimeline";
 import { LineChart } from "@/components/dashboard/LineChart";
+import { NewsCard } from "@/components/news/NewsCard";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/components/ui/sonner";
+import { useNews } from "@/hooks/useNews";
+import { Button } from "@/components/ui/button";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { formatNewsDate } from "@/services/newsService";
 
 const Index = () => {
   const [lang, setLang] = useState("fr");
@@ -15,6 +21,14 @@ const Index = () => {
   
   const isArabic = lang === "ar";
   const dir = isArabic ? "rtl" : "ltr";
+  
+  // Use the useNews hook to fetch news data
+  const {
+    news,
+    loading: newsLoading,
+    activeTab,
+    setActiveTab
+  } = useNews();
   
   const labels = {
     ar: {
@@ -149,6 +163,9 @@ const Index = () => {
     }
   ] : [];
 
+  // Get a limited number of news items for the homepage
+  const displayNews = news.slice(0, 6);
+
   return (
     <div className="space-y-6">
       <div dir={dir} className="flex flex-col px-4 relative animate-fade-in">
@@ -188,6 +205,59 @@ const Index = () => {
             </div>
           </div>
         )}
+        
+        {/* News Section */}
+        <div className="w-full max-w-5xl mx-auto mb-8">
+          <div className="flex justify-between items-center mb-4">
+            <h2 className="text-xl font-semibold text-gray-800">{t.latestNews}</h2>
+            <Link 
+              to="/news" 
+              className="text-purple-700 hover:text-purple-900 font-medium flex items-center gap-1"
+            >
+              Voir plus <ArrowRight className="h-4 w-4" />
+            </Link>
+          </div>
+          
+          {/* News Tabs */}
+          <Tabs 
+            value={activeTab} 
+            onValueChange={(value) => setActiveTab(value as 'maroc' | 'monde')}
+            className="mb-4"
+          >
+            <TabsList className="w-fit">
+              <TabsTrigger value="maroc">
+                <span className="mr-1">🇲🇦</span> Maroc
+              </TabsTrigger>
+              <TabsTrigger value="monde">Monde</TabsTrigger>
+            </TabsList>
+          </Tabs>
+          
+          {newsLoading ? (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {[1, 2, 3, 4, 5, 6].map(i => (
+                <div key={i} className="bg-white rounded-lg shadow-md p-4 h-[200px] animate-pulse">
+                  <div className="h-5 bg-gray-200 rounded mb-2 w-3/4"></div>
+                  <div className="h-4 bg-gray-200 rounded mb-4 w-1/2"></div>
+                  <div className="h-16 bg-gray-200 rounded"></div>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {displayNews.map((item) => (
+                <NewsCard
+                  key={item.guid}
+                  title={item.title}
+                  description={item.description}
+                  source={item.source}
+                  date={formatNewsDate(item.pubDate)}
+                  link={item.link}
+                  compact={true}
+                />
+              ))}
+            </div>
+          )}
+        </div>
         
         {/* Analytics Chart */}
         {!isLoading && analyticsChartData.length > 0 && (
