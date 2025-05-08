@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { Search, ArrowUp, MessageSquare, Users, Newspaper, BarChart } from "lucide-react";
@@ -31,7 +30,8 @@ const Index = () => {
       activity: "النشاطات الأخيرة",
       weather: "الطقس",
       analyticsTitle: "تحليلات المستخدم",
-      latestNews: "آخر الأخبار"
+      latestNews: "آخر الأخبار",
+      news: "الأخبار"
     },
     fr: {
       title: "Dashboard Journalistes",
@@ -46,7 +46,8 @@ const Index = () => {
       activity: "Activités récentes",
       weather: "Météo",
       analyticsTitle: "Analyse de l'engagement",
-      latestNews: "Dernières actualités"
+      latestNews: "Dernières actualités",
+      news: "Actualités"
     }
   };
   
@@ -230,6 +231,11 @@ const Index = () => {
 
             <Link to="/translation" className="flex-1 bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white font-semibold text-lg py-6 px-4 rounded-xl shadow-lg text-center transition duration-300 flex items-center justify-center gap-3">
               {t.translate}
+            </Link>
+            
+            <Link to="/news" className="flex-1 bg-gradient-to-r from-indigo-500 to-blue-500 hover:from-indigo-600 hover:to-blue-600 text-white font-semibold text-lg py-6 px-4 rounded-xl shadow-lg text-center transition duration-300 flex items-center justify-center gap-3">
+              <Newspaper className="h-5 w-5" />
+              <span>{t.news}</span>
             </Link>
           </div>
         </div>

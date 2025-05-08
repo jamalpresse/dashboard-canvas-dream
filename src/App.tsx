@@ -13,7 +13,8 @@ import Settings from "./pages/Settings";
 import NotFound from "./pages/NotFound";
 import Search from "./pages/Search";
 import Improve from "./pages/Improve";
-import Translation from "./pages/Translation"; // Import the new Translation page
+import Translation from "./pages/Translation";
+import News from "./pages/News"; // Import la nouvelle page d'actualités
 
 const queryClient = new QueryClient();
 
@@ -31,7 +32,8 @@ const App = () => (
             <Route path="/settings" element={<Settings />} />
             <Route path="/search" element={<Search />} />
             <Route path="/improve" element={<Improve />} />
-            <Route path="/translation" element={<Translation />} /> {/* Add the Translation route */}
+            <Route path="/translation" element={<Translation />} />
+            <Route path="/news" element={<News />} /> {/* Ajout de la route News */}
           </Route>
           <Route path="*" element={<NotFound />} />
         </Routes>
