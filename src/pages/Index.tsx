@@ -110,7 +110,7 @@ const Index = () => {
       minute: '2-digit'
     }),
     icon: <Newspaper className="h-4 w-4" />,
-    type: "default"
+    type: "default" as "default" | "success" | "warning" | "error"
   }));
 
   // Calculate stats from the latest analytics entry
