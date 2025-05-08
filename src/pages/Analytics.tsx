@@ -1,4 +1,5 @@
 
+import { useState, useEffect } from "react";
 import { LineChart } from "@/components/dashboard/LineChart";
 import { OverviewChart } from "@/components/dashboard/OverviewChart";
 import {
@@ -24,32 +25,10 @@ import {
   Legend,
   Tooltip as RechartsTooltip,
 } from "recharts";
+import { supabase } from "@/integrations/supabase/client";
+import { toast } from "@/components/ui/sonner";
 
-const salesData = [
-  { name: "Jan", total: 4500 },
-  { name: "Feb", total: 5200 },
-  { name: "Mar", total: 3800 },
-  { name: "Apr", total: 6000 },
-  { name: "May", total: 5100 },
-  { name: "Jun", total: 7000 },
-  { name: "Jul", total: 6300 },
-  { name: "Aug", total: 5700 },
-  { name: "Sep", total: 7500 },
-  { name: "Oct", total: 8200 },
-  { name: "Nov", total: 7800 },
-  { name: "Dec", total: 9000 },
-];
-
-const trafficData = [
-  { name: "Jan", organic: 4000, direct: 2400, referral: 1800 },
-  { name: "Feb", organic: 3000, direct: 1398, referral: 2100 },
-  { name: "Mar", organic: 2000, direct: 9800, referral: 2290 },
-  { name: "Apr", organic: 2780, direct: 3908, referral: 2000 },
-  { name: "May", organic: 1890, direct: 4800, referral: 2181 },
-  { name: "Jun", organic: 2390, direct: 3800, referral: 2500 },
-  { name: "Jul", organic: 3490, direct: 4300, referral: 2100 },
-];
-
+// Device data for the pie charts
 const deviceData = [
   { name: "Desktop", value: 58 },
   { name: "Mobile", value: 32 },
@@ -59,12 +38,12 @@ const deviceData = [
 const DEVICE_COLORS = ["#3B82F6", "#10B981", "#F59E0B"];
 
 const countryData = [
-  { name: "United States", value: 42 },
-  { name: "United Kingdom", value: 18 },
-  { name: "Germany", value: 12 },
-  { name: "France", value: 10 },
-  { name: "Japan", value: 8 },
-  { name: "Other", value: 10 },
+  { name: "Maroc", value: 72 },
+  { name: "Algérie", value: 8 },
+  { name: "France", value: 6 },
+  { name: "Tunisie", value: 5 },
+  { name: "Sénégal", value: 4 },
+  { name: "Autre", value: 5 },
 ];
 
 const COUNTRY_COLORS = ["#3B82F6", "#10B981", "#F59E0B", "#EF4444", "#A855F7", "#6B7280"];
@@ -95,6 +74,76 @@ function CustomPieChart({ data, colors }: { data: any[]; colors: string[] }) {
 }
 
 const Analytics = () => {
+  const [period, setPeriod] = useState("30days");
+  const [analyticsData, setAnalyticsData] = useState<any[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  
+  useEffect(() => {
+    const fetchAnalytics = async () => {
+      try {
+        setIsLoading(true);
+        const { data, error } = await supabase
+          .from('analytics')
+          .select('*')
+          .order('date', { ascending: true });
+          
+        if (error) throw error;
+        setAnalyticsData(data || []);
+      } catch (error) {
+        console.error('Error fetching analytics data:', error);
+        toast.error('Erreur lors du chargement des données analytiques');
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    
+    fetchAnalytics();
+  }, []);
+  
+  // Format analytics data for charts
+  const formattedData = analyticsData.map(item => ({
+    name: new Date(item.date).toLocaleDateString('fr-FR', { day: '2-digit', month: 'short' }),
+    total: item.page_view_count
+  }));
+  
+  // Format traffic data
+  const trafficData = analyticsData.map(item => ({
+    name: new Date(item.date).toLocaleDateString('fr-FR', { day: '2-digit', month: 'short' }),
+    organic: Math.round(item.page_view_count * 0.65), // 65% organic
+    direct: Math.round(item.page_view_count * 0.25), // 25% direct
+    referral: Math.round(item.page_view_count * 0.10), // 10% referral
+  }));
+  
+  // Calculate totals for overview
+  const latestData = analyticsData.length > 0 ? analyticsData[analyticsData.length - 1] : null;
+  const previousData = analyticsData.length > 1 ? analyticsData[analyticsData.length - 2] : null;
+  
+  const calculatePercentChange = (current: number, previous: number) => {
+    if (!previous) return '+0.0%';
+    const change = ((current - previous) / previous) * 100;
+    const sign = change >= 0 ? '+' : '';
+    return `${sign}${change.toFixed(1)}%`;
+  };
+  
+  // Data for engagement tab
+  const engagementData = [
+    { name: analyticsData[0]?.date ? new Date(analyticsData[0].date).toLocaleDateString('fr-FR', { day: '2-digit', month: 'short' }) : 'Jan', sessions: 5000, bounceRate: 45 },
+    { name: analyticsData[1]?.date ? new Date(analyticsData[1].date).toLocaleDateString('fr-FR', { day: '2-digit', month: 'short' }) : 'Feb', sessions: 4800, bounceRate: 47 },
+    { name: analyticsData[2]?.date ? new Date(analyticsData[2].date).toLocaleDateString('fr-FR', { day: '2-digit', month: 'short' }) : 'Mar', sessions: 6200, bounceRate: 42 },
+    { name: analyticsData[3]?.date ? new Date(analyticsData[3].date).toLocaleDateString('fr-FR', { day: '2-digit', month: 'short' }) : 'Apr', sessions: 5700, bounceRate: 44 },
+    { name: analyticsData[4]?.date ? new Date(analyticsData[4].date).toLocaleDateString('fr-FR', { day: '2-digit', month: 'short' }) : 'May', sessions: 6800, bounceRate: 40 },
+    { name: analyticsData[5]?.date ? new Date(analyticsData[5].date).toLocaleDateString('fr-FR', { day: '2-digit', month: 'short' }) : 'Jun', sessions: 7200, bounceRate: 38 },
+  ];
+  
+  const pageviewData = [
+    { name: analyticsData[0]?.date ? new Date(analyticsData[0].date).toLocaleDateString('fr-FR', { day: '2-digit', month: 'short' }) : 'Jan', pageviews: 12000, avgDuration: 210 },
+    { name: analyticsData[1]?.date ? new Date(analyticsData[1].date).toLocaleDateString('fr-FR', { day: '2-digit', month: 'short' }) : 'Feb', pageviews: 11500, avgDuration: 205 },
+    { name: analyticsData[2]?.date ? new Date(analyticsData[2].date).toLocaleDateString('fr-FR', { day: '2-digit', month: 'short' }) : 'Mar', pageviews: 14800, avgDuration: 220 },
+    { name: analyticsData[3]?.date ? new Date(analyticsData[3].date).toLocaleDateString('fr-FR', { day: '2-digit', month: 'short' }) : 'Apr', pageviews: 13600, avgDuration: 215 },
+    { name: analyticsData[4]?.date ? new Date(analyticsData[4].date).toLocaleDateString('fr-FR', { day: '2-digit', month: 'short' }) : 'May', pageviews: 16200, avgDuration: 225 },
+    { name: analyticsData[5]?.date ? new Date(analyticsData[5].date).toLocaleDateString('fr-FR', { day: '2-digit', month: 'short' }) : 'Jun', pageviews: 17000, avgDuration: 230 },
+  ];
+
   return (
     <div className="space-y-6">
       <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
@@ -103,7 +152,7 @@ const Analytics = () => {
           <p className="text-muted-foreground">Detailed insights and performance metrics</p>
         </div>
 
-        <Select defaultValue="30days">
+        <Select defaultValue={period} onValueChange={setPeriod}>
           <SelectTrigger className="w-[180px]">
             <SelectValue placeholder="Select period" />
           </SelectTrigger>
@@ -118,42 +167,54 @@ const Analytics = () => {
 
       <Tabs defaultValue="overview">
         <TabsList className="mb-4 w-full justify-start">
-          <TabsTrigger value="overview">Overview</TabsTrigger>
-          <TabsTrigger value="sales">Sales</TabsTrigger>
+          <TabsTrigger value="overview">Aperçu</TabsTrigger>
           <TabsTrigger value="traffic">Traffic</TabsTrigger>
           <TabsTrigger value="engagement">Engagement</TabsTrigger>
+          <TabsTrigger value="content">Contenu</TabsTrigger>
         </TabsList>
 
         <TabsContent value="overview" className="space-y-6">
           <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
             <Card>
               <CardHeader className="pb-2">
-                <CardTitle>Total Revenue</CardTitle>
-                <CardDescription>Last 30 days</CardDescription>
+                <CardTitle>Visites Totales</CardTitle>
+                <CardDescription>30 derniers jours</CardDescription>
               </CardHeader>
               <CardContent>
-                <div className="text-3xl font-bold">$45,231</div>
-                <p className="text-xs text-muted-foreground">+12.5% from last month</p>
+                <div className="text-3xl font-bold">
+                  {latestData ? latestData.page_view_count.toLocaleString() : '...'} 
+                </div>
+                <p className="text-xs text-muted-foreground">
+                  {previousData ? calculatePercentChange(latestData?.page_view_count || 0, previousData?.page_view_count || 0) : '...'} depuis le mois dernier
+                </p>
               </CardContent>
             </Card>
             <Card>
               <CardHeader className="pb-2">
-                <CardTitle>Conversion Rate</CardTitle>
-                <CardDescription>Last 30 days</CardDescription>
+                <CardTitle>Articles Consultés</CardTitle>
+                <CardDescription>30 derniers jours</CardDescription>
               </CardHeader>
               <CardContent>
-                <div className="text-3xl font-bold">3.2%</div>
-                <p className="text-xs text-muted-foreground">+0.5% from last month</p>
+                <div className="text-3xl font-bold">
+                  {latestData ? latestData.article_view_count.toLocaleString() : '...'}
+                </div>
+                <p className="text-xs text-muted-foreground">
+                  {previousData ? calculatePercentChange(latestData?.article_view_count || 0, previousData?.article_view_count || 0) : '...'} depuis le mois dernier
+                </p>
               </CardContent>
             </Card>
             <Card>
               <CardHeader className="pb-2">
-                <CardTitle>Average Order Value</CardTitle>
-                <CardDescription>Last 30 days</CardDescription>
+                <CardTitle>Traductions</CardTitle>
+                <CardDescription>30 derniers jours</CardDescription>
               </CardHeader>
               <CardContent>
-                <div className="text-3xl font-bold">$89.42</div>
-                <p className="text-xs text-muted-foreground">+2.1% from last month</p>
+                <div className="text-3xl font-bold">
+                  {latestData ? latestData.translation_count.toLocaleString() : '...'}
+                </div>
+                <p className="text-xs text-muted-foreground">
+                  {previousData ? calculatePercentChange(latestData?.translation_count || 0, previousData?.translation_count || 0) : '...'} depuis le mois dernier
+                </p>
               </CardContent>
             </Card>
           </div>
@@ -161,20 +222,20 @@ const Analytics = () => {
           <div className="grid gap-6 md:grid-cols-2">
             <LineChart
               data={trafficData}
-              title="Traffic Sources"
+              title="Sources de trafic"
               lines={[
-                { dataKey: "organic", stroke: "#3B82F6", name: "Organic" },
+                { dataKey: "organic", stroke: "#3B82F6", name: "Organique" },
                 { dataKey: "direct", stroke: "#10B981", name: "Direct" },
-                { dataKey: "referral", stroke: "#F59E0B", name: "Referral" },
+                { dataKey: "referral", stroke: "#F59E0B", name: "Référents" },
               ]}
             />
-            <OverviewChart data={salesData} title="Sales Overview" />
+            <OverviewChart data={formattedData} title="Aperçu des visites" />
           </div>
 
           <div className="grid gap-6 md:grid-cols-2">
             <Card>
               <CardHeader>
-                <CardTitle>Traffic by Device</CardTitle>
+                <CardTitle>Trafic par Appareil</CardTitle>
               </CardHeader>
               <CardContent>
                 <CustomPieChart data={deviceData} colors={DEVICE_COLORS} />
@@ -182,7 +243,7 @@ const Analytics = () => {
             </Card>
             <Card>
               <CardHeader>
-                <CardTitle>Traffic by Country</CardTitle>
+                <CardTitle>Trafic par Pays</CardTitle>
               </CardHeader>
               <CardContent>
                 <CustomPieChart data={countryData} colors={COUNTRY_COLORS} />
@@ -191,41 +252,20 @@ const Analytics = () => {
           </div>
         </TabsContent>
 
-        <TabsContent value="sales" className="space-y-6">
-          <OverviewChart data={salesData} title="Monthly Sales" />
-          <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-            {[1, 2, 3, 4, 5, 6].map((i) => (
-              <Card key={i} className="flex flex-col justify-between">
-                <CardHeader className="pb-2">
-                  <CardTitle>Product {i}</CardTitle>
-                  <CardDescription>Category {Math.ceil(i / 2)}</CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <div className="text-2xl font-bold">${(i * 123).toFixed(2)}</div>
-                  <p className="text-xs text-muted-foreground">
-                    {i % 2 === 0 ? "+" : "-"}
-                    {Math.floor(Math.random() * 10) + 1}% from last month
-                  </p>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
-        </TabsContent>
-
         <TabsContent value="traffic" className="space-y-6">
           <LineChart
             data={trafficData}
-            title="Traffic Sources Over Time"
+            title="Sources de trafic dans le temps"
             lines={[
-              { dataKey: "organic", stroke: "#3B82F6", name: "Organic" },
+              { dataKey: "organic", stroke: "#3B82F6", name: "Organique" },
               { dataKey: "direct", stroke: "#10B981", name: "Direct" },
-              { dataKey: "referral", stroke: "#F59E0B", name: "Referral" },
+              { dataKey: "referral", stroke: "#F59E0B", name: "Référents" },
             ]}
           />
           <div className="grid gap-6 md:grid-cols-2">
             <Card>
               <CardHeader>
-                <CardTitle>Device Breakdown</CardTitle>
+                <CardTitle>Distribution des appareils</CardTitle>
               </CardHeader>
               <CardContent>
                 <CustomPieChart data={deviceData} colors={DEVICE_COLORS} />
@@ -233,7 +273,7 @@ const Analytics = () => {
             </Card>
             <Card>
               <CardHeader>
-                <CardTitle>Geographic Distribution</CardTitle>
+                <CardTitle>Distribution géographique</CardTitle>
               </CardHeader>
               <CardContent>
                 <CustomPieChart data={countryData} colors={COUNTRY_COLORS} />
@@ -245,29 +285,29 @@ const Analytics = () => {
         <TabsContent value="engagement" className="space-y-6">
           <Card>
             <CardHeader>
-              <CardTitle>Engagement Overview</CardTitle>
+              <CardTitle>Vue d'ensemble de l'engagement</CardTitle>
               <CardDescription>
-                Key metrics related to user engagement over the past 30 days
+                Métriques clés liées à l'engagement utilisateur au cours des 30 derniers jours
               </CardDescription>
             </CardHeader>
             <CardContent>
               <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
                 <div>
                   <div className="text-sm font-medium text-muted-foreground">
-                    Avg. Session Duration
+                    Durée moyenne de session
                   </div>
                   <div className="text-2xl font-bold">3m 42s</div>
                 </div>
                 <div>
-                  <div className="text-sm font-medium text-muted-foreground">Pages per Session</div>
+                  <div className="text-sm font-medium text-muted-foreground">Pages par session</div>
                   <div className="text-2xl font-bold">2.3</div>
                 </div>
                 <div>
-                  <div className="text-sm font-medium text-muted-foreground">Bounce Rate</div>
+                  <div className="text-sm font-medium text-muted-foreground">Taux de rebond</div>
                   <div className="text-2xl font-bold">42.8%</div>
                 </div>
                 <div>
-                  <div className="text-sm font-medium text-muted-foreground">New vs Returning</div>
+                  <div className="text-sm font-medium text-muted-foreground">Nouveaux vs Récurrents</div>
                   <div className="text-2xl font-bold">67% / 33%</div>
                 </div>
               </div>
@@ -276,34 +316,81 @@ const Analytics = () => {
 
           <div className="grid gap-6 md:grid-cols-2">
             <LineChart
-              data={[
-                { name: "Jan", sessions: 5000, bounceRate: 45 },
-                { name: "Feb", sessions: 4800, bounceRate: 47 },
-                { name: "Mar", sessions: 6200, bounceRate: 42 },
-                { name: "Apr", sessions: 5700, bounceRate: 44 },
-                { name: "May", sessions: 6800, bounceRate: 40 },
-                { name: "Jun", sessions: 7200, bounceRate: 38 },
-              ]}
-              title="Sessions & Bounce Rate"
+              data={engagementData}
+              title="Sessions & Taux de rebond"
               lines={[
                 { dataKey: "sessions", stroke: "#3B82F6", name: "Sessions" },
-                { dataKey: "bounceRate", stroke: "#F59E0B", name: "Bounce Rate %" },
+                { dataKey: "bounceRate", stroke: "#F59E0B", name: "Taux de rebond %" },
               ]}
             />
             <LineChart
-              data={[
-                { name: "Jan", pageviews: 12000, avgDuration: 210 },
-                { name: "Feb", pageviews: 11500, avgDuration: 205 },
-                { name: "Mar", pageviews: 14800, avgDuration: 220 },
-                { name: "Apr", pageviews: 13600, avgDuration: 215 },
-                { name: "May", pageviews: 16200, avgDuration: 225 },
-                { name: "Jun", pageviews: 17000, avgDuration: 230 },
-              ]}
-              title="Pageviews & Avg. Duration"
+              data={pageviewData}
+              title="Pages vues & Durée moyenne"
               lines={[
-                { dataKey: "pageviews", stroke: "#3B82F6", name: "Pageviews" },
-                { dataKey: "avgDuration", stroke: "#10B981", name: "Avg. Duration (s)" },
+                { dataKey: "pageviews", stroke: "#3B82F6", name: "Pages vues" },
+                { dataKey: "avgDuration", stroke: "#10B981", name: "Durée moyenne (s)" },
               ]}
+            />
+          </div>
+        </TabsContent>
+
+        <TabsContent value="content" className="space-y-6">
+          <Card>
+            <CardHeader>
+              <CardTitle>Performance du contenu</CardTitle>
+              <CardDescription>
+                Analyse des types de contenu et leur performance
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
+                <div>
+                  <div className="text-sm font-medium text-muted-foreground">
+                    Articles en français
+                  </div>
+                  <div className="text-2xl font-bold">78%</div>
+                </div>
+                <div>
+                  <div className="text-sm font-medium text-muted-foreground">Articles en arabe</div>
+                  <div className="text-2xl font-bold">22%</div>
+                </div>
+                <div>
+                  <div className="text-sm font-medium text-muted-foreground">Temps de lecture moyen</div>
+                  <div className="text-2xl font-bold">2m 12s</div>
+                </div>
+                <div>
+                  <div className="text-sm font-medium text-muted-foreground">Taux d'achèvement</div>
+                  <div className="text-2xl font-bold">58%</div>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          <div className="grid gap-6 md:grid-cols-2">
+            <LineChart
+              data={[
+                { name: "Politique", views: 3200, shares: 280 },
+                { name: "Sport", views: 4800, shares: 420 },
+                { name: "Culture", views: 2100, shares: 190 },
+                { name: "Économie", views: 2800, shares: 210 },
+                { name: "Société", views: 3500, shares: 310 },
+                { name: "Tech", views: 1800, shares: 150 },
+              ]}
+              title="Performance par catégorie"
+              lines={[
+                { dataKey: "views", stroke: "#3B82F6", name: "Vues" },
+                { dataKey: "shares", stroke: "#10B981", name: "Partages" },
+              ]}
+            />
+            <OverviewChart 
+              data={[
+                { name: "Texte", total: 4500 },
+                { name: "Photo", total: 6700 },
+                { name: "Vidéo", total: 5200 },
+                { name: "Audio", total: 2100 },
+                { name: "Infog.", total: 3200 },
+              ]} 
+              title="Performance par format" 
             />
           </div>
         </TabsContent>

@@ -1,14 +1,22 @@
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
-import { Search, ArrowUp, MessageSquare, Users } from "lucide-react";
+import { Search, ArrowUp, MessageSquare, Users, Newspaper, BarChart } from "lucide-react";
 import { StatCard } from "@/components/dashboard/StatCard";
 import { ActivityTimeline } from "@/components/dashboard/ActivityTimeline";
+import { LineChart } from "@/components/dashboard/LineChart";
+import { supabase } from "@/integrations/supabase/client";
+import { toast } from "@/components/ui/sonner";
 
 const Index = () => {
   const [lang, setLang] = useState("fr");
+  const [analytics, setAnalytics] = useState<any[]>([]);
+  const [newsArticles, setNewsArticles] = useState<any[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  
   const isArabic = lang === "ar";
   const dir = isArabic ? "rtl" : "ltr";
+  
   const labels = {
     ar: {
       title: "لوحة تحكم الصحفيين",
@@ -22,6 +30,8 @@ const Index = () => {
       stats: "الإحصائيات",
       activity: "النشاطات الأخيرة",
       weather: "الطقس",
+      analyticsTitle: "تحليلات المستخدم",
+      latestNews: "آخر الأخبار"
     },
     fr: {
       title: "Dashboard Journalistes",
@@ -35,64 +45,118 @@ const Index = () => {
       stats: "Statistiques",
       activity: "Activités récentes",
       weather: "Météo",
+      analyticsTitle: "Analyse de l'engagement",
+      latestNews: "Dernières actualités"
     }
   };
+  
   const t = labels[lang];
 
-  // Mock data for statistics
-  const statsData = [{
-    title: isArabic ? "المقالات" : "Articles",
-    value: "125",
-    icon: <MessageSquare className="h-5 w-5 text-white" />,
-    trend: {
-      value: 12,
-      positive: true
-    }
-  }, {
-    title: isArabic ? "الزيارات" : "Visites",
-    value: "2.5K",
-    icon: <Users className="h-5 w-5 text-white" />,
-    trend: {
-      value: 8,
-      positive: true
+  // Fetch data from Supabase
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        setIsLoading(true);
+        
+        // Fetch analytics data
+        const { data: analyticsData, error: analyticsError } = await supabase
+          .from('analytics')
+          .select('*')
+          .order('date', { ascending: true });
+          
+        if (analyticsError) throw analyticsError;
+        
+        // Fetch news articles
+        const { data: articlesData, error: articlesError } = await supabase
+          .from('news_articles')
+          .select('*')
+          .order('publication_date', { ascending: false })
+          .limit(5);
+          
+        if (articlesError) throw articlesError;
+        
+        setAnalytics(analyticsData || []);
+        setNewsArticles(articlesData || []);
+      } catch (error) {
+        console.error('Error fetching data:', error);
+        toast.error("Erreur lors du chargement des données");
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    
+    fetchData();
+  }, []);
+  
+  // Format analytics data for charts
+  const analyticsChartData = analytics.map(item => ({
+    name: new Date(item.date).toLocaleDateString(lang === 'ar' ? 'ar-MA' : 'fr-FR', { day: '2-digit', month: 'short' }),
+    pageViews: item.page_view_count,
+    articles: item.article_view_count,
+    searches: item.search_count,
+    translations: item.translation_count,
+    improvements: item.improve_count
+  }));
+  
+  // Create activities from news articles
+  const activities = newsArticles.map(article => ({
+    id: article.id,
+    title: article.title,
+    description: article.content.substring(0, 100) + (article.content.length > 100 ? '...' : ''),
+    time: new Date(article.publication_date).toLocaleDateString(lang === 'ar' ? 'ar-MA' : 'fr-FR', { 
+      day: '2-digit', 
+      month: 'short',
+      hour: '2-digit',
+      minute: '2-digit'
+    }),
+    icon: <Newspaper className="h-4 w-4" />,
+    type: "default"
+  }));
+
+  // Calculate stats from the latest analytics entry
+  const latestAnalytics = analytics.length ? analytics[analytics.length - 1] : null;
+  const prevAnalytics = analytics.length > 1 ? analytics[analytics.length - 2] : null;
+  
+  const calculateTrend = (current: number, previous: number) => {
+    if (!previous) return { value: 0, positive: true };
+    const diff = current - previous;
+    const percentage = Math.round((diff / previous) * 100);
+    return { value: Math.abs(percentage), positive: diff >= 0 };
+  };
+  
+  // Stats data for StatCard components
+  const statsData = latestAnalytics ? [
+    {
+      title: isArabic ? "الزيارات" : "Visites",
+      value: latestAnalytics.page_view_count.toString(),
+      icon: <Users className="h-5 w-5 text-white" />,
+      trend: calculateTrend(latestAnalytics.page_view_count, prevAnalytics?.page_view_count || 0)
     },
-    variant: "primary" as const
-  }, {
-    title: isArabic ? "الترجمات" : "Traductions",
-    value: "84",
-    icon: <ArrowUp className="h-5 w-5 text-white" />,
-    trend: {
-      value: 5,
-      positive: false
+    {
+      title: isArabic ? "المقالات" : "Articles",
+      value: latestAnalytics.article_view_count.toString(),
+      icon: <Newspaper className="h-5 w-5 text-white" />,
+      trend: calculateTrend(latestAnalytics.article_view_count, prevAnalytics?.article_view_count || 0),
+      variant: "primary" as const
+    },
+    {
+      title: isArabic ? "الترجمات" : "Traductions",
+      value: latestAnalytics.translation_count.toString(),
+      icon: <ArrowUp className="h-5 w-5 text-white" />,
+      trend: calculateTrend(latestAnalytics.translation_count, prevAnalytics?.translation_count || 0),
+      variant: "success" as const
     }
-  }];
+  ] : [];
 
-  // Mock data for the activity timeline
-  const activities = [{
-    id: "1",
-    title: "Article publié",
-    description: "Le nouvel article sur le climat a été publié",
-    time: "Il y a 2 heures",
-    icon: <MessageSquare className="h-4 w-4" />
-  }, {
-    id: "2",
-    title: "Traduction complétée",
-    description: "L'article a été traduit en arabe",
-    time: "Il y a 3 heures",
-    icon: <ArrowUp className="h-4 w-4" />
-  }, {
-    id: "3",
-    title: "Nouveau membre",
-    description: "Karim a rejoint l'équipe de journalistes",
-    time: "Il y a 5 heures",
-    icon: <Users className="h-4 w-4" />
-  }];
-
-  return <div className="space-y-6">
-      <div dir={dir} className="min-h-[80vh] bg-gradient-to-br from-purple-50 to-pink-50 flex flex-col px-4 relative animate-fade-in">
+  return (
+    <div className="space-y-6">
+      <div dir={dir} className="flex flex-col px-4 relative animate-fade-in">
         {/* Language Switcher */}
         <div className="w-full max-w-5xl mx-auto flex justify-end pt-4">
-          <button onClick={() => setLang(isArabic ? "fr" : "ar")} className="text-sm bg-white/80 backdrop-blur-sm px-4 py-1 rounded-full shadow-sm hover:bg-white transition-all duration-300 text-purple-700">
+          <button 
+            onClick={() => setLang(isArabic ? "fr" : "ar")} 
+            className="text-sm bg-white/80 backdrop-blur-sm px-4 py-1 rounded-full shadow-sm hover:bg-white transition-all duration-300 text-purple-700"
+          >
             {t.switchTo}
           </button>
         </div>
@@ -105,10 +169,51 @@ const Index = () => {
           </div>
         </div>
 
-        {/* Activities Section */}
-        <div className="w-full max-w-5xl mx-auto mb-8">
-          <ActivityTimeline items={activities} className="shadow-md hover:shadow-lg transition-shadow duration-300" />
-        </div>
+        {/* Stats Cards */}
+        {!isLoading && statsData.length > 0 && (
+          <div className="w-full max-w-5xl mx-auto mb-8">
+            <h2 className="text-xl font-semibold mb-4 text-gray-800">{t.stats}</h2>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              {statsData.map((stat, index) => (
+                <StatCard
+                  key={index}
+                  title={stat.title}
+                  value={stat.value}
+                  icon={stat.icon}
+                  trend={stat.trend}
+                  variant={stat.variant}
+                />
+              ))}
+            </div>
+          </div>
+        )}
+        
+        {/* Analytics Chart */}
+        {!isLoading && analyticsChartData.length > 0 && (
+          <div className="w-full max-w-5xl mx-auto mb-8">
+            <LineChart
+              title={t.analyticsTitle}
+              data={analyticsChartData}
+              lines={[
+                { dataKey: "pageViews", stroke: "#8884d8", name: isArabic ? "الزيارات" : "Visites" },
+                { dataKey: "articles", stroke: "#82ca9d", name: isArabic ? "المقالات" : "Articles" },
+                { dataKey: "translations", stroke: "#ffc658", name: isArabic ? "الترجمات" : "Traductions" }
+              ]}
+              className="shadow-md hover:shadow-lg transition-shadow duration-300"
+            />
+          </div>
+        )}
+
+        {/* Latest News */}
+        {!isLoading && activities.length > 0 && (
+          <div className="w-full max-w-5xl mx-auto mb-8">
+            <ActivityTimeline 
+              items={activities} 
+              title={t.latestNews}
+              className="shadow-md hover:shadow-lg transition-shadow duration-300" 
+            />
+          </div>
+        )}
 
         {/* Features Buttons */}
         <div className="w-full max-w-5xl mx-auto mb-8">
@@ -142,6 +247,8 @@ const Index = () => {
           }
         `}
       </style>
-    </div>;
+    </div>
+  );
 };
+
 export default Index;

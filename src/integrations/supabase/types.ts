@@ -9,7 +9,84 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
-      [_ in never]: never
+      analytics: {
+        Row: {
+          article_view_count: number | null
+          created_at: string | null
+          date: string | null
+          id: string
+          improve_count: number | null
+          page_view_count: number | null
+          search_count: number | null
+          translation_count: number | null
+          updated_at: string | null
+        }
+        Insert: {
+          article_view_count?: number | null
+          created_at?: string | null
+          date?: string | null
+          id?: string
+          improve_count?: number | null
+          page_view_count?: number | null
+          search_count?: number | null
+          translation_count?: number | null
+          updated_at?: string | null
+        }
+        Update: {
+          article_view_count?: number | null
+          created_at?: string | null
+          date?: string | null
+          id?: string
+          improve_count?: number | null
+          page_view_count?: number | null
+          search_count?: number | null
+          translation_count?: number | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
+      news_articles: {
+        Row: {
+          author: string | null
+          category: string | null
+          content: string
+          created_at: string | null
+          id: string
+          image_url: string | null
+          language: string
+          publication_date: string | null
+          source: string | null
+          title: string
+          updated_at: string | null
+        }
+        Insert: {
+          author?: string | null
+          category?: string | null
+          content: string
+          created_at?: string | null
+          id?: string
+          image_url?: string | null
+          language: string
+          publication_date?: string | null
+          source?: string | null
+          title: string
+          updated_at?: string | null
+        }
+        Update: {
+          author?: string | null
+          category?: string | null
+          content?: string
+          created_at?: string | null
+          id?: string
+          image_url?: string | null
+          language?: string
+          publication_date?: string | null
+          source?: string | null
+          title?: string
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
