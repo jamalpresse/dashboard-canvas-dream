@@ -38,11 +38,30 @@ export const formatResponseData = (data: any) => {
   // Si c'est une chaîne qui semble être du JSON
   if (typeof data === 'string') {
     try {
-      return JSON.parse(data);
+      const parsedData = JSON.parse(data);
+      
+      // Handle the case where keywords might be a string and need to be converted to array
+      if (parsedData.keywords && typeof parsedData.keywords === 'string') {
+        const keywordSeparator = parsedData.keywords.includes(',') ? ',' : ' ';
+        parsedData.keywords = parsedData.keywords.split(keywordSeparator)
+          .map((k: string) => k.trim())
+          .filter((k: string) => k.length > 0);
+      }
+      
+      return parsedData;
     } catch (e) {
       console.error("Erreur lors du parsing de la réponse:", e);
       return { body: data };
     }
+  }
+  
+  // Check if data has keywords as string that need to be converted to array
+  if (data && typeof data === 'object' && data.keywords && typeof data.keywords === 'string') {
+    const keywordSeparator = data.keywords.includes(',') ? ',' : ' ';
+    data.keywords = data.keywords.split(keywordSeparator)
+      .map((k: string) => k.trim())
+      .filter((k: string) => k.length > 0);
+    console.log("Processed keywords:", data.keywords);
   }
   
   // Si c'est déjà un objet avec la structure attendue (SEO titles, etc.)
@@ -52,7 +71,7 @@ export const formatResponseData = (data: any) => {
       data.main_title !== undefined ||
       data.body !== undefined ||
       Array.isArray(data.seo_titles) ||
-      Array.isArray(data.keywords) ||
+      data.keywords !== undefined ||
       Array.isArray(data.hashtags);
       
     if (hasExpectedFields) {

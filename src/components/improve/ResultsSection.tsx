@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { ResultCard } from './ResultCard';
 import ErrorResult from '../translation/ErrorResult';
@@ -60,13 +61,24 @@ export function ResultsSection({ result, handleCopy }: ResultsSectionProps) {
     );
   }
 
+  // Process keywords field - it might be a string that needs to be split
+  // This handles the case where keywords come as a single string with commas or spaces
+  if (processedResult.keywords && typeof processedResult.keywords === 'string') {
+    // Try to split by comma first, then by spaces if no commas
+    const keywordSeparator = processedResult.keywords.includes(',') ? ',' : ' ';
+    processedResult.keywords = processedResult.keywords.split(keywordSeparator)
+      .map((k: string) => k.trim())
+      .filter((k: string) => k.length > 0);
+    console.log("Processed keywords from string:", processedResult.keywords);
+  }
+
   // If the result is empty or doesn't have any of the expected fields
   const hasExpectedFields = 
     processedResult.main_title !== undefined ||
     processedResult.body !== undefined ||
     Array.isArray(processedResult.seo_titles) ||
     Array.isArray(processedResult.keywords) ||
-    Array.isArray(processedResult.mots_cles) || // Add support for French "mots_cles" field
+    Array.isArray(processedResult.mots_cles) ||
     Array.isArray(processedResult.hashtags) ||
     processedResult.youtube_thumbnail_title !== undefined;
 
@@ -129,6 +141,15 @@ export function ResultsSection({ result, handleCopy }: ResultsSectionProps) {
           content={processedResult.mots_cles} 
           handleCopy={handleCopy}
           isArrayContent={true} 
+        />
+      )}
+      
+      {/* Handle string keywords that weren't processed earlier */}
+      {processedResult.keywords && !Array.isArray(processedResult.keywords) && (
+        <ResultCard 
+          title="Mots-clés" 
+          content={String(processedResult.keywords)} 
+          handleCopy={handleCopy}
         />
       )}
       
