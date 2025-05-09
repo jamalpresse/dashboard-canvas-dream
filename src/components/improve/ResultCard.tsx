@@ -13,22 +13,26 @@ interface ResultCardProps {
 }
 
 export function ResultCard({ title, content, handleCopy, isArrayContent = false }: ResultCardProps) {
+  // Check if we're dealing with keywords (both "Keywords" and "Mots-clés" titles)
+  const isKeywords = title === "Keywords" || title === "Mots-clés";
+  const isHashtags = title === "Hashtags";
+
   if (isArrayContent && Array.isArray(content)) {
     return (
       <Card className="overflow-hidden hover:shadow-md transition-shadow duration-300">
         <CardContent className="p-4">
           <h3 className="font-bold mb-2 text-purple-800">{title}</h3>
-          {title === "Keywords" || title === "Hashtags" ? (
-            <div className={title === "Keywords" ? "flex flex-wrap gap-2" : "flex flex-col gap-1"}>
+          {isKeywords || isHashtags ? (
+            <div className={isKeywords ? "flex flex-wrap gap-2" : "flex flex-col gap-1"}>
               {content.map((item: string, i: number) => (
                 <div key={i} className="flex items-center">
                   <span
                     dir={dirFrom(item)}
-                    className={`${alignFrom(item)} ${title === "Hashtags" ? "text-purple-600" : ""}`}
+                    className={`${alignFrom(item)} ${isHashtags ? "text-purple-600" : ""}`}
                   >
                     {item}
                   </span>
-                  {title === "Keywords" && (
+                  {isKeywords && (
                     <Button
                       onClick={() => handleCopy(item)}
                       variant="ghost"
@@ -65,7 +69,7 @@ export function ResultCard({ title, content, handleCopy, isArrayContent = false 
               ))}
             </ul>
           )}
-          {title === "Hashtags" && (
+          {isHashtags && (
             <Button
               onClick={() => handleCopy(content.join('\n'))}
               variant="outline"

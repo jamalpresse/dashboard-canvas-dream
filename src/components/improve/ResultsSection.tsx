@@ -66,6 +66,7 @@ export function ResultsSection({ result, handleCopy }: ResultsSectionProps) {
     processedResult.body !== undefined ||
     Array.isArray(processedResult.seo_titles) ||
     Array.isArray(processedResult.keywords) ||
+    Array.isArray(processedResult.mots_cles) || // Add support for French "mots_cles" field
     Array.isArray(processedResult.hashtags) ||
     processedResult.youtube_thumbnail_title !== undefined;
 
@@ -111,10 +112,21 @@ export function ResultsSection({ result, handleCopy }: ResultsSectionProps) {
         />
       )}
       
+      {/* Support both "keywords" and "mots_cles" fields */}
       {Array.isArray(processedResult.keywords) && processedResult.keywords.length > 0 && (
         <ResultCard 
           title="Mots-clés" 
           content={processedResult.keywords} 
+          handleCopy={handleCopy}
+          isArrayContent={true} 
+        />
+      )}
+      
+      {/* Add support for French "mots_cles" field */}
+      {Array.isArray(processedResult.mots_cles) && processedResult.mots_cles.length > 0 && (
+        <ResultCard 
+          title="Mots-clés" 
+          content={processedResult.mots_cles} 
           handleCopy={handleCopy}
           isArrayContent={true} 
         />
