@@ -2,6 +2,7 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
 import { Separator } from "@/components/ui/separator";
+import { isRTL, dirFrom } from "@/utils/textUtils";
 
 type TimelineItem = {
   id: string;
@@ -36,7 +37,7 @@ export function ActivityTimeline({
                 <div className="flex items-start space-x-4">
                   {item.icon && (
                     <div className={cn(
-                      "mt-0.5 rounded-full p-1.5",
+                      "mt-0.5 rounded-full p-1.5 flex-shrink-0",
                       item.type === "success" ? "bg-green-100" :
                       item.type === "warning" ? "bg-yellow-100" :
                       item.type === "error" ? "bg-red-100" :
@@ -55,10 +56,21 @@ export function ActivityTimeline({
                   )}
                   <div className="flex-1 space-y-1">
                     <div className="flex items-center justify-between">
-                      <p className="text-sm font-medium">{item.title}</p>
+                      <p 
+                        className="text-sm font-medium" 
+                        dir={dirFrom(item.title)}
+                      >
+                        {item.title}
+                      </p>
                       <p className="text-xs text-muted-foreground">{item.time}</p>
                     </div>
-                    <p className="text-sm text-muted-foreground">{item.description}</p>
+                    <div 
+                      className="text-sm text-muted-foreground"
+                      dir={dirFrom(item.description)}
+                    >
+                      {/* Safely render description or remove HTML tags */}
+                      {item.description.replace(/<\/?[^>]+(>|$)/g, "")}
+                    </div>
                   </div>
                 </div>
               </div>

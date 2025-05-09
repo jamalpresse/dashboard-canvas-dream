@@ -2,6 +2,7 @@
 import { useState, useEffect } from 'react';
 import { useAnalytics } from '@/hooks/use-analytics';
 import { NewsItem, fetchNewsByCountry, fetchNewsFromSource, searchNews, filterNewsBySourceId } from '@/services/newsService';
+import { toast } from "@/components/ui/sonner";
 
 export function useNews() {
   const [news, setNews] = useState<NewsItem[]>([]);
@@ -30,11 +31,19 @@ export function useNews() {
           trackEvent('article_view', { category: activeTab });
         }
         
+        // Clean HTML tags from descriptions and content
+        newsData = newsData.map(item => ({
+          ...item,
+          description: item.description ? sanitizeHtml(item.description) : 'Pas de description disponible',
+          content: item.content ? sanitizeHtml(item.content) : ''
+        }));
+        
         setNews(newsData);
         applyFilters(newsData, searchQuery, activeSource);
       } catch (err) {
         console.error('Error loading news:', err);
         setError('Une erreur est survenue lors du chargement des actualités');
+        toast.error('Erreur de chargement des actualités');
       } finally {
         setLoading(false);
       }
@@ -42,6 +51,19 @@ export function useNews() {
     
     loadNews();
   }, [activeTab, activeSource, trackEvent]);
+
+  // Sanitize HTML content
+  const sanitizeHtml = (html: string): string => {
+    // Basic HTML tag removal
+    return html.replace(/<\/?[^>]+(>|$)/g, "")
+      // Replace HTML entities
+      .replace(/&nbsp;/g, " ")
+      .replace(/&amp;/g, "&")
+      .replace(/&lt;/g, "<")
+      .replace(/&gt;/g, ">")
+      .replace(/&quot;/g, '"')
+      .trim();
+  };
 
   // Appliquer les filtres (recherche et source)
   const applyFilters = (newsItems: NewsItem[], query: string, source: string | null) => {
@@ -69,7 +91,7 @@ export function useNews() {
   };
 
   return {
-    news: filteredNews,
+    news: filteredNews.length > 0 ? filteredNews : news,
     loading,
     error,
     activeTab,

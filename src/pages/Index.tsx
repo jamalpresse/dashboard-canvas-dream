@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
-import { Search, ArrowUp, MessageSquare, Users, Newspaper, BarChart, ArrowRight, Globe } from "lucide-react";
+import { Search, ArrowUp, MessageSquare, Users, Newspaper, BarChart, ArrowRight, Globe, AlertCircle } from "lucide-react";
 import { StatCard } from "@/components/dashboard/StatCard";
 import { ActivityTimeline } from "@/components/dashboard/ActivityTimeline";
 import { LineChart } from "@/components/dashboard/LineChart";
@@ -24,6 +24,7 @@ const Index = () => {
   const {
     news,
     loading: newsLoading,
+    error: newsError,
     activeTab,
     setActiveTab
   } = useNews();
@@ -199,22 +200,29 @@ const Index = () => {
               to="/news" 
               className="px-4 py-1.5 bg-gradient-to-r from-purple-600 to-pink-500 text-white rounded-full flex items-center gap-1 text-sm font-medium hover:shadow-md transition-all duration-300 hover:scale-105"
             >
-              Voir plus <ArrowRight className="h-4 w-4 animate-pulse" />
+              {isArabic ? "عرض المزيد" : "Voir plus"} <ArrowRight className="h-4 w-4 animate-pulse" />
             </Link>
           </div>
           
           {/* News Tabs */}
           <Tabs value={activeTab} onValueChange={value => setActiveTab(value as 'maroc' | 'monde')} className="mb-4">
-            <TabsList className="w-fit bg-white shadow-sm border border-purple-100">
-              <TabsTrigger value="maroc" className="text-base data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-600 data-[state=active]:to-pink-500 data-[state=active]:text-white">
+            <TabsList className="w-fit bg-white shadow-sm border border-purple-100 p-1 rounded-full">
+              <TabsTrigger 
+                value="maroc" 
+                className="text-base rounded-full data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-600 data-[state=active]:to-pink-500 data-[state=active]:text-white px-4 py-1.5"
+              >
                 <span className="mr-1 text-lg">🇲🇦</span> Maroc
               </TabsTrigger>
-              <TabsTrigger value="monde" className="text-base data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-600 data-[state=active]:to-pink-500 data-[state=active]:text-white">
+              <TabsTrigger 
+                value="monde" 
+                className="text-base rounded-full data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-600 data-[state=active]:to-pink-500 data-[state=active]:text-white px-4 py-1.5"
+              >
                 <Globe className="h-4 w-4 mr-2" /> Monde
               </TabsTrigger>
             </TabsList>
           </Tabs>
           
+          {/* News Display */}
           {newsLoading ? (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
               {[1, 2, 3, 4, 5, 6].map(i => (
@@ -225,17 +233,31 @@ const Index = () => {
                 </div>
               ))}
             </div>
+          ) : newsError ? (
+            <div className="bg-red-50 border border-red-200 rounded-lg p-4 text-center">
+              <div className="flex justify-center items-center mb-2">
+                <AlertCircle className="h-5 w-5 text-red-500 mr-2" />
+                <p className="text-red-700 font-medium">Erreur de chargement</p>
+              </div>
+              <p className="text-red-600">{newsError}</p>
+            </div>
+          ) : displayNews.length === 0 ? (
+            <div className="bg-gray-50 border border-gray-200 rounded-lg p-8 text-center">
+              <Newspaper className="h-10 w-10 text-gray-400 mx-auto mb-2" />
+              <p className="text-gray-500">Aucune actualité disponible pour le moment</p>
+            </div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
               {displayNews.map(item => (
                 <NewsCard
                   key={item.guid}
-                  title={item.title}
-                  description={item.description}
+                  title={item.title || "Titre non disponible"}
+                  description={item.description || "Description non disponible"}
                   source={item.source}
                   date={formatNewsDate(item.pubDate)}
                   link={item.link}
                   compact={true}
+                  error={item.title?.includes("Impossible de charger") ? "Impossible de charger les actualités de cette source" : undefined}
                 />
               ))}
             </div>
