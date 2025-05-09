@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
-import { Search, ArrowUp, MessageSquare, Users, Newspaper, BarChart, ArrowRight } from "lucide-react";
+import { Search, ArrowUp, MessageSquare, Users, Newspaper, BarChart, ArrowRight, Globe } from "lucide-react";
 import { StatCard } from "@/components/dashboard/StatCard";
 import { ActivityTimeline } from "@/components/dashboard/ActivityTimeline";
 import { LineChart } from "@/components/dashboard/LineChart";
@@ -9,8 +9,9 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/components/ui/sonner";
 import { useNews } from "@/hooks/useNews";
 import { Button } from "@/components/ui/button";
-import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { formatNewsDate } from "@/services/newsService";
+
 const Index = () => {
   const [lang, setLang] = useState("fr");
   const [analytics, setAnalytics] = useState<any[]>([]);
@@ -191,31 +192,54 @@ const Index = () => {
         {/* News Section */}
         <div className="w-full max-w-5xl mx-auto mb-8">
           <div className="flex justify-between items-center mb-4">
-            <h2 className="text-xl font-semibold text-gray-800">{t.latestNews}</h2>
-            <Link to="/news" className="text-purple-700 hover:text-purple-900 font-medium flex items-center gap-1">
-              Voir plus <ArrowRight className="h-4 w-4" />
+            <h2 className="text-xl font-semibold bg-gradient-to-r from-purple-600 to-pink-500 bg-clip-text text-transparent">
+              {t.latestNews}
+            </h2>
+            <Link 
+              to="/news" 
+              className="px-4 py-1.5 bg-gradient-to-r from-purple-600 to-pink-500 text-white rounded-full flex items-center gap-1 text-sm font-medium hover:shadow-md transition-all duration-300 hover:scale-105"
+            >
+              Voir plus <ArrowRight className="h-4 w-4 animate-pulse" />
             </Link>
           </div>
           
           {/* News Tabs */}
           <Tabs value={activeTab} onValueChange={value => setActiveTab(value as 'maroc' | 'monde')} className="mb-4">
-            <TabsList className="w-fit">
-              <TabsTrigger value="maroc">
-                <span className="mr-1">🇲🇦</span> Maroc
+            <TabsList className="w-fit bg-white shadow-sm border border-purple-100">
+              <TabsTrigger value="maroc" className="text-base data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-600 data-[state=active]:to-pink-500 data-[state=active]:text-white">
+                <span className="mr-1 text-lg">🇲🇦</span> Maroc
               </TabsTrigger>
-              <TabsTrigger value="monde">Monde</TabsTrigger>
+              <TabsTrigger value="monde" className="text-base data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-600 data-[state=active]:to-pink-500 data-[state=active]:text-white">
+                <Globe className="h-4 w-4 mr-2" /> Monde
+              </TabsTrigger>
             </TabsList>
           </Tabs>
           
-          {newsLoading ? <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {[1, 2, 3, 4, 5, 6].map(i => <div key={i} className="bg-white rounded-lg shadow-md p-4 h-[200px] animate-pulse">
+          {newsLoading ? (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+              {[1, 2, 3, 4, 5, 6].map(i => (
+                <div key={i} className="bg-white rounded-lg shadow-sm p-4 h-[180px] animate-pulse">
                   <div className="h-5 bg-gray-200 rounded mb-2 w-3/4"></div>
                   <div className="h-4 bg-gray-200 rounded mb-4 w-1/2"></div>
                   <div className="h-16 bg-gray-200 rounded"></div>
-                </div>)}
-            </div> : <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {displayNews.map(item => <NewsCard key={item.guid} title={item.title} description={item.description} source={item.source} date={formatNewsDate(item.pubDate)} link={item.link} compact={true} />)}
-            </div>}
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+              {displayNews.map(item => (
+                <NewsCard
+                  key={item.guid}
+                  title={item.title}
+                  description={item.description}
+                  source={item.source}
+                  date={formatNewsDate(item.pubDate)}
+                  link={item.link}
+                  compact={true}
+                />
+              ))}
+            </div>
+          )}
         </div>
         
         {/* Analytics Chart */}
@@ -275,8 +299,18 @@ const Index = () => {
           .animate-fade-in {
             animation: fadeIn 0.5s ease-out forwards;
           }
+
+          @keyframes pulse {
+            0%, 100% { transform: translateX(0px); }
+            50% { transform: translateX(3px); }
+          }
+          
+          .animate-pulse {
+            animation: pulse 1.5s infinite;
+          }
         `}
       </style>
     </div>;
 };
+
 export default Index;
