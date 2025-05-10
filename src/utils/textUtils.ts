@@ -7,6 +7,11 @@ export const checkClipboardSupport = () => {
   return !!navigator.clipboard && typeof navigator.clipboard.writeText === 'function';
 };
 
+// Helper function for joining keywords with Arabic commas
+export const joinKeywordsWithArabicCommas = (keywords: string[]) => {
+  return keywords.join('، '); // Join with Arabic comma
+};
+
 export const formatResponseData = (data: any) => {
   // Handle different response formats
   if (!data) return { body: "Aucune réponse reçue" };

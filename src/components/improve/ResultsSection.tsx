@@ -124,23 +124,25 @@ export function ResultsSection({ result, handleCopy }: ResultsSectionProps) {
         />
       )}
       
-      {/* Support both "keywords" and "mots_cles" fields */}
+      {/* Support both "keywords" and "mots_cles" fields with paragraph display mode */}
       {Array.isArray(processedResult.keywords) && processedResult.keywords.length > 0 && (
         <ResultCard 
           title="Mots-clés" 
           content={processedResult.keywords} 
           handleCopy={handleCopy}
-          isArrayContent={true} 
+          isArrayContent={true}
+          displayMode="paragraph" 
         />
       )}
       
-      {/* Add support for French "mots_cles" field */}
+      {/* Add support for French "mots_cles" field with paragraph display mode */}
       {Array.isArray(processedResult.mots_cles) && processedResult.mots_cles.length > 0 && (
         <ResultCard 
           title="Mots-clés" 
           content={processedResult.mots_cles} 
           handleCopy={handleCopy}
-          isArrayContent={true} 
+          isArrayContent={true}
+          displayMode="paragraph"
         />
       )}
       

@@ -11,15 +11,28 @@ interface ResultCardProps {
   content: string | string[];
   handleCopy: (value: string) => Promise<void>;
   isArrayContent?: boolean;
+  displayMode?: "badges" | "paragraph";
 }
 
-export function ResultCard({ title, content, handleCopy, isArrayContent = false }: ResultCardProps) {
+export function ResultCard({ 
+  title, 
+  content, 
+  handleCopy, 
+  isArrayContent = false, 
+  displayMode = "badges" 
+}: ResultCardProps) {
   // Check if we're dealing with keywords (both "Keywords" and "Mots-clés" titles)
   const isKeywords = title === "Keywords" || title === "Mots-clés";
   const isHashtags = title === "Hashtags";
 
   // Render keywords in a more visual way using badges
   const renderKeywords = (items: string[]) => {
+    // If displayMode is paragraph, return keywords as a single paragraph with Arabic commas
+    if (displayMode === "paragraph" && isKeywords) {
+      return renderKeywordsAsParagraph(items);
+    }
+
+    // Default display as badges
     return (
       <div className="flex flex-wrap gap-2">
         {items.map((item: string, i: number) => (
@@ -42,6 +55,30 @@ export function ResultCard({ title, content, handleCopy, isArrayContent = false 
             </Button>
           </div>
         ))}
+      </div>
+    );
+  };
+
+  // New function to render keywords as a paragraph with Arabic commas
+  const renderKeywordsAsParagraph = (items: string[]) => {
+    const joinedText = items.join('، '); // Join with Arabic comma
+    
+    return (
+      <div className="mb-3">
+        <p 
+          dir={dirFrom(joinedText)} 
+          className={`${alignFrom(joinedText)} whitespace-pre-wrap text-purple-800`}
+        >
+          {joinedText}
+        </p>
+        <Button
+          onClick={() => handleCopy(joinedText)}
+          variant="outline"
+          size="sm"
+          className="mt-2"
+        >
+          <Copy className="h-4 w-4 mr-2" /> Copier
+        </Button>
       </div>
     );
   };
