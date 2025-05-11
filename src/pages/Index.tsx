@@ -11,7 +11,6 @@ import { useNews } from "@/hooks/useNews";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { formatNewsDate } from "@/services/newsService";
-
 const Index = () => {
   const [lang, setLang] = useState("fr");
   const [analytics, setAnalytics] = useState<any[]>([]);
@@ -275,9 +274,7 @@ const Index = () => {
           </div>}
 
         {/* Latest News */}
-        {!isLoading && activities.length > 0 && <div className="w-full max-w-5xl mx-auto mb-8">
-            <ActivityTimeline items={activities} title={t.latestNews} className="shadow-md hover:shadow-lg transition-shadow duration-300" />
-          </div>}
+        {!isLoading && activities.length > 0}
       </div>
 
       <style>
@@ -303,5 +300,4 @@ const Index = () => {
       </style>
     </div>;
 };
-
 export default Index;
