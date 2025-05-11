@@ -11,6 +11,7 @@ import { useNews } from "@/hooks/useNews";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { formatNewsDate } from "@/services/newsService";
+
 const Index = () => {
   const [lang, setLang] = useState("fr");
   const [analytics, setAnalytics] = useState<any[]>([]);
@@ -177,7 +178,30 @@ const Index = () => {
         <div className="w-full max-w-5xl mx-auto mt-8">
           <div className="bg-gradient-to-r from-purple-600 to-pink-500 rounded-xl p-8 shadow-lg text-white mb-8">
             <h1 className="text-3xl font-bold">{t.welcome}</h1>
+          </div>
+        </div>
+
+        {/* MOVED: Features Buttons */}
+        <div className="w-full max-w-5xl mx-auto mb-8">
+          <h2 className="text-xl font-semibold mb-4 text-gray-800">{t.subtitle}</h2>
+          <div className="flex flex-col md:flex-row gap-6">
+            <Link to="/search" className="flex-1 bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-700 hover:to-purple-800 text-white font-semibold text-lg py-6 px-4 rounded-xl shadow-lg text-center transition duration-300 flex items-center justify-center gap-3">
+              <Search className="h-5 w-5" />
+              <span>{t.search}</span>
+            </Link>
+
+            <Link to="/improve" className="flex-1 bg-gradient-to-r from-pink-500 to-purple-600 hover:from-pink-600 hover:to-purple-700 text-white font-semibold text-lg py-6 px-4 rounded-xl shadow-lg text-center transition duration-300 flex items-center justify-center gap-3">
+              {t.improve}
+            </Link>
+
+            <Link to="/translation" className="flex-1 bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white font-semibold text-lg py-6 px-4 rounded-xl shadow-lg text-center transition duration-300 flex items-center justify-center gap-3">
+              {t.translate}
+            </Link>
             
+            <Link to="/news" className="flex-1 bg-gradient-to-r from-indigo-500 to-blue-500 hover:from-indigo-600 hover:to-blue-600 text-white font-semibold text-lg py-6 px-4 rounded-xl shadow-lg text-center transition duration-300 flex items-center justify-center gap-3">
+              <Newspaper className="h-5 w-5" />
+              <span>{t.news}</span>
+            </Link>
           </div>
         </div>
 
@@ -254,30 +278,6 @@ const Index = () => {
         {!isLoading && activities.length > 0 && <div className="w-full max-w-5xl mx-auto mb-8">
             <ActivityTimeline items={activities} title={t.latestNews} className="shadow-md hover:shadow-lg transition-shadow duration-300" />
           </div>}
-
-        {/* Features Buttons */}
-        <div className="w-full max-w-5xl mx-auto mb-8">
-          <h2 className="text-xl font-semibold mb-4 text-gray-800">{t.subtitle}</h2>
-          <div className="flex flex-col md:flex-row gap-6">
-            <Link to="/search" className="flex-1 bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-700 hover:to-purple-800 text-white font-semibold text-lg py-6 px-4 rounded-xl shadow-lg text-center transition duration-300 flex items-center justify-center gap-3">
-              <Search className="h-5 w-5" />
-              <span>{t.search}</span>
-            </Link>
-
-            <Link to="/improve" className="flex-1 bg-gradient-to-r from-pink-500 to-purple-600 hover:from-pink-600 hover:to-purple-700 text-white font-semibold text-lg py-6 px-4 rounded-xl shadow-lg text-center transition duration-300 flex items-center justify-center gap-3">
-              {t.improve}
-            </Link>
-
-            <Link to="/translation" className="flex-1 bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white font-semibold text-lg py-6 px-4 rounded-xl shadow-lg text-center transition duration-300 flex items-center justify-center gap-3">
-              {t.translate}
-            </Link>
-            
-            <Link to="/news" className="flex-1 bg-gradient-to-r from-indigo-500 to-blue-500 hover:from-indigo-600 hover:to-blue-600 text-white font-semibold text-lg py-6 px-4 rounded-xl shadow-lg text-center transition duration-300 flex items-center justify-center gap-3">
-              <Newspaper className="h-5 w-5" />
-              <span>{t.news}</span>
-            </Link>
-          </div>
-        </div>
       </div>
 
       <style>
@@ -303,4 +303,5 @@ const Index = () => {
       </style>
     </div>;
 };
+
 export default Index;
