@@ -64,10 +64,10 @@ export function ActivityTimeline({
                       </div>
                     )}
                     <div className="flex-1">
-                      <h4 className="text-sm font-medium" dir={dirFrom(isRtlTitle)}>
+                      <h4 className="text-sm font-medium" dir={dirFrom(isRtlTitle ? "rtl" : "ltr")}>
                         {item.title}
                       </h4>
-                      <p className="text-sm text-muted-foreground mt-1" dir={dirFrom(isRtlDesc)}>
+                      <p className="text-sm text-muted-foreground mt-1" dir={dirFrom(isRtlDesc ? "rtl" : "ltr")}>
                         {item.description}
                       </p>
                     </div>

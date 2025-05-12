@@ -7,7 +7,7 @@ export interface ImageGenerationResponse {
 
 export async function generateImage(prompt: string): Promise<ImageGenerationResponse> {
   try {
-    const response = await fetch('https://n8n-jamal-u38598.vm.elestio.app/webhook/9f32367c-65f7-4868-a660-bbab69fc391c', {
+    const response = await fetch('https://jajkfzwzmogpkwzclisv.supabase.co/functions/v1/image-generation', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
