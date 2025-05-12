@@ -14,7 +14,8 @@ import NotFound from "./pages/NotFound";
 import Search from "./pages/Search";
 import Improve from "./pages/Improve";
 import Translation from "./pages/Translation";
-import News from "./pages/News"; // Import la nouvelle page d'actualités
+import News from "./pages/News";
+import ImageGeneration from "./pages/ImageGeneration"; // Import la nouvelle page de génération d'images
 
 const queryClient = new QueryClient();
 
@@ -33,7 +34,8 @@ const App = () => (
             <Route path="/search" element={<Search />} />
             <Route path="/improve" element={<Improve />} />
             <Route path="/translation" element={<Translation />} />
-            <Route path="/news" element={<News />} /> {/* Ajout de la route News */}
+            <Route path="/news" element={<News />} />
+            <Route path="/image-generation" element={<ImageGeneration />} /> {/* Ajout de la route ImageGeneration */}
           </Route>
           <Route path="*" element={<NotFound />} />
         </Routes>

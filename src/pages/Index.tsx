@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
-import { Search, ArrowUp, MessageSquare, Users, Newspaper, BarChart, ArrowRight, Globe, AlertCircle } from "lucide-react";
+import { Search, ArrowUp, MessageSquare, Users, Newspaper, BarChart, ArrowRight, Globe, AlertCircle, ImageIcon } from "lucide-react";
 import { StatCard } from "@/components/dashboard/StatCard";
 import { ActivityTimeline } from "@/components/dashboard/ActivityTimeline";
 import { LineChart } from "@/components/dashboard/LineChart";
@@ -11,6 +11,7 @@ import { useNews } from "@/hooks/useNews";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { formatNewsDate } from "@/services/newsService";
+
 const Index = () => {
   const [lang, setLang] = useState("fr");
   const [analytics, setAnalytics] = useState<any[]>([]);
@@ -197,9 +198,9 @@ const Index = () => {
               {t.translate}
             </Link>
             
-            <Link to="/news" className="flex-1 bg-gradient-to-r from-indigo-500 to-blue-500 hover:from-indigo-600 hover:to-blue-600 text-white font-semibold text-lg py-6 px-4 rounded-xl shadow-lg text-center transition duration-300 flex items-center justify-center gap-3">
-              <Newspaper className="h-5 w-5" />
-              <span>{t.news}</span>
+            <Link to="/image-generation" className="flex-1 bg-gradient-to-r from-indigo-500 to-blue-500 hover:from-indigo-600 hover:to-blue-600 text-white font-semibold text-lg py-6 px-4 rounded-xl shadow-lg text-center transition duration-300 flex items-center justify-center gap-3">
+              <ImageIcon className="h-5 w-5" />
+              <span>{isArabic ? "توليد الصور" : "Génération d'images"}</span>
             </Link>
           </div>
         </div>
