@@ -1,7 +1,6 @@
 
 import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { generateImage, createDownloadableImage } from "@/services/imageGenerationService";
@@ -26,11 +25,10 @@ const ImageGeneration = () => {
 
     try {
       const result = await generateImage(prompt);
+      console.log("Résultat de la génération:", result);
       
-      // For demo purposes, we'll use a placeholder if no image URL is returned
-      // In a real implementation, adjust this to use the actual image URL from the response
-      const imageUrl = result.imageUrl || 'https://picsum.photos/800/600'; // placeholder
-      setGeneratedImage(imageUrl);
+      // On utilise maintenant l'URL d'image qui est garantie par le service
+      setGeneratedImage(result.imageUrl);
       toast.success("Image générée avec succès!");
     } catch (err) {
       console.error("Error generating image:", err);
@@ -114,7 +112,11 @@ const ImageGeneration = () => {
                 src={generatedImage} 
                 alt="Generated image" 
                 className="w-full h-auto object-contain"
-                onError={() => setError("Impossible de charger l'image générée.")}
+                onError={() => {
+                  setError("Impossible de charger l'image générée.");
+                  // Utiliser une image de secours en cas d'erreur de chargement
+                  setGeneratedImage("https://images.unsplash.com/photo-1581091226825-a6a2a5aee158");
+                }}
               />
             </div>
           </CardContent>

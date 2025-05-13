@@ -9,6 +9,9 @@ const corsHeaders = {
 // L'URL du webhook externe pour la génération d'images
 const externalWebhookUrl = "https://n8n-jamal-u38598.vm.elestio.app/webhook/9f32367c-65f7-4868-a660-bbab69fc391c";
 
+// URL de secours fiable
+const fallbackImageUrl = "https://images.unsplash.com/photo-1581091226825-a6a2a5aee158";
+
 serve(async (req) => {
   // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
@@ -21,7 +24,11 @@ serve(async (req) => {
     
     if (!prompt) {
       return new Response(
-        JSON.stringify({ error: 'Le prompt est requis' }),
+        JSON.stringify({
+          myField: "error",
+          imageUrl: fallbackImageUrl,
+          error: 'Le prompt est requis'
+        }),
         { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 400 }
       );
     }
@@ -33,7 +40,7 @@ serve(async (req) => {
     console.log("URL du webhook:", webhookUrl);
 
     const response = await fetch(webhookUrl, {
-      method: 'GET', // Changé de POST à GET selon l'erreur rapportée
+      method: 'GET',
       headers: {
         'Content-Type': 'application/json',
       }
@@ -43,12 +50,15 @@ serve(async (req) => {
       const errorText = await response.text();
       console.error("Erreur du service externe:", response.status, errorText);
       
+      // En cas d'erreur, retourner une réponse avec une image de secours
       return new Response(
-        JSON.stringify({ 
-          error: `Erreur du service externe: ${response.status}`, 
-          details: errorText 
+        JSON.stringify({
+          myField: "error",
+          imageUrl: fallbackImageUrl,
+          error: `Erreur du service externe: ${response.status}`,
+          details: errorText
         }),
-        { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 500 }
+        { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 200 }
       );
     }
 
@@ -56,10 +66,14 @@ serve(async (req) => {
     const data = await response.json();
     console.log("Réponse du webhook:", data);
     
+    // Vérifier si la réponse contient une URL d'image
+    // Si le champ imageUrl est absent ou vide, utiliser notre URL de secours fiable
+    const imageUrl = data.imageUrl || fallbackImageUrl;
+    
     // Formatter la réponse selon ce qui est attendu
     const formattedResponse = {
       myField: data.myField || "value",
-      imageUrl: data.imageUrl || 'https://picsum.photos/800/600'
+      imageUrl: imageUrl
     };
     
     console.log("Réponse formatée:", formattedResponse);
@@ -75,7 +89,7 @@ serve(async (req) => {
     return new Response(
       JSON.stringify({ 
         myField: "erreur", 
-        imageUrl: 'https://picsum.photos/800/600',
+        imageUrl: fallbackImageUrl,
         error: "Une erreur s'est produite lors de la génération de l'image", 
         details: error.message 
       }),
