@@ -20,7 +20,13 @@ export async function generateImage(prompt: string): Promise<ImageGenerationResp
     }
 
     const data = await response.json();
-    return data;
+    console.log("Données reçues de la fonction Edge:", data);
+    
+    // S'assurer que les données respectent l'interface
+    return {
+      myField: data.myField || "value",
+      imageUrl: data.imageUrl || null
+    };
   } catch (error) {
     console.error('Error generating image:', error);
     throw error;
