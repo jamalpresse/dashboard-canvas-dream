@@ -66,9 +66,14 @@ serve(async (req) => {
     const data = await response.json();
     console.log("Réponse du webhook:", data);
     
-    // Vérifier si la réponse contient une URL d'image
-    // Si le champ imageUrl est absent ou vide, utiliser notre URL de secours fiable
-    const imageUrl = data.imageUrl && data.imageUrl !== "URL_DE_VOTRE_IMAGE" 
+    // Vérifier si la réponse contient une URL d'image valide
+    // Détecter spécifiquement la string avec template Mustache/Handlebars
+    const isTemplateString = typeof data.imageUrl === 'string' && 
+      (data.imageUrl.includes('{{') || 
+       data.imageUrl.includes('}}') ||
+       data.imageUrl === 'URL_DE_VOTRE_IMAGE');
+    
+    const imageUrl = data.imageUrl && !isTemplateString 
       ? data.imageUrl 
       : fallbackImageUrl;
     
