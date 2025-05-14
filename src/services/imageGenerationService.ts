@@ -24,13 +24,13 @@ export async function generateImage(prompt: string): Promise<ImageGenerationResp
     const data = await response.json();
     console.log("Données reçues de la fonction Edge:", data);
     
-    // Vérifier que l'URL d'image est valide (n'est pas une valeur template)
-    const isTemplateString = typeof data.imageUrl === 'string' && 
-      (data.imageUrl.includes('{{') || 
-       data.imageUrl.includes('}}') ||
-       data.imageUrl === 'URL_DE_VOTRE_IMAGE');
+    // Vérification simplifiée de l'URL d'image
+    const isValidUrl = typeof data.imageUrl === 'string' && 
+      data.imageUrl.startsWith('http') &&
+      !data.imageUrl.includes('{{') &&
+      !data.imageUrl.includes('}}');
     
-    if (!data.imageUrl || isTemplateString) {
+    if (!isValidUrl) {
       console.warn("URL d'image invalide reçue, utilisation de l'image de secours");
       return {
         myField: data.myField || "value",

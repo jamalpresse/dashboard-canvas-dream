@@ -67,19 +67,18 @@ serve(async (req) => {
     console.log("Réponse du webhook:", data);
     
     // Vérifier si la réponse contient une URL d'image valide
-    // Détecter spécifiquement la string avec template Mustache/Handlebars
-    const isTemplateString = typeof data.imageUrl === 'string' && 
-      (data.imageUrl.includes('{{') || 
-       data.imageUrl.includes('}}') ||
-       data.imageUrl === 'URL_DE_VOTRE_IMAGE');
+    // Adaptation pour le nouveau format de réponse simplifié
+    const isValidImageUrl = typeof data.imageUrl === 'string' && 
+      data.imageUrl.startsWith('http') && 
+      !data.imageUrl.includes('{{') && 
+      !data.imageUrl.includes('}}');
     
-    const imageUrl = data.imageUrl && !isTemplateString 
-      ? data.imageUrl 
-      : fallbackImageUrl;
+    const imageUrl = isValidImageUrl ? data.imageUrl : fallbackImageUrl;
     
-    // Formatter la réponse selon ce qui est attendu
+    // Formatter la réponse selon ce qui est attendu par le service frontend
+    // Ajout du champ myField qui n'existe plus dans la réponse du webhook
     const formattedResponse = {
-      myField: data.myField || "value",
+      myField: "value", // Valeur par défaut car n'est plus fourni par le webhook
       imageUrl: imageUrl
     };
     
