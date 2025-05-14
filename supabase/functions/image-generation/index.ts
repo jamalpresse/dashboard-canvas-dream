@@ -6,10 +6,7 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
-// L'URL du webhook externe pour la génération d'images
-const externalWebhookUrl = "https://n8n-jamal-u38598.vm.elestio.app/webhook/9f32367c-65f7-4868-a660-bbab69fc391c";
-
-// URL de secours fiable
+// URL de secours fiable d'Unsplash (image fixe)
 const fallbackImageUrl = "https://images.unsplash.com/photo-1581091226825-a6a2a5aee158";
 
 serve(async (req) => {
@@ -35,6 +32,9 @@ serve(async (req) => {
 
     console.log("Génération d'image pour prompt:", prompt);
 
+    // L'URL du webhook externe pour la génération d'images
+    const externalWebhookUrl = "https://n8n-jamal-u38598.vm.elestio.app/webhook/9f32367c-65f7-4868-a660-bbab69fc391c";
+    
     // Appeler le service externe avec une méthode GET au lieu de POST
     const webhookUrl = `${externalWebhookUrl}?prompt=${encodeURIComponent(prompt)}`;
     console.log("URL du webhook:", webhookUrl);
@@ -68,7 +68,9 @@ serve(async (req) => {
     
     // Vérifier si la réponse contient une URL d'image
     // Si le champ imageUrl est absent ou vide, utiliser notre URL de secours fiable
-    const imageUrl = data.imageUrl || fallbackImageUrl;
+    const imageUrl = data.imageUrl && data.imageUrl !== "URL_DE_VOTRE_IMAGE" 
+      ? data.imageUrl 
+      : fallbackImageUrl;
     
     // Formatter la réponse selon ce qui est attendu
     const formattedResponse = {

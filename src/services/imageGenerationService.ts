@@ -2,7 +2,9 @@
 // Service for image generation using the external webhook
 export interface ImageGenerationResponse {
   myField: string;
-  imageUrl: string; // Maintenant toujours obligatoire
+  imageUrl: string;
+  error?: string;
+  details?: string;
 }
 
 export async function generateImage(prompt: string): Promise<ImageGenerationResponse> {
@@ -22,10 +24,9 @@ export async function generateImage(prompt: string): Promise<ImageGenerationResp
     const data = await response.json();
     console.log("Données reçues de la fonction Edge:", data);
     
-    // Vérifier qu'une URL d'image est présente
-    if (!data.imageUrl) {
-      // Utiliser une image de secours fiable si aucune URL n'est fournie
-      console.warn("Aucune URL d'image reçue, utilisation de l'image de secours");
+    // Vérifier que l'URL d'image est valide (n'est pas la valeur "URL_DE_VOTRE_IMAGE")
+    if (!data.imageUrl || data.imageUrl === "URL_DE_VOTRE_IMAGE") {
+      console.warn("URL d'image invalide reçue, utilisation de l'image de secours");
       return {
         myField: data.myField || "value",
         imageUrl: "https://images.unsplash.com/photo-1581091226825-a6a2a5aee158"
