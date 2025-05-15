@@ -61,11 +61,11 @@ export function createDownloadableImage(imageUrl: string, fileName: string = 'ge
   document.body.removeChild(link);
 }
 
-// New function to handle n8n webhook response with just imageUrl field
+// Updated function to use the new webhook URL
 export async function generateImageWithN8n(prompt: string): Promise<{imageUrl: string}> {
   try {
-    // Pour la nouvelle version, j'utilise la méthode GET avec le prompt en param d'URL
-    const webhookUrl = `https://n8n-jamal-u38598.vm.elestio.app/webhook/9f32367c-65f7-4868-a660-bbab69fc391c?prompt=${encodeURIComponent(prompt)}`;
+    // Mise à jour avec la nouvelle URL de webhook
+    const webhookUrl = `https://n8n-jamal-u38598.vm.elestio.app/webhook/generate-image?prompt=${encodeURIComponent(prompt)}`;
     
     const response = await fetch(webhookUrl, {
       method: 'GET',
