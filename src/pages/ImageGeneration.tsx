@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -7,7 +6,6 @@ import { generateImage, generateImageWithN8n, createDownloadableImage } from "@/
 import { toast } from "@/components/ui/use-toast";
 import { Loader2, Download, ImageIcon, RefreshCw } from "lucide-react";
 import { AspectRatio } from "@/components/ui/aspect-ratio";
-
 const ImageGeneration = () => {
   const [prompt, setPrompt] = useState("");
   const [isGenerating, setIsGenerating] = useState(false);
@@ -17,7 +15,6 @@ const ImageGeneration = () => {
   // Simple image generation function
   const handleGenerateImage = async (e: React.FormEvent) => {
     e.preventDefault();
-    
     if (!prompt.trim()) {
       toast({
         title: "Erreur",
@@ -26,13 +23,10 @@ const ImageGeneration = () => {
       });
       return;
     }
-
     setIsGenerating(true);
     setError(null);
-
     try {
       const result = await generateImageWithN8n(prompt);
-      
       if (result && result.imageUrl) {
         setGeneratedImage(result.imageUrl);
         toast({
@@ -57,7 +51,6 @@ const ImageGeneration = () => {
       setIsGenerating(false);
     }
   };
-
   const handleDownload = () => {
     if (generatedImage) {
       try {
@@ -75,16 +68,13 @@ const ImageGeneration = () => {
       }
     }
   };
-
   const resetForm = () => {
     setPrompt("");
     setGeneratedImage(null);
     setError(null);
   };
-
-  return (
-    <div className="container mx-auto max-w-4xl py-8 px-4">
-      <h1 className="text-3xl font-bold bg-gradient-to-r from-purple-600 to-pink-500 bg-clip-text text-transparent mb-6">Google Free Pix</h1>
+  return <div className="container mx-auto max-w-4xl py-8 px-4">
+      
       
       <div className="grid grid-cols-1 gap-8">
         <Card className="shadow-md">
@@ -103,89 +93,55 @@ const ImageGeneration = () => {
                 <label htmlFor="prompt" className="text-lg font-medium">
                   Description de l'image
                 </label>
-                <Input
-                  id="prompt"
-                  placeholder="Décrivez l'image que vous souhaitez générer..."
-                  value={prompt}
-                  onChange={(e) => setPrompt(e.target.value)}
-                  className="w-full"
-                />
+                <Input id="prompt" placeholder="Décrivez l'image que vous souhaitez générer..." value={prompt} onChange={e => setPrompt(e.target.value)} className="w-full" />
               </div>
               
-              <Button 
-                type="submit" 
-                className="w-full bg-gradient-to-r from-purple-600 to-pink-500 hover:from-purple-700 hover:to-pink-600"
-                disabled={isGenerating}
-              >
-                {isGenerating ? (
-                  <>
+              <Button type="submit" className="w-full bg-gradient-to-r from-purple-600 to-pink-500 hover:from-purple-700 hover:to-pink-600" disabled={isGenerating}>
+                {isGenerating ? <>
                     <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                     Génération en cours...
-                  </>
-                ) : (
-                  <>
+                  </> : <>
                     <ImageIcon className="mr-2 h-4 w-4" />
                     Générer l'image
-                  </>
-                )}
+                  </>}
               </Button>
             </form>
             
-            {error && (
-              <div className="mt-4 bg-red-50 border border-red-200 rounded-lg p-4">
+            {error && <div className="mt-4 bg-red-50 border border-red-200 rounded-lg p-4">
                 <p className="text-red-700">{error}</p>
-              </div>
-            )}
+              </div>}
             
-            {generatedImage && !isGenerating && (
-              <div className="mt-8 space-y-4">
+            {generatedImage && !isGenerating && <div className="mt-8 space-y-4">
                 <AspectRatio ratio={1}>
-                  <img
-                    src={generatedImage}
-                    alt="Image générée"
-                    className="rounded-md w-full h-full object-cover"
-                    onError={() => {
-                      setError("Impossible de charger l'image générée.");
-                      setGeneratedImage("https://images.unsplash.com/photo-1581091226825-a6a2a5aee158");
-                    }}
-                  />
+                  <img src={generatedImage} alt="Image générée" className="rounded-md w-full h-full object-cover" onError={() => {
+                setError("Impossible de charger l'image générée.");
+                setGeneratedImage("https://images.unsplash.com/photo-1581091226825-a6a2a5aee158");
+              }} />
                 </AspectRatio>
                 
                 <div className="flex flex-wrap gap-2">
-                  <Button 
-                    variant="outline" 
-                    className="flex-1"
-                    onClick={resetForm}
-                  >
+                  <Button variant="outline" className="flex-1" onClick={resetForm}>
                     <RefreshCw className="mr-2 h-4 w-4" />
                     Recommencer
                   </Button>
                   
-                  <Button 
-                    className="flex-1 bg-gradient-to-r from-blue-500 to-cyan-500 hover:from-blue-600 hover:to-cyan-600"
-                    onClick={handleDownload}
-                  >
+                  <Button className="flex-1 bg-gradient-to-r from-blue-500 to-cyan-500 hover:from-blue-600 hover:to-cyan-600" onClick={handleDownload}>
                     <Download className="mr-2 h-4 w-4" />
                     Télécharger
                   </Button>
                 </div>
-              </div>
-            )}
+              </div>}
             
-            {!generatedImage && !isGenerating && (
-              <div className="mt-6 border border-dashed border-gray-300 rounded-lg p-12 text-center">
+            {!generatedImage && !isGenerating && <div className="mt-6 border border-dashed border-gray-300 rounded-lg p-12 text-center">
                 <div className="flex flex-col items-center justify-center text-gray-400">
                   <ImageIcon size={48} className="mb-4" />
                   <p>Aucune image générée</p>
                   <p className="text-sm mt-2">Utilisez le formulaire ci-dessus pour générer une image</p>
                 </div>
-              </div>
-            )}
+              </div>}
           </CardContent>
         </Card>
       </div>
-    </div>
-  );
+    </div>;
 };
-
 export default ImageGeneration;
