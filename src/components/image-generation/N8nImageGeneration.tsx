@@ -185,7 +185,7 @@ export const N8nImageGeneration = () => {
           )}
           
           {response?.error && (
-            <Alert variant="warning">
+            <Alert variant="destructive">
               <AlertCircle className="h-4 w-4" />
               <AlertTitle>Attention</AlertTitle>
               <AlertDescription>{response.error}</AlertDescription>
@@ -263,3 +263,4 @@ export const N8nImageGeneration = () => {
     </Card>
   );
 };
+
