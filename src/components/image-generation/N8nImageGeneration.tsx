@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from "@/components/ui/card";
@@ -129,7 +128,7 @@ export const N8nImageGeneration = () => {
     <Card className="shadow-md hover:shadow-lg transition-all duration-300">
       <CardHeader>
         <CardTitle className="text-2xl bg-gradient-to-r from-blue-500 to-indigo-600 bg-clip-text text-transparent">
-          Génération d'images via n8n
+          Génération d'images - n8n
         </CardTitle>
         <CardDescription>
           Utilisez notre webhook n8n pour générer des images
@@ -263,4 +262,3 @@ export const N8nImageGeneration = () => {
     </Card>
   );
 };
-
