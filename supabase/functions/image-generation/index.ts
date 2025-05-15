@@ -22,7 +22,6 @@ serve(async (req) => {
     if (!prompt) {
       return new Response(
         JSON.stringify({
-          myField: "error",
           imageUrl: fallbackImageUrl,
           error: 'Le prompt est requis'
         }),
@@ -53,7 +52,6 @@ serve(async (req) => {
       // En cas d'erreur, retourner une réponse avec une image de secours
       return new Response(
         JSON.stringify({
-          myField: "error",
           imageUrl: fallbackImageUrl,
           error: `Erreur du service externe: ${response.status}`,
           details: errorText
@@ -66,20 +64,25 @@ serve(async (req) => {
     const data = await response.json();
     console.log("Réponse du webhook:", data);
     
-    // Vérifier si la réponse contient une URL d'image valide
-    // Adaptation pour le nouveau format de réponse simplifié
-    const isValidImageUrl = typeof data.imageUrl === 'string' && 
+    // Vérifier si la réponse contient une URL d'image valide ou si elle contient une référence n8n non évaluée
+    let finalImageUrl = fallbackImageUrl;
+    
+    // Cas où l'URL est une chaîne valide
+    if (typeof data.imageUrl === 'string' && 
       data.imageUrl.startsWith('http') && 
       !data.imageUrl.includes('{{') && 
-      !data.imageUrl.includes('}}');
+      !data.imageUrl.includes('}}')) {
+      finalImageUrl = data.imageUrl;
+    }
+    // Cas où nous avons une référence n8n {{...}} non évaluée
+    else if (typeof data.imageUrl === 'string' && 
+      (data.imageUrl.includes('{{') || data.imageUrl.includes('}}'))) {
+      console.log("Template n8n détecté dans l'URL, utilisation de l'image de secours");
+    }
     
-    const imageUrl = isValidImageUrl ? data.imageUrl : fallbackImageUrl;
-    
-    // Formatter la réponse selon ce qui est attendu par le service frontend
-    // Ajout du champ myField qui n'existe plus dans la réponse du webhook
+    // Formatter la réponse de manière simplifiée avec uniquement l'imageUrl
     const formattedResponse = {
-      myField: "value", // Valeur par défaut car n'est plus fourni par le webhook
-      imageUrl: imageUrl
+      imageUrl: finalImageUrl
     };
     
     console.log("Réponse formatée:", formattedResponse);
@@ -94,7 +97,6 @@ serve(async (req) => {
     // En cas d'erreur, retourner une réponse avec une image par défaut
     return new Response(
       JSON.stringify({ 
-        myField: "erreur", 
         imageUrl: fallbackImageUrl,
         error: "Une erreur s'est produite lors de la génération de l'image", 
         details: error.message 

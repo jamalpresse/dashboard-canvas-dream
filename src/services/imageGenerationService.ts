@@ -1,7 +1,6 @@
 
 // Service for image generation using the external webhook
 export interface ImageGenerationResponse {
-  myField: string;
   imageUrl: string;
   error?: string;
   details?: string;
@@ -30,10 +29,11 @@ export async function generateImage(prompt: string): Promise<ImageGenerationResp
       !data.imageUrl.includes('{{') &&
       !data.imageUrl.includes('}}');
     
-    // S'assurer que myField existe
+    // S'assurer que imageUrl existe et est valide
     const result = {
-      myField: data.myField || "value",
-      imageUrl: isValidUrl ? data.imageUrl : "https://images.unsplash.com/photo-1581091226825-a6a2a5aee158"
+      imageUrl: isValidUrl ? data.imageUrl : "https://images.unsplash.com/photo-1581091226825-a6a2a5aee158",
+      error: data.error,
+      details: data.details
     };
     
     return result;
@@ -41,8 +41,8 @@ export async function generateImage(prompt: string): Promise<ImageGenerationResp
     console.error('Error generating image:', error);
     // En cas d'erreur, retourner une image de secours
     return {
-      myField: "error",
-      imageUrl: "https://images.unsplash.com/photo-1581091226825-a6a2a5aee158"
+      imageUrl: "https://images.unsplash.com/photo-1581091226825-a6a2a5aee158",
+      error: "Une erreur s'est produite lors de la génération de l'image"
     };
   }
 }
@@ -57,15 +57,14 @@ export function createDownloadableImage(imageUrl: string, fileName: string = 'ge
   document.body.removeChild(link);
 }
 
-// New function to handle n8n webhook response
-export async function generateImageWithN8n(prompt: string): Promise<any> {
+// New function to handle n8n webhook response with just imageUrl field
+export async function generateImageWithN8n(prompt: string): Promise<{imageUrl: string}> {
   try {
-    const response = await fetch('https://n8n-jamal-u38598.vm.elestio.app/webhook/generate-image', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ prompt }),
+    // Pour la nouvelle version, j'utilise la méthode GET avec le prompt en param d'URL
+    const webhookUrl = `https://n8n-jamal-u38598.vm.elestio.app/webhook/9f32367c-65f7-4868-a660-bbab69fc391c?prompt=${encodeURIComponent(prompt)}`;
+    
+    const response = await fetch(webhookUrl, {
+      method: 'GET',
     });
 
     if (!response.ok) {
@@ -75,7 +74,14 @@ export async function generateImageWithN8n(prompt: string): Promise<any> {
     const data = await response.json();
     console.log("N8n webhook response:", data);
     
-    // Return the raw response as we're not sure about the structure
+    // Vérifier si l'URL est valide
+    if (!data.imageUrl || 
+        typeof data.imageUrl !== 'string' || 
+        data.imageUrl.includes('{{') || 
+        data.imageUrl.includes('}}')) {
+      return { imageUrl: "https://images.unsplash.com/photo-1581091226825-a6a2a5aee158" };
+    }
+    
     return data;
   } catch (error) {
     console.error('Error calling n8n webhook:', error);

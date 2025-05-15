@@ -8,7 +8,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { AspectRatio } from "@/components/ui/aspect-ratio";
 import { createDownloadableImage } from "@/services/imageGenerationService";
 
-// Updated interface to match the new webhook response format
+// Interface mise à jour pour correspondre au nouveau format de réponse
 interface N8nGenerationResponse {
   imageUrl: string;
 }
@@ -29,22 +29,27 @@ export const N8nImageGeneration = () => {
     setIsGenerating(true);
     
     try {
-      // Modification: Changed from POST to GET method
-      // Removed Content-Type header and body
-      // Added prompt as a query parameter in the URL
-      const webhookUrl = `https://n8n-jamal-u38598.vm.elestio.app/webhook/generate-image?prompt=${encodeURIComponent(prompt)}`;
+      // Appel au webhook n8n avec la méthode GET
+      const webhookUrl = `https://n8n-jamal-u38598.vm.elestio.app/webhook/9f32367c-65f7-4868-a660-bbab69fc391c?prompt=${encodeURIComponent(prompt)}`;
       
       console.log("Appel du webhook n8n (GET):", webhookUrl);
       
       const result = await fetch(webhookUrl, {
-        method: "GET", // Changed from POST to GET
+        method: "GET",
       });
       
       const data = await result.json();
       console.log("Réponse du webhook n8n:", data);
       
       setResponse(data);
-      toast.success("Image générée avec succès!");
+      
+      // Vérification si l'URL de l'image est valide
+      if (data.imageUrl && typeof data.imageUrl === 'string' && 
+          !data.imageUrl.includes('{{') && !data.imageUrl.includes('}}')) {
+        toast.success("Image générée avec succès!");
+      } else {
+        toast.warning("La réponse ne contient pas d'URL d'image valide");
+      }
     } catch (err) {
       console.error("Erreur lors de l'appel du webhook:", err);
       toast.error("Échec de la communication avec le webhook");
@@ -69,7 +74,7 @@ export const N8nImageGeneration = () => {
     }
   };
 
-  // Check if the imageUrl looks valid
+  // Vérification si l'URL de l'image semble valide
   const hasValidImage = response?.imageUrl && 
     typeof response.imageUrl === 'string' && 
     !response.imageUrl.includes('{{') &&
