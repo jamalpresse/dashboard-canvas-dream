@@ -3,12 +3,14 @@ import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from "@/components/ui/card";
 import { toast } from "@/components/ui/sonner";
-import { Loader2, ImageIcon, RefreshCw } from "lucide-react";
+import { Loader2, ImageIcon, RefreshCw, Download } from "lucide-react";
 import { Textarea } from "@/components/ui/textarea";
+import { AspectRatio } from "@/components/ui/aspect-ratio";
+import { createDownloadableImage } from "@/services/imageGenerationService";
 
+// Updated interface to match the new webhook response format
 interface N8nGenerationResponse {
-  myField: string;
-  imageUrl?: string; // We make this optional since we're not sure if it will be included
+  imageUrl: string;
 }
 
 export const N8nImageGeneration = () => {
@@ -42,7 +44,7 @@ export const N8nImageGeneration = () => {
       console.log("Réponse du webhook n8n:", data);
       
       setResponse(data);
-      toast.success("Requête traitée avec succès!");
+      toast.success("Image générée avec succès!");
     } catch (err) {
       console.error("Erreur lors de l'appel du webhook:", err);
       toast.error("Échec de la communication avec le webhook");
@@ -55,6 +57,23 @@ export const N8nImageGeneration = () => {
     setPrompt("");
     setResponse(null);
   };
+  
+  const handleDownload = () => {
+    if (response?.imageUrl) {
+      try {
+        createDownloadableImage(response.imageUrl, `image-n8n-${Date.now()}`);
+        toast.success("Téléchargement démarré!");
+      } catch (err) {
+        toast.error("Erreur lors du téléchargement de l'image");
+      }
+    }
+  };
+
+  // Check if the imageUrl looks valid
+  const hasValidImage = response?.imageUrl && 
+    typeof response.imageUrl === 'string' && 
+    !response.imageUrl.includes('{{') &&
+    !response.imageUrl.includes('}}');
 
   return (
     <Card className="shadow-md hover:shadow-lg transition-all duration-300">
@@ -68,7 +87,7 @@ export const N8nImageGeneration = () => {
       </CardHeader>
       
       <form onSubmit={handleGenerateWithN8n}>
-        <CardContent className="space-y-4">
+        <CardContent className="space-y-6">
           <Textarea 
             placeholder="Décrivez l'image que vous souhaitez générer..."
             value={prompt}
@@ -77,10 +96,26 @@ export const N8nImageGeneration = () => {
             disabled={isGenerating}
           />
           
+          {hasValidImage && (
+            <div className="space-y-2">
+              <h3 className="text-lg font-medium">Image générée:</h3>
+              <div className="border border-gray-200 rounded-lg overflow-hidden bg-gray-50">
+                <AspectRatio ratio={16/9} className="bg-gray-100">
+                  <img 
+                    src={response.imageUrl} 
+                    alt="Image générée" 
+                    className="w-full h-full object-contain"
+                    onError={() => toast.error("Impossible de charger l'image")}
+                  />
+                </AspectRatio>
+              </div>
+            </div>
+          )}
+          
           {response && (
             <div className="bg-gray-50 border border-gray-200 rounded-lg p-4">
-              <h3 className="text-lg font-medium mb-2">Réponse reçue:</h3>
-              <pre className="bg-gray-100 p-3 rounded overflow-x-auto">
+              <h3 className="text-lg font-medium mb-2">Réponse JSON:</h3>
+              <pre className="bg-gray-100 p-3 rounded overflow-x-auto text-xs">
                 {JSON.stringify(response, null, 2)}
               </pre>
             </div>
@@ -89,14 +124,27 @@ export const N8nImageGeneration = () => {
         
         <CardFooter className="flex justify-end gap-3">
           {response && (
-            <Button 
-              type="button" 
-              variant="outline"
-              onClick={resetForm}
-            >
-              <RefreshCw className="mr-2 h-4 w-4" />
-              Réinitialiser
-            </Button>
+            <>
+              <Button 
+                type="button" 
+                variant="outline"
+                onClick={resetForm}
+              >
+                <RefreshCw className="mr-2 h-4 w-4" />
+                Réinitialiser
+              </Button>
+              
+              {hasValidImage && (
+                <Button
+                  type="button"
+                  variant="secondary"
+                  onClick={handleDownload}
+                >
+                  <Download className="mr-2 h-4 w-4" />
+                  Télécharger
+                </Button>
+              )}
+            </>
           )}
           
           <Button 
