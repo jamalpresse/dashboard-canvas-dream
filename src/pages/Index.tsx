@@ -12,7 +12,6 @@ import { Button } from "@/components/ui/button";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { formatNewsDate } from "@/services/newsService";
 import { N8nImageGeneration } from "@/components/image-generation/N8nImageGeneration";
-
 const Index = () => {
   const [lang, setLang] = useState("fr");
   const [analytics, setAnalytics] = useState<any[]>([]);
@@ -208,9 +207,7 @@ const Index = () => {
 
         {/* New N8n Image Generation Section */}
         <div className="w-full max-w-5xl mx-auto mb-8">
-          <h2 className="text-xl font-semibold mb-4 bg-gradient-to-r from-blue-600 to-indigo-500 bg-clip-text text-transparent">
-            {isArabic ? "توليد الصور مع n8n" : "Génération d'images avec n8n"}
-          </h2>
+          
           <N8nImageGeneration />
         </div>
 
