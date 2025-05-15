@@ -12,6 +12,7 @@ import { Button } from "@/components/ui/button";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { formatNewsDate } from "@/services/newsService";
 import { N8nImageGeneration } from "@/components/image-generation/N8nImageGeneration";
+
 const Index = () => {
   const [lang, setLang] = useState("fr");
   const [analytics, setAnalytics] = useState<any[]>([]);
@@ -203,6 +204,16 @@ const Index = () => {
               <span>{isArabic ? "توليد الصور" : "Google Free Pix"}</span>
             </Link>
           </div>
+        </div>
+
+        {/* Nouveau bouton pour la génération d'image simplifiée */}
+        <div className="w-full max-w-5xl mx-auto mb-8">
+          <Link to="/simple-image-generation" className="block bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-600 hover:to-purple-600 text-white font-semibold text-xl py-4 px-6 rounded-xl shadow-lg text-center transition duration-300">
+            <div className="flex items-center justify-center gap-3">
+              <ImageIcon className="h-6 w-6" />
+              <span>{isArabic ? "توليد الصور البسيطة" : "Génération d'image"}</span>
+            </div>
+          </Link>
         </div>
 
         {/* New N8n Image Generation Section */}

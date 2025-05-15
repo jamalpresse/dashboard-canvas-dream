@@ -15,7 +15,8 @@ import Search from "./pages/Search";
 import Improve from "./pages/Improve";
 import Translation from "./pages/Translation";
 import News from "./pages/News";
-import ImageGeneration from "./pages/ImageGeneration"; // Import la nouvelle page de génération d'images
+import ImageGeneration from "./pages/ImageGeneration";
+import SimpleImageGeneration from "./pages/SimpleImageGeneration"; // Import la nouvelle page de génération d'images simplifiée
 
 const queryClient = new QueryClient();
 
@@ -35,7 +36,8 @@ const App = () => (
             <Route path="/improve" element={<Improve />} />
             <Route path="/translation" element={<Translation />} />
             <Route path="/news" element={<News />} />
-            <Route path="/image-generation" element={<ImageGeneration />} /> {/* Ajout de la route ImageGeneration */}
+            <Route path="/image-generation" element={<ImageGeneration />} />
+            <Route path="/simple-image-generation" element={<SimpleImageGeneration />} /> {/* Ajout de la nouvelle route */}
           </Route>
           <Route path="*" element={<NotFound />} />
         </Routes>
