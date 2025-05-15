@@ -61,8 +61,23 @@ export function createDownloadableImage(imageUrl: string, fileName: string = 'ge
   document.body.removeChild(link);
 }
 
+// Helper function to check if the response contains an unevaluated template
+function isTemplateString(str: string): boolean {
+  return typeof str === 'string' && 
+         (str.includes('{{') || str.includes('}}'));
+}
+
+// Function to extract the path from a template expression
+function extractPathFromTemplate(template: string): string | null {
+  const match = template.match(/\{\{\s*\$json\['(.+?)'\](.+?)\s*\}\}/);
+  if (match) {
+    return `${match[1]}${match[2]}`;
+  }
+  return null;
+}
+
 // Updated function to use the new webhook URL
-export async function generateImageWithN8n(prompt: string): Promise<{imageUrl: string}> {
+export async function generateImageWithN8n(prompt: string): Promise<ImageGenerationResponse> {
   try {
     // Mise à jour avec la nouvelle URL de webhook
     const webhookUrl = `https://n8n-jamal-u38598.vm.elestio.app/webhook/generate-image?prompt=${encodeURIComponent(prompt)}`;
@@ -78,18 +93,38 @@ export async function generateImageWithN8n(prompt: string): Promise<{imageUrl: s
     const data = await response.json();
     console.log("N8n webhook response:", data);
     
-    // Vérifier si l'URL est valide ou si c'est un modèle n8n non évalué
-    if (!data.imageUrl || 
-        typeof data.imageUrl !== 'string' || 
-        data.imageUrl.includes('{{') || 
-        data.imageUrl.includes('}}')) {
-      console.warn("URL d'image invalide ou modèle non évalué:", data.imageUrl);
-      return { imageUrl: "https://images.unsplash.com/photo-1581091226825-a6a2a5aee158" };
+    // Handle template strings in the response
+    if (data.imageUrl && isTemplateString(data.imageUrl)) {
+      const templatePath = extractPathFromTemplate(data.imageUrl);
+      
+      return {
+        imageUrl: "https://images.unsplash.com/photo-1581091226825-a6a2a5aee158", // Fallback image
+        error: "Le modèle n8n n'a pas été évalué correctement",
+        details: `L'URL contient un modèle non évalué: ${data.imageUrl}`,
+        templatePath: templatePath,
+        originalResponse: data
+      };
     }
     
-    return data;
+    // Vérifier si l'URL est valide
+    if (!data.imageUrl || typeof data.imageUrl !== 'string' || !data.imageUrl.startsWith('http')) {
+      console.warn("URL d'image invalide:", data.imageUrl);
+      return { 
+        imageUrl: "https://images.unsplash.com/photo-1581091226825-a6a2a5aee158",
+        error: "URL d'image invalide dans la réponse"
+      };
+    }
+    
+    return {
+      imageUrl: data.imageUrl,
+      originalResponse: data
+    };
   } catch (error) {
     console.error('Error calling n8n webhook:', error);
-    throw error;
+    return { 
+      imageUrl: "https://images.unsplash.com/photo-1581091226825-a6a2a5aee158",
+      error: "Une erreur s'est produite lors de la génération de l'image",
+      details: error instanceof Error ? error.message : "Erreur inconnue"
+    };
   }
 }
