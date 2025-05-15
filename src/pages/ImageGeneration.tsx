@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
@@ -45,7 +44,7 @@ const ImageGeneration = () => {
     }
   };
   return <div className="container mx-auto max-w-4xl py-8 px-4">
-      <h1 className="text-3xl font-bold bg-gradient-to-r from-purple-600 to-pink-500 bg-clip-text text-transparent mb-6">Google Free Pix</h1>
+      <h1 className="text-3xl font-bold bg-gradient-to-r from-purple-600 to-pink-500 bg-clip-text text-transparent mb-6">Génération d'images</h1>
       
       <Card className="mb-8">
         <CardHeader>
