@@ -283,8 +283,8 @@ const Index = () => {
         }]} className="shadow-md hover:shadow-lg transition-shadow duration-300" />
           </div>}
 
-        {/* Latest News */}
-        {!isLoading && activities.length > 0 && <ActivityTimeline title={t.activity} activities={activities} />}
+        {/* Latest News - Change activities prop to items prop */}
+        {!isLoading && activities.length > 0 && <ActivityTimeline title={t.activity} items={activities} />}
       </div>
 
       <style>
