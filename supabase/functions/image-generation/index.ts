@@ -9,6 +9,22 @@ const corsHeaders = {
 // URL de secours fiable d'Unsplash (image fixe)
 const fallbackImageUrl = "https://images.unsplash.com/photo-1581091226825-a6a2a5aee158";
 
+// Fonction pour extraire le chemin d'accès dans un modèle n8n non évalué
+// Par exemple: "{{ $json['results'][0].urls.stream }}" → Extraire la structure du chemin d'accès
+function extractPathFromN8nTemplate(template) {
+  // Vérifie si le modèle contient la structure n8n non évaluée
+  const match = template.match(/\{\{\s*\$json\['(.+?)'\](.+?)\s*\}\}/);
+  if (match) {
+    console.log("Modèle n8n détecté:", template);
+    console.log("Structure de chemin extraite:", match[1] + match[2]);
+    return {
+      isTemplate: true,
+      path: match[1] + match[2] // Ex: "results[0].urls.stream"
+    };
+  }
+  return { isTemplate: false, path: null };
+}
+
 serve(async (req) => {
   // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
@@ -64,20 +80,31 @@ serve(async (req) => {
     const data = await response.json();
     console.log("Réponse du webhook:", data);
     
-    // Vérifier si la réponse contient une URL d'image valide ou si elle contient une référence n8n non évaluée
+    // Vérifier si l'imageUrl est un modèle n8n non évalué
     let finalImageUrl = fallbackImageUrl;
     
-    // Cas où l'URL est une chaîne valide
-    if (typeof data.imageUrl === 'string' && 
-      data.imageUrl.startsWith('http') && 
-      !data.imageUrl.includes('{{') && 
-      !data.imageUrl.includes('}}')) {
-      finalImageUrl = data.imageUrl;
-    }
-    // Cas où nous avons une référence n8n {{...}} non évaluée
-    else if (typeof data.imageUrl === 'string' && 
-      (data.imageUrl.includes('{{') || data.imageUrl.includes('}}'))) {
-      console.log("Template n8n détecté dans l'URL, utilisation de l'image de secours");
+    if (data.imageUrl) {
+      const templateInfo = extractPathFromN8nTemplate(data.imageUrl);
+      
+      if (templateInfo.isTemplate) {
+        console.log("Détecté modèle n8n non évalué:", data.imageUrl);
+        console.log("Utilisation de l'image de secours car le template n8n n'est pas évalué");
+        
+        // Ajouter des détails supplémentaires sur le problème pour faciliter le débogage
+        return new Response(
+          JSON.stringify({
+            imageUrl: fallbackImageUrl,
+            error: "Le modèle n8n n'a pas été évalué correctement",
+            details: `Modèle reçu: ${data.imageUrl}. Assurez-vous d'utiliser un nœud 'Set' dans n8n pour évaluer cette expression avant de l'envoyer.`,
+            templatePath: templateInfo.path,
+            originalResponse: data
+          }),
+          { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        );
+      }
+      else if (typeof data.imageUrl === 'string' && data.imageUrl.startsWith('http')) {
+        finalImageUrl = data.imageUrl;
+      }
     }
     
     // Formatter la réponse de manière simplifiée avec uniquement l'imageUrl

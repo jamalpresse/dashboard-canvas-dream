@@ -4,6 +4,8 @@ export interface ImageGenerationResponse {
   imageUrl: string;
   error?: string;
   details?: string;
+  templatePath?: string;
+  originalResponse?: any;
 }
 
 export async function generateImage(prompt: string): Promise<ImageGenerationResponse> {
@@ -33,7 +35,9 @@ export async function generateImage(prompt: string): Promise<ImageGenerationResp
     const result = {
       imageUrl: isValidUrl ? data.imageUrl : "https://images.unsplash.com/photo-1581091226825-a6a2a5aee158",
       error: data.error,
-      details: data.details
+      details: data.details,
+      templatePath: data.templatePath,
+      originalResponse: data.originalResponse
     };
     
     return result;
@@ -74,11 +78,12 @@ export async function generateImageWithN8n(prompt: string): Promise<{imageUrl: s
     const data = await response.json();
     console.log("N8n webhook response:", data);
     
-    // Vérifier si l'URL est valide
+    // Vérifier si l'URL est valide ou si c'est un modèle n8n non évalué
     if (!data.imageUrl || 
         typeof data.imageUrl !== 'string' || 
         data.imageUrl.includes('{{') || 
         data.imageUrl.includes('}}')) {
+      console.warn("URL d'image invalide ou modèle non évalué:", data.imageUrl);
       return { imageUrl: "https://images.unsplash.com/photo-1581091226825-a6a2a5aee158" };
     }
     
