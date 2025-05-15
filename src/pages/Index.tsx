@@ -201,7 +201,7 @@ const Index = () => {
             
             <Link to="/image-generation" className="flex-1 bg-gradient-to-r from-indigo-500 to-blue-500 hover:from-indigo-600 hover:to-blue-600 text-white font-semibold text-lg py-6 px-4 rounded-xl shadow-lg text-center transition duration-300 flex items-center justify-center gap-3">
               <ImageIcon className="h-5 w-5" />
-              <span>{isArabic ? "توليد الصور" : "Génération d'images"}</span>
+              <span>{isArabic ? "توليد الصور" : "Google Free Pix"}</span>
             </Link>
           </div>
         </div>
@@ -284,7 +284,7 @@ const Index = () => {
           </div>}
 
         {/* Latest News */}
-        {!isLoading && activities.length > 0}
+        {!isLoading && activities.length > 0 && <ActivityTimeline title={t.activity} activities={activities} />}
       </div>
 
       <style>

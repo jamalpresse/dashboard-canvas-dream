@@ -16,7 +16,7 @@ const navItems = [
     icon: <LayoutDashboard className="h-6 w-6" />
   },
   {
-    title: "Génération d'images",
+    title: "Google Free Pix",
     href: "/image-generation",
     icon: <ImageIcon className="h-6 w-6" />
   },
