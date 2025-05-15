@@ -30,18 +30,13 @@ export async function generateImage(prompt: string): Promise<ImageGenerationResp
       !data.imageUrl.includes('{{') &&
       !data.imageUrl.includes('}}');
     
-    if (!isValidUrl) {
-      console.warn("URL d'image invalide reçue, utilisation de l'image de secours");
-      return {
-        myField: data.myField || "value",
-        imageUrl: "https://images.unsplash.com/photo-1581091226825-a6a2a5aee158"
-      };
-    }
-    
-    return {
+    // S'assurer que myField existe
+    const result = {
       myField: data.myField || "value",
-      imageUrl: data.imageUrl
+      imageUrl: isValidUrl ? data.imageUrl : "https://images.unsplash.com/photo-1581091226825-a6a2a5aee158"
     };
+    
+    return result;
   } catch (error) {
     console.error('Error generating image:', error);
     // En cas d'erreur, retourner une image de secours
@@ -60,4 +55,30 @@ export function createDownloadableImage(imageUrl: string, fileName: string = 'ge
   document.body.appendChild(link);
   link.click();
   document.body.removeChild(link);
+}
+
+// New function to handle n8n webhook response
+export async function generateImageWithN8n(prompt: string): Promise<any> {
+  try {
+    const response = await fetch('https://n8n-jamal-u38598.vm.elestio.app/webhook/generate-image', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ prompt }),
+    });
+
+    if (!response.ok) {
+      throw new Error(`Error: ${response.status} - ${response.statusText}`);
+    }
+
+    const data = await response.json();
+    console.log("N8n webhook response:", data);
+    
+    // Return the raw response as we're not sure about the structure
+    return data;
+  } catch (error) {
+    console.error('Error calling n8n webhook:', error);
+    throw error;
+  }
 }
