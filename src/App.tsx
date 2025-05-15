@@ -3,7 +3,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 
 import DashboardLayout from "./components/layout/DashboardLayout";
 import Index from "./pages/Index";
@@ -16,7 +16,6 @@ import Improve from "./pages/Improve";
 import Translation from "./pages/Translation";
 import News from "./pages/News";
 import ImageGeneration from "./pages/ImageGeneration";
-import SimpleImageGeneration from "./pages/SimpleImageGeneration"; // Import la nouvelle page de génération d'images simplifiée
 
 const queryClient = new QueryClient();
 
@@ -37,7 +36,7 @@ const App = () => (
             <Route path="/translation" element={<Translation />} />
             <Route path="/news" element={<News />} />
             <Route path="/image-generation" element={<ImageGeneration />} />
-            <Route path="/simple-image-generation" element={<SimpleImageGeneration />} /> {/* Ajout de la nouvelle route */}
+            <Route path="/simple-image-generation" element={<Navigate to="/image-generation" replace />} />
           </Route>
           <Route path="*" element={<NotFound />} />
         </Routes>
