@@ -27,12 +27,15 @@ export const N8nImageGeneration = () => {
     setIsGenerating(true);
     
     try {
-      const result = await fetch("https://n8n-jamal-u38598.vm.elestio.app/webhook/generate-image", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ prompt }),
+      // Modification: Changed from POST to GET method
+      // Removed Content-Type header and body
+      // Added prompt as a query parameter in the URL
+      const webhookUrl = `https://n8n-jamal-u38598.vm.elestio.app/webhook/generate-image?prompt=${encodeURIComponent(prompt)}`;
+      
+      console.log("Appel du webhook n8n (GET):", webhookUrl);
+      
+      const result = await fetch(webhookUrl, {
+        method: "GET", // Changed from POST to GET
       });
       
       const data = await result.json();
