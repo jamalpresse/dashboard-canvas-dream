@@ -9,7 +9,7 @@ const GoogleFreePix = () => {
         Google Free Pix
       </h1>
       <p className="text-gray-600 mb-8">
-        Générez des images gratuites depuis Google Freepix. Cliquez sur le bouton pour obtenir une image aléatoire.
+        Générez des images à partir d'une description textuelle. Saisissez votre prompt et cliquez sur le bouton pour générer une image.
       </p>
       <div className="max-w-3xl mx-auto">
         <GoogleFreePixComponent />
