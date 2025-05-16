@@ -1,9 +1,8 @@
-
 import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { toast } from "sonner";
-import { Loader2, Copy, Image, Download } from "lucide-react";
+import { Loader2, Copy, Download, Search } from "lucide-react";
 import { AspectRatio } from "@/components/ui/aspect-ratio";
 import { Textarea } from "@/components/ui/textarea";
 import { createDownloadableImage } from "@/services/imageGenerationService";
@@ -112,8 +111,8 @@ export const GoogleFreePix = () => {
                 <Loader2 className="h-5 w-5 mr-2 animate-spin" />
               ) : (
                 <>
-                  <Image className="h-5 w-5 mr-2" />
-                  Générer une image
+                  <Search className="h-5 w-5 mr-2" />
+                  🔍 Rechercher
                 </>
               )}
             </Button>
