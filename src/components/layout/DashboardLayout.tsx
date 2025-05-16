@@ -4,9 +4,9 @@ import { LayoutDashboard, Settings, Menu, X, Users, Newspaper, ImageIcon, Clock,
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { useIsMobile } from "@/hooks/use-mobile";
-import { RssTickerFloat } from "@/components/common/RssTickerFloat";
 import { WeatherWidget } from "@/components/dashboard/WeatherWidget";
 import { SNRTNewsFrame } from "@/components/common/SNRTNewsFrame";
+
 const navItems = [{
   title: "Dashboard",
   href: "/",
@@ -40,22 +40,27 @@ export default function DashboardLayout() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [showNewsFrame, setShowNewsFrame] = useState(false);
   const isMobile = useIsMobile();
+  
   const toggleSidebar = () => {
     setSidebarOpen(!sidebarOpen);
   };
+  
   const toggleNewsFrame = () => {
     setShowNewsFrame(!showNewsFrame);
   };
+  
   const currentDate = new Date().toLocaleDateString('fr-FR', {
     weekday: 'long',
     year: 'numeric',
     month: 'long',
     day: 'numeric'
   });
+  
   const currentTime = new Date().toLocaleTimeString('fr-FR', {
     hour: '2-digit',
     minute: '2-digit'
   });
+  
   return <div className="min-h-screen bg-background text-foreground">
       {/* SNRT-style header */}
       <header className="snrt-header flex flex-col">
@@ -144,8 +149,5 @@ export default function DashboardLayout() {
             <SNRTNewsFrame onClose={toggleNewsFrame} />
           </div>
         </div>}
-
-      {/* Floating RSS Ticker */}
-      <RssTickerFloat />
     </div>;
 }
