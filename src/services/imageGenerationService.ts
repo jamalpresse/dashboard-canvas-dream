@@ -1,4 +1,3 @@
-
 // Service for image generation using the external webhook
 export interface ImageGenerationResponse {
   imageUrl: string;
@@ -109,7 +108,7 @@ function extractPathFromTemplate(template: string): string | null {
   return null;
 }
 
-// Updated function to use the correct webhook URL
+// Updated function to handle nested imageUrl structure
 export async function generateImageWithN8n(prompt: string): Promise<ImageGenerationResponse> {
   try {
     // URL du webhook harmonisée
@@ -125,6 +124,12 @@ export async function generateImageWithN8n(prompt: string): Promise<ImageGenerat
 
     const data = await response.json();
     console.log("N8n webhook response:", data);
+    
+    // Handle nested imageUrl structure (when imageUrl is an object that contains imageUrl)
+    if (data.imageUrl && typeof data.imageUrl === 'object' && data.imageUrl.imageUrl) {
+      console.log("Detected nested imageUrl structure, extracting inner URL");
+      data.imageUrl = data.imageUrl.imageUrl;
+    }
     
     // Handle template strings in the response - avec support amélioré pour "={{ $json.xxx }}"
     if (data.imageUrl && isTemplateString(data.imageUrl)) {

@@ -104,7 +104,13 @@ serve(async (req) => {
     const data = await response.json();
     console.log("Réponse du webhook:", data);
     
-    // Vérifier si l'imageUrl est un modèle n8n non évalué (standard ou avec "=")
+    // Gérer la structure imbriquée (si imageUrl est un objet contenant imageUrl)
+    if (data.imageUrl && typeof data.imageUrl === 'object' && data.imageUrl.imageUrl) {
+      console.log("Structure d'URL imbriquée détectée, extraction de l'URL interne");
+      data.imageUrl = data.imageUrl.imageUrl;
+    }
+    
+    // Vérifier si l'imageUrl est un modèle n8n non évalué
     let finalImageUrl = fallbackImageUrl;
     
     if (data.imageUrl) {

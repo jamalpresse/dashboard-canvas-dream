@@ -34,6 +34,7 @@ const SimpleImageGeneration = () => {
     setDetails(null);
 
     try {
+      // Utiliser la fonction améliorée qui gère les structures d'URL imbriquées
       const result = await generateImageWithN8n(prompt);
       
       if (result.imageUrl) {
