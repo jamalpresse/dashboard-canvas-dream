@@ -30,8 +30,11 @@ const Index = () => {
     loading: newsLoading,
     error: newsError,
     activeTab,
-    setActiveTab
+    setActiveTab,
+    featuredArticle,
+    featuredLoading
   } = useNews();
+  
   const labels = {
     ar: {
       title: "لوحة تحكم الصحفيين",
@@ -170,9 +173,9 @@ const Index = () => {
     variant: "success" as const
   }] : [];
 
-  // Get news items for feature, hero and grid
-  const featuredNews = news.length > 0 ? news[0] : null;
-  const gridNews = news.slice(1, 7);
+  // Get news items for grid only (featuredArticle is now separate)
+  const gridNews = news.slice(0, 6);
+  
   return <div dir={dir} className="space-y-6">
       <div className="animate-fade-in">
         {/* Language Switcher */}
@@ -182,8 +185,26 @@ const Index = () => {
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-6 mt-4">
           {/* Main content area - 3 columns */}
           <div className="lg:col-span-3 space-y-6">
-            {/* Hero Section */}
-            {featuredNews && <HeroNews title={featuredNews.title || "Actualité principale"} imageUrl="/lovable-uploads/32ff14e9-af71-4640-b4c9-583985037c66.png" category={featuredNews.source} timestamp={formatNewsDate(featuredNews.pubDate)} link={featuredNews.link} />}
+            {/* Hero Section - Now using featuredArticle from SNRT */}
+            {featuredLoading ? (
+              <div className="bg-card rounded-lg shadow-sm h-[300px] md:h-[400px] animate-pulse flex items-center justify-center">
+                <p className="text-gray-400">Chargement de l'article à la une...</p>
+              </div>
+            ) : featuredArticle ? (
+              <HeroNews 
+                title={featuredArticle.title || "Actualité SNRT"} 
+                imageUrl={featuredArticle.thumbnail || featuredArticle.enclosure?.link || "/lovable-uploads/32ff14e9-af71-4640-b4c9-583985037c66.png"} 
+                category={featuredArticle.source} 
+                timestamp={formatNewsDate(featuredArticle.pubDate)} 
+                link={featuredArticle.link} 
+              />
+            ) : (
+              <HeroNews 
+                title="Actualité SNRT" 
+                imageUrl="/lovable-uploads/32ff14e9-af71-4640-b4c9-583985037c66.png" 
+                category="SNRT News" 
+              />
+            )}
 
             {/* Features Buttons */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">

@@ -12,6 +12,7 @@ export function useNews() {
   const [activeTab, setActiveTab] = useState<'maroc' | 'monde'>('maroc');
   const [activeSource, setActiveSource] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState<string>('');
+  const [featuredArticle, setFeaturedArticle] = useState<NewsItem | null>(null);
   const { trackEvent } = useAnalytics();
 
   // Charger les actualités en fonction de l'onglet actif
@@ -51,6 +52,24 @@ export function useNews() {
     
     loadNews();
   }, [activeTab, activeSource, trackEvent]);
+
+  // Load featured SNRT article
+  useEffect(() => {
+    const loadFeaturedArticle = async () => {
+      try {
+        const snrtNews = await fetchNewsFromSource('snrt');
+        if (snrtNews && snrtNews.length > 0) {
+          // Get the first article as the featured one
+          setFeaturedArticle(snrtNews[0]);
+        }
+      } catch (err) {
+        console.error('Error loading featured article:', err);
+        // We don't show an error toast here to avoid double error messages
+      }
+    };
+    
+    loadFeaturedArticle();
+  }, []);
 
   // Sanitize HTML content
   const sanitizeHtml = (html: string): string => {
@@ -99,6 +118,8 @@ export function useNews() {
     activeSource,
     setActiveSource,
     searchQuery,
-    handleSearch
+    handleSearch,
+    featuredArticle,
+    featuredLoading: loading && !featuredArticle
   };
 }
