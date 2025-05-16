@@ -45,9 +45,7 @@ export const GoogleFreePix = () => {
       if (data.imageUrl) {
         setImageUrl(data.imageUrl);
         setResponse(data.response || "Image générée avec succès.");
-        toast("Succès", {
-          description: "Image générée avec succès!",
-        });
+        toast("Image générée avec succès!");
       } else {
         throw new Error("URL d'image non trouvée dans la réponse");
       }
@@ -64,9 +62,7 @@ export const GoogleFreePix = () => {
     if (imageUrl) {
       navigator.clipboard.writeText(imageUrl)
         .then(() => {
-          toast("URL copiée", {
-            description: "L'URL de l'image a été copiée dans le presse-papiers",
-          });
+          toast("URL copiée dans le presse-papiers");
         })
         .catch((err) => {
           console.error("Erreur lors de la copie:", err);
@@ -79,10 +75,7 @@ export const GoogleFreePix = () => {
     if (imageUrl) {
       try {
         createDownloadableImage(imageUrl, `google-freepix-${Date.now()}`);
-        toast({
-          title: "Succès",
-          description: "Téléchargement démarré!"
-        });
+        toast("Téléchargement démarré!");
       } catch (err) {
         toast.error("Erreur lors du téléchargement de l'image");
       }
