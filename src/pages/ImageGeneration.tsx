@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -8,6 +7,7 @@ import { toast } from "@/components/ui/use-toast";
 import { Loader2, Download, ImageIcon, RefreshCw, AlertCircle } from "lucide-react";
 import { AspectRatio } from "@/components/ui/aspect-ratio";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import ImageGenerationNavigationButtons from "@/components/image-generation/ImageGenerationNavigationButtons";
 
 const ImageGeneration = () => {
   const [prompt, setPrompt] = useState("");
@@ -187,6 +187,9 @@ const ImageGeneration = () => {
                 </div>
               </div>
             )}
+            
+            {/* Add navigation buttons component */}
+            <ImageGenerationNavigationButtons />
           </CardContent>
         </Card>
       </div>
