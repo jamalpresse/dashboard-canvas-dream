@@ -62,17 +62,37 @@ export function createDownloadableImage(imageUrl: string, fileName: string = 'ge
 }
 
 // Helper function to check if the response contains an unevaluated template
+// Mise à jour pour prendre en compte les expressions qui commencent par "="
 function isTemplateString(str: string): boolean {
-  return typeof str === 'string' && 
-         (str.includes('{{') || str.includes('}}'));
+  if (typeof str !== 'string') return false;
+  
+  // Détecte les expressions n8n standard avec {{ }}
+  const hasTemplateMarkers = str.includes('{{') || str.includes('}}');
+  
+  // Détecte les expressions n8n qui commencent par "="
+  const hasEqualTemplate = str.match(/=\{\{\s*\$json/i) !== null;
+  
+  // Nouvelle condition - détecte si c'est une expression de la forme "={{ $json.quelqueChose }}"
+  const isEqualExpression = str.startsWith('={{') || str.startsWith('= {{');
+  
+  return hasTemplateMarkers || hasEqualTemplate || isEqualExpression;
 }
 
 // Function to extract the path from a template expression
+// Mise à jour pour extraire les chemins des expressions "="
 function extractPathFromTemplate(template: string): string | null {
-  const match = template.match(/\{\{\s*\$json\['(.+?)'\](.+?)\s*\}\}/);
-  if (match) {
-    return `${match[1]}${match[2]}`;
+  // Pour les expressions standard {{ $json['path'] }}
+  const standardMatch = template.match(/\{\{\s*\$json\['(.+?)'\](.+?)\s*\}\}/);
+  if (standardMatch) {
+    return `${standardMatch[1]}${standardMatch[2]}`;
   }
+  
+  // Pour les expressions avec "=" comme "={{ $json.imageUrl }}"
+  const equalMatch = template.match(/=\{\{\s*\$json\.(.+?)\s*\}\}/);
+  if (equalMatch) {
+    return equalMatch[1];
+  }
+  
   return null;
 }
 

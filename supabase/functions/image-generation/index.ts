@@ -12,16 +12,40 @@ const fallbackImageUrl = "https://images.unsplash.com/photo-1581091226825-a6a2a5
 // Fonction pour extraire le chemin d'accès dans un modèle n8n non évalué
 // Par exemple: "{{ $json['results'][0].urls.stream }}" → Extraire la structure du chemin d'accès
 function extractPathFromN8nTemplate(template) {
-  // Vérifie si le modèle contient la structure n8n non évaluée
-  const match = template.match(/\{\{\s*\$json\['(.+?)'\](.+?)\s*\}\}/);
-  if (match) {
-    console.log("Modèle n8n détecté:", template);
-    console.log("Structure de chemin extraite:", match[1] + match[2]);
+  if (typeof template !== 'string') return { isTemplate: false, path: null };
+  
+  // Vérification standard pour "{{ $json['key'] }}"
+  const standardMatch = template.match(/\{\{\s*\$json\['(.+?)'\](.+?)\s*\}\}/);
+  if (standardMatch) {
+    console.log("Modèle n8n standard détecté:", template);
+    console.log("Structure de chemin extraite:", standardMatch[1] + standardMatch[2]);
     return {
       isTemplate: true,
-      path: match[1] + match[2] // Ex: "results[0].urls.stream"
+      path: standardMatch[1] + standardMatch[2] // Ex: "results[0].urls.stream"
     };
   }
+  
+  // Nouvelle vérification pour "={{ $json.key }}"
+  const equalMatch = template.match(/=\{\{\s*\$json\.(.+?)\s*\}\}/);
+  if (equalMatch) {
+    console.log("Modèle n8n avec préfixe '=' détecté:", template);
+    console.log("Structure de chemin extraite:", equalMatch[1]);
+    return {
+      isTemplate: true,
+      path: equalMatch[1] // Ex: "imageUrl"
+    };
+  }
+  
+  // Vérification basique de présence de {{ ou }}
+  const hasTemplateMarkers = template.includes('{{') || template.includes('}}');
+  if (hasTemplateMarkers) {
+    console.log("Marqueurs de modèle n8n détectés:", template);
+    return {
+      isTemplate: true,
+      path: null
+    };
+  }
+  
   return { isTemplate: false, path: null };
 }
 
@@ -80,7 +104,7 @@ serve(async (req) => {
     const data = await response.json();
     console.log("Réponse du webhook:", data);
     
-    // Vérifier si l'imageUrl est un modèle n8n non évalué
+    // Vérifier si l'imageUrl est un modèle n8n non évalué (standard ou avec "=")
     let finalImageUrl = fallbackImageUrl;
     
     if (data.imageUrl) {
