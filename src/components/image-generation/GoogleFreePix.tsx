@@ -1,9 +1,8 @@
-
 import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { toast } from "sonner";
-import { Loader2, Copy, Download, Search } from "lucide-react";
+import { Loader2, Copy, Download, Search, Eraser } from "lucide-react";
 import { AspectRatio } from "@/components/ui/aspect-ratio";
 import { Textarea } from "@/components/ui/textarea";
 import { createDownloadableImage } from "@/services/imageGenerationService";
@@ -134,6 +133,16 @@ export const GoogleFreePix = () => {
     }
   };
 
+  const handleClear = () => {
+    setPrompt("");
+    if (imageUrl || statusMessage || error) {
+      toast.info("Formulaire réinitialisé");
+    }
+    setImageUrl(null);
+    setStatusMessage(null);
+    setError(null);
+  };
+
   return (
     <div className="w-full">
       <Card className="shadow-md hover:shadow-lg transition-all duration-300">
@@ -155,20 +164,32 @@ export const GoogleFreePix = () => {
               className="min-h-[120px] border-purple-100 focus:border-purple-300 transition-colors"
             />
             
-            <Button
-              onClick={fetchImage}
-              disabled={isLoading || !prompt.trim()}
-              className="bg-gradient-to-r from-purple-600 to-pink-500 hover:from-purple-700 hover:to-pink-600 text-white font-semibold text-lg py-6 px-8 rounded-xl shadow-lg transition duration-300 w-full md:w-auto"
-            >
-              {isLoading ? (
-                <Loader2 className="h-5 w-5 mr-2 animate-spin" />
-              ) : (
-                <>
-                  <Search className="h-5 w-5 mr-2" />
-                  🔍 Rechercher
-                </>
-              )}
-            </Button>
+            <div className="flex flex-wrap gap-3">
+              <Button
+                onClick={fetchImage}
+                disabled={isLoading || !prompt.trim()}
+                className="bg-gradient-to-r from-purple-600 to-pink-500 hover:from-purple-700 hover:to-pink-600 text-white font-semibold text-lg py-6 px-8 rounded-xl shadow-lg transition duration-300 w-full md:w-auto"
+              >
+                {isLoading ? (
+                  <Loader2 className="h-5 w-5 mr-2 animate-spin" />
+                ) : (
+                  <>
+                    <Search className="h-5 w-5 mr-2" />
+                    🔍 Rechercher
+                  </>
+                )}
+              </Button>
+              
+              <Button
+                onClick={handleClear}
+                disabled={isLoading || (!prompt.trim() && !imageUrl && !statusMessage && !error)}
+                variant="outline"
+                className="font-semibold text-lg py-6 px-8 rounded-xl border-gray-300 hover:bg-gray-100 transition duration-300 w-full md:w-auto"
+              >
+                <Eraser className="h-5 w-5 mr-2" />
+                Effacer
+              </Button>
+            </div>
           </div>
 
           {error && (
