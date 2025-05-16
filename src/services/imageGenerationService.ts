@@ -25,6 +25,19 @@ export async function generateImage(prompt: string): Promise<ImageGenerationResp
     const data = await response.json();
     console.log("Données reçues de la fonction Edge:", data);
     
+    // Vérification améliorée pour détecter les templates non évalués
+    if (data.imageUrl && isTemplateString(data.imageUrl)) {
+      const templatePath = extractPathFromTemplate(data.imageUrl);
+      
+      return {
+        imageUrl: "https://images.unsplash.com/photo-1581091226825-a6a2a5aee158", // Image de secours
+        error: "Le modèle n8n n'a pas été évalué correctement",
+        details: `L'URL contient un modèle non évalué: ${data.imageUrl}. Ajoutez un nœud 'Set' dans n8n pour évaluer cette expression.`,
+        templatePath: templatePath,
+        originalResponse: data
+      };
+    }
+    
     // Vérification simplifiée de l'URL d'image
     const isValidUrl = typeof data.imageUrl === 'string' && 
       data.imageUrl.startsWith('http') &&
@@ -113,14 +126,14 @@ export async function generateImageWithN8n(prompt: string): Promise<ImageGenerat
     const data = await response.json();
     console.log("N8n webhook response:", data);
     
-    // Handle template strings in the response
+    // Handle template strings in the response - avec support amélioré pour "={{ $json.xxx }}"
     if (data.imageUrl && isTemplateString(data.imageUrl)) {
       const templatePath = extractPathFromTemplate(data.imageUrl);
       
       return {
         imageUrl: "https://images.unsplash.com/photo-1581091226825-a6a2a5aee158", // Fallback image
         error: "Le modèle n8n n'a pas été évalué correctement",
-        details: `L'URL contient un modèle non évalué: ${data.imageUrl}. Ajoutez un nœud 'Set' dans n8n pour évaluer cette expression.`,
+        details: `L'URL contient un modèle non évalué: ${data.imageUrl}. Ajoutez un nœud 'Set' dans n8n pour évaluer cette expression avant le nœud 'Répondre Webhook'.`,
         templatePath: templatePath,
         originalResponse: data
       };
@@ -131,7 +144,8 @@ export async function generateImageWithN8n(prompt: string): Promise<ImageGenerat
       console.warn("URL d'image invalide:", data.imageUrl);
       return { 
         imageUrl: "https://images.unsplash.com/photo-1581091226825-a6a2a5aee158",
-        error: "URL d'image invalide dans la réponse"
+        error: "URL d'image invalide dans la réponse",
+        details: "Le webhook a retourné: " + JSON.stringify(data)
       };
     }
     

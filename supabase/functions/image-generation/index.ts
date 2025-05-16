@@ -119,7 +119,7 @@ serve(async (req) => {
           JSON.stringify({
             imageUrl: fallbackImageUrl,
             error: "Le modèle n8n n'a pas été évalué correctement",
-            details: `Modèle reçu: ${data.imageUrl}. Ajoutez un nœud 'Set' dans n8n pour évaluer cette expression avant de l'envoyer.`,
+            details: `Modèle reçu: ${data.imageUrl}. Ajoutez un nœud 'Set' dans n8n pour évaluer cette expression avant le nœud 'Répondre Webhook'.`,
             templatePath: templateInfo.path,
             originalResponse: data
           }),
