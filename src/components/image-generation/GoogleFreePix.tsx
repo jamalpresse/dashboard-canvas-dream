@@ -13,7 +13,7 @@ export const GoogleFreePix = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [prompt, setPrompt] = useState("");
-  const [response, setResponse] = useState<string | null>(null);
+  const [statusMessage, setStatusMessage] = useState<string | null>(null);
 
   const fetchImage = async () => {
     setIsLoading(true);
@@ -26,7 +26,7 @@ export const GoogleFreePix = () => {
     }
     
     try {
-      const response = await fetch(
+      const apiResponse = await fetch(
         `https://n8n-jamal-u38598.vm.elestio.app/webhook/a13ac2e6-cac4-4b6a-ae7f-7f2f9b848c34?prompt=${encodeURIComponent(prompt)}`,
         {
           method: "GET",
@@ -36,44 +36,50 @@ export const GoogleFreePix = () => {
         }
       );
 
-      if (!response.ok) {
-        throw new Error(`Erreur réseau: ${response.status}`);
+      if (!apiResponse.ok) {
+        throw new Error(`Erreur réseau: ${apiResponse.status}`);
       }
 
-      const data = await response.json();
-      console.log("Réponse du webhook:", data);
+      const data = await apiResponse.json();
+      console.log("Réponse du webhook (structure complète):", JSON.stringify(data));
       
       // Handle different response formats - check for both imageUrl and data.url structure
       let extractedImageUrl = null;
       
       if (data.imageUrl) {
+        console.log("Format imageUrl détecté:", data.imageUrl);
         // Direct imageUrl format
         extractedImageUrl = data.imageUrl;
       } else if (data.data && data.data.url) {
+        console.log("Format data.url détecté:", data.data.url);
         // Nested format with data.url
         extractedImageUrl = data.data.url;
       } else if (data.url) {
+        console.log("Format url détecté:", data.url);
         // Direct url format
         if (data.url === "value" || !isValidImageUrl(data.url)) {
+          console.log("URL invalide détectée, utilisation de l'image de démonstration");
           // Pour le cas où l'URL n'est pas valide, on utilise une image de démonstration
           extractedImageUrl = "https://images.unsplash.com/photo-1617854818583-09e7f077a156?q=80&w=1470&auto=format&fit=crop";
-          setResponse(`Le webhook a retourné une URL non valide: "${data.url}". Utilisation d'une image de démonstration.`);
+          setStatusMessage(`Le webhook a retourné une URL non valide: "${data.url}". Utilisation d'une image de démonstration.`);
         } else {
           extractedImageUrl = data.url;
         }
       } else if (data.myField) {
+        console.log("Format myField détecté:", data.myField);
         // For testing/demo purposes - using the format seen in the screenshot
         extractedImageUrl = "https://images.unsplash.com/photo-1617854818583-09e7f077a156?q=80&w=1470&auto=format&fit=crop";
-        setResponse(`Réponse de test reçue avec myField: "${data.myField}". Utilisation d'une image de démonstration.`);
+        setStatusMessage(`Réponse de test reçue avec myField: "${data.myField}". Utilisation d'une image de démonstration.`);
       } else {
+        console.log("Aucun format reconnu dans la réponse:", data);
         throw new Error("Format de réponse non reconnu");
       }
       
       if (extractedImageUrl) {
         setImageUrl(extractedImageUrl);
-        // Si une réponse spécifique n'a pas déjà été définie
-        if (!response) {
-          setResponse("Image générée avec succès.");
+        // Si un message de statut spécifique n'a pas déjà été défini
+        if (!statusMessage) {
+          setStatusMessage("Image générée avec succès.");
         }
         toast.success("Image générée avec succès!");
       } else {
@@ -171,10 +177,10 @@ export const GoogleFreePix = () => {
             </div>
           )}
 
-          {response && !error && (
+          {statusMessage && !error && (
             <div className="bg-purple-50 border border-purple-100 rounded-lg p-4">
               <h3 className="font-medium text-purple-700 mb-2">Réponse:</h3>
-              <p className="text-gray-700">{response}</p>
+              <p className="text-gray-700">{statusMessage}</p>
             </div>
           )}
 
@@ -219,4 +225,3 @@ export const GoogleFreePix = () => {
     </div>
   );
 };
-
