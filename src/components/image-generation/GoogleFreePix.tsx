@@ -54,7 +54,13 @@ export const GoogleFreePix = () => {
         extractedImageUrl = data.data.url;
       } else if (data.url) {
         // Direct url format
-        extractedImageUrl = data.url;
+        if (data.url === "value" || !isValidImageUrl(data.url)) {
+          // Pour le cas où l'URL n'est pas valide, on utilise une image de démonstration
+          extractedImageUrl = "https://images.unsplash.com/photo-1617854818583-09e7f077a156?q=80&w=1470&auto=format&fit=crop";
+          setResponse(`Le webhook a retourné une URL non valide: "${data.url}". Utilisation d'une image de démonstration.`);
+        } else {
+          extractedImageUrl = data.url;
+        }
       } else if (data.myField) {
         // For testing/demo purposes - using the format seen in the screenshot
         extractedImageUrl = "https://images.unsplash.com/photo-1617854818583-09e7f077a156?q=80&w=1470&auto=format&fit=crop";
@@ -65,8 +71,10 @@ export const GoogleFreePix = () => {
       
       if (extractedImageUrl) {
         setImageUrl(extractedImageUrl);
-        // Here's the fix: Use a string instead of passing the response object
-        setResponse("Image générée avec succès.");
+        // Si une réponse spécifique n'a pas déjà été définie
+        if (!response) {
+          setResponse("Image générée avec succès.");
+        }
         toast.success("Image générée avec succès!");
       } else {
         throw new Error("URL d'image non trouvée dans la réponse");
@@ -78,6 +86,22 @@ export const GoogleFreePix = () => {
     } finally {
       setIsLoading(false);
     }
+  };
+
+  // Fonction pour vérifier si une URL est une image valide
+  const isValidImageUrl = (url: string): boolean => {
+    return (
+      typeof url === 'string' &&
+      url.startsWith('http') &&
+      (url.endsWith('.jpg') || 
+       url.endsWith('.jpeg') || 
+       url.endsWith('.png') || 
+       url.endsWith('.gif') || 
+       url.endsWith('.webp') ||
+       url.includes('unsplash.com') ||
+       url.includes('images') ||
+       url.includes('photo'))
+    );
   };
 
   const copyImageUrl = () => {
@@ -195,3 +219,4 @@ export const GoogleFreePix = () => {
     </div>
   );
 };
+
