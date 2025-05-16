@@ -95,34 +95,7 @@ export const N8nImageGeneration = () => {
       
       
       <form onSubmit={handleGenerateWithN8n}>
-        <CardContent className="space-y-4">
-          
-
-          {hasValidImage && <div className="space-y-4 pt-2">
-              <AspectRatio ratio={1} className="overflow-hidden bg-gray-100 rounded-md">
-                <img src={response?.imageUrl} alt="Image générée" className="object-cover w-full h-full rounded-md" />
-              </AspectRatio>
-            </div>}
-
-          {hasTemplateError && <Alert variant="destructive">
-              <AlertCircle className="h-4 w-4" />
-              <AlertTitle>Erreur de modèle n8n</AlertTitle>
-              <AlertDescription>
-                Le modèle n8n n'a pas été correctement évalué. Veuillez ajouter un nœud 'Set' dans votre workflow n8n pour évaluer l'expression avant de la renvoyer.
-                {response?.details && <p className="mt-2 text-sm">{response.details}</p>}
-              </AlertDescription>
-            </Alert>}
-
-          {response?.error && !hasTemplateError && <Alert variant="destructive">
-              <AlertCircle className="h-4 w-4" />
-              <AlertTitle>Erreur</AlertTitle>
-              <AlertDescription>{response.error}</AlertDescription>
-            </Alert>}
-
-          {showDebug && response && <div className="bg-gray-50 p-4 rounded-md overflow-auto max-h-[300px] text-xs">
-              <pre>{JSON.stringify(response, null, 2)}</pre>
-            </div>}
-        </CardContent>
+        
 
         
       </form>
