@@ -7,7 +7,7 @@ import { Loader2, ImageIcon, RefreshCw, Download, AlertCircle } from "lucide-rea
 import { Textarea } from "@/components/ui/textarea";
 import { AspectRatio } from "@/components/ui/aspect-ratio";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { createDownloadableImage } from "@/services/imageGenerationService";
+import { createDownloadableImage, generateImageWithN8n } from "@/services/imageGenerationService";
 
 // Interface mise à jour pour correspondre au format de réponse complet
 interface N8nGenerationResponse {
@@ -35,43 +35,31 @@ export const N8nImageGeneration = () => {
       return;
     }
     setIsGenerating(true);
+    
     try {
-      // Appel au webhook n8n avec la méthode GET
-      const webhookUrl = `https://n8n-jamal-u38598.vm.elestio.app/webhook/9f32367c-65f7-4868-a660-bbab69fc391c?prompt=${encodeURIComponent(prompt)}`;
-      console.log("Appel du webhook n8n (GET):", webhookUrl);
-      const result = await fetch(webhookUrl, {
-        method: "GET"
-      });
-      const data = await result.json();
-      console.log("Réponse du webhook n8n:", data);
-
-      // Traiter comme une réponse complète pour capturer les détails d'erreur potentiels
-      setResponse(data);
-
-      // Vérification si l'URL de l'image est valide
-      if (data.imageUrl && typeof data.imageUrl === 'string' && !data.imageUrl.includes('{{') && !data.imageUrl.includes('}}')) {
+      // Utiliser la fonction du service pour appeler le webhook correctement
+      const result = await generateImageWithN8n(prompt);
+      console.log("Résultat de la génération d'image:", result);
+      
+      setResponse(result);
+      
+      if (result.error) {
+        toast({
+          title: "Attention",
+          description: result.error,
+          variant: "destructive"
+        });
+      } else if (result.imageUrl && !result.imageUrl.includes('{{')) {
         toast({
           title: "Succès",
           description: "Image générée avec succès!"
         });
-      } else if (data.error) {
-        toast({
-          title: "Attention",
-          description: data.error,
-          variant: "destructive"
-        });
-      } else {
-        toast({
-          title: "Attention",
-          description: "La réponse ne contient pas d'URL d'image valide",
-          variant: "destructive"
-        });
       }
     } catch (err) {
-      console.error("Erreur lors de l'appel du webhook:", err);
+      console.error("Erreur lors de la génération:", err);
       toast({
         title: "Erreur",
-        description: "Échec de la communication avec le webhook",
+        description: "Échec de la communication avec le service de génération d'images",
         variant: "destructive"
       });
     } finally {
@@ -150,12 +138,13 @@ export const N8nImageGeneration = () => {
               <AlertCircle className="h-4 w-4" />
               <AlertTitle>Erreur de modèle n8n</AlertTitle>
               <AlertDescription>
-                Le modèle n8n n'a pas été correctement évalué. URL reçue: {response?.imageUrl}
+                Le modèle n8n n'a pas été correctement évalué. Veuillez ajouter un nœud 'Set' dans votre workflow n8n pour évaluer l'expression avant de la renvoyer.
+                {response?.details && <p className="mt-2 text-sm">{response.details}</p>}
               </AlertDescription>
             </Alert>
           )}
 
-          {response?.error && (
+          {response?.error && !hasTemplateError && (
             <Alert variant="destructive">
               <AlertCircle className="h-4 w-4" />
               <AlertTitle>Erreur</AlertTitle>

@@ -47,10 +47,10 @@ serve(async (req) => {
 
     console.log("Génération d'image pour prompt:", prompt);
 
-    // L'URL du webhook externe pour la génération d'images
-    const externalWebhookUrl = "https://n8n-jamal-u38598.vm.elestio.app/webhook/9f32367c-65f7-4868-a660-bbab69fc391c";
+    // L'URL du webhook externe pour la génération d'images - URL harmonisée
+    const externalWebhookUrl = "https://n8n-jamal-u38598.vm.elestio.app/webhook/generate-image";
     
-    // Appeler le service externe avec une méthode GET au lieu de POST
+    // Appeler le service externe avec une méthode GET
     const webhookUrl = `${externalWebhookUrl}?prompt=${encodeURIComponent(prompt)}`;
     console.log("URL du webhook:", webhookUrl);
 
@@ -95,7 +95,7 @@ serve(async (req) => {
           JSON.stringify({
             imageUrl: fallbackImageUrl,
             error: "Le modèle n8n n'a pas été évalué correctement",
-            details: `Modèle reçu: ${data.imageUrl}. Assurez-vous d'utiliser un nœud 'Set' dans n8n pour évaluer cette expression avant de l'envoyer.`,
+            details: `Modèle reçu: ${data.imageUrl}. Ajoutez un nœud 'Set' dans n8n pour évaluer cette expression avant de l'envoyer.`,
             templatePath: templateInfo.path,
             originalResponse: data
           }),

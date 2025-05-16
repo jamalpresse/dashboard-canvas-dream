@@ -76,10 +76,10 @@ function extractPathFromTemplate(template: string): string | null {
   return null;
 }
 
-// Updated function to use the new webhook URL
+// Updated function to use the correct webhook URL
 export async function generateImageWithN8n(prompt: string): Promise<ImageGenerationResponse> {
   try {
-    // Mise à jour avec la nouvelle URL de webhook
+    // URL du webhook harmonisée
     const webhookUrl = `https://n8n-jamal-u38598.vm.elestio.app/webhook/generate-image?prompt=${encodeURIComponent(prompt)}`;
     
     const response = await fetch(webhookUrl, {
@@ -100,7 +100,7 @@ export async function generateImageWithN8n(prompt: string): Promise<ImageGenerat
       return {
         imageUrl: "https://images.unsplash.com/photo-1581091226825-a6a2a5aee158", // Fallback image
         error: "Le modèle n8n n'a pas été évalué correctement",
-        details: `L'URL contient un modèle non évalué: ${data.imageUrl}`,
+        details: `L'URL contient un modèle non évalué: ${data.imageUrl}. Ajoutez un nœud 'Set' dans n8n pour évaluer cette expression.`,
         templatePath: templatePath,
         originalResponse: data
       };
