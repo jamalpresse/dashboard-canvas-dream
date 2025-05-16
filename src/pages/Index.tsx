@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { ArrowRight, Globe, AlertCircle, Search } from "lucide-react"; // Added Search import
@@ -189,25 +188,31 @@ const Index = () => {
           {/* Main content area - 3 columns */}
           <div className="lg:col-span-3 space-y-6">
             {/* Hero Section */}
-            {featuredNews && <HeroNews title={featuredNews.title || "Actualité principale"} imageUrl={featuredNews.thumbnail || "https://via.placeholder.com/800x400?text=News"} category={featuredNews.source} timestamp={formatNewsDate(featuredNews.pubDate)} link={featuredNews.link} />}
+            {featuredNews && <HeroNews 
+              title={featuredNews.title || "Actualité principale"} 
+              imageUrl="/lovable-uploads/c5a1c67b-0dda-4c2f-91cd-643f3280a38a.png" 
+              category={featuredNews.source} 
+              timestamp={formatNewsDate(featuredNews.pubDate)} 
+              link={featuredNews.link} 
+            />}
 
             {/* Features Buttons */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <Link to="/search" className="bg-red-600 hover:bg-red-700 text-white font-semibold text-xl py-6 px-6 rounded-lg shadow-lg text-center transition duration-300 flex items-center justify-center">
+              <Link to="/search" className="bg-red-600 hover:bg-red-700 text-white font-semibold text-2xl py-8 px-6 rounded-lg shadow-lg text-center transition duration-300 flex items-center justify-center">
                 <span>{t.search}</span>
               </Link>
 
-              <Link to="/improve" className="bg-card hover:bg-gray-800 border border-red-600/30 text-white font-semibold text-xl py-6 px-6 rounded-lg shadow-lg text-center transition duration-300 flex items-center justify-center">
+              <Link to="/improve" className="bg-red-600 hover:bg-red-700 text-white font-semibold text-2xl py-8 px-6 rounded-lg shadow-lg text-center transition duration-300 flex items-center justify-center">
                 {t.improve}
               </Link>
 
-              <Link to="/translation" className="bg-card hover:bg-gray-800 border border-red-600/30 text-white font-semibold text-xl py-6 px-6 rounded-lg shadow-lg text-center transition duration-300 flex items-center justify-center">
+              <Link to="/translation" className="bg-red-600 hover:bg-red-700 text-white font-semibold text-2xl py-8 px-6 rounded-lg shadow-lg text-center transition duration-300 flex items-center justify-center">
                 {t.translate}
               </Link>
             </div>
             
             {/* Image Generation Button */}
-            <Link to="/image-generation" className="flex bg-red-600 hover:bg-red-700 text-white font-semibold text-xl py-6 px-6 rounded-lg shadow-lg text-center transition duration-300 justify-center items-center">
+            <Link to="/image-generation" className="flex bg-red-600 hover:bg-red-700 text-white font-semibold text-2xl py-8 px-6 rounded-lg shadow-lg text-center transition duration-300 justify-center items-center">
               <span>{isArabic ? "توليد الصور" : "Génération d'image"}</span>
             </Link>
 
