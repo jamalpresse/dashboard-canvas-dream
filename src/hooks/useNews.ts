@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { useAnalytics } from '@/hooks/use-analytics';
 import { NewsItem, fetchNewsByCountry, fetchNewsFromSource, searchNews, filterNewsBySourceId } from '@/services/newsService';
@@ -56,15 +55,39 @@ export function useNews() {
   // Load featured SNRT article
   useEffect(() => {
     const loadFeaturedArticle = async () => {
+      setLoading(true);
       try {
+        console.log("Fetching SNRT featured article...");
         const snrtNews = await fetchNewsFromSource('snrt');
+        console.log("SNRT News fetched:", snrtNews);
+        
         if (snrtNews && snrtNews.length > 0) {
           // Get the first article as the featured one
-          setFeaturedArticle(snrtNews[0]);
+          const featured = snrtNews[0];
+          
+          // Debug the article structure
+          console.log("Featured Article Full Structure:", JSON.stringify(featured, null, 2));
+          console.log("Featured Article Image Sources:", {
+            thumbnail: featured.thumbnail,
+            enclosure: featured.enclosure,
+          });
+          
+          // Clean HTML from content
+          const cleanedFeatured = {
+            ...featured,
+            description: featured.description ? sanitizeHtml(featured.description) : 'Pas de description disponible',
+            content: featured.content ? sanitizeHtml(featured.content) : ''
+          };
+          
+          setFeaturedArticle(cleanedFeatured);
+        } else {
+          console.log("No SNRT articles found");
         }
       } catch (err) {
         console.error('Error loading featured article:', err);
         // We don't show an error toast here to avoid double error messages
+      } finally {
+        setLoading(false);
       }
     };
     

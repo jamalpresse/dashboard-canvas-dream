@@ -193,8 +193,13 @@ const Index = () => {
             ) : featuredArticle ? (
               <HeroNews 
                 title={featuredArticle.title || "Actualité SNRT"} 
-                imageUrl={featuredArticle.thumbnail || featuredArticle.enclosure?.link || "/lovable-uploads/32ff14e9-af71-4640-b4c9-583985037c66.png"} 
-                category={featuredArticle.source} 
+                imageUrl={
+                  featuredArticle.enclosure?.link || 
+                  featuredArticle.thumbnail || 
+                  (featuredArticle.content && featuredArticle.content.match(/src=["'](https?:\/\/[^"']+)["']/)?.[1]) || 
+                  "/lovable-uploads/32ff14e9-af71-4640-b4c9-583985037c66.png"
+                } 
+                category="SNRT News" 
                 timestamp={formatNewsDate(featuredArticle.pubDate)} 
                 link={featuredArticle.link} 
               />
