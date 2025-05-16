@@ -43,10 +43,7 @@ export const GoogleFreePix = () => {
     } catch (err) {
       console.error("Erreur lors de la récupération de l'image:", err);
       setError(err instanceof Error ? err.message : "Une erreur inconnue s'est produite");
-      toast("Erreur", {
-        description: "Impossible de récupérer l'image. Veuillez réessayer.",
-        variant: "destructive"
-      });
+      toast.error("Impossible de récupérer l'image. Veuillez réessayer.");
     } finally {
       setIsLoading(false);
     }
@@ -62,10 +59,7 @@ export const GoogleFreePix = () => {
         })
         .catch((err) => {
           console.error("Erreur lors de la copie:", err);
-          toast("Erreur", {
-            description: "Impossible de copier l'URL",
-            variant: "destructive"
-          });
+          toast.error("Impossible de copier l'URL");
         });
     }
   };
