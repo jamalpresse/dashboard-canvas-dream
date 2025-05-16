@@ -1,3 +1,4 @@
+
 import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from "@/components/ui/card";
@@ -91,13 +92,95 @@ export const N8nImageGeneration = () => {
 
   // Vérification si nous avons une erreur de modèle n8n non évalué
   const hasTemplateError = response?.imageUrl && typeof response.imageUrl === 'string' && (response.imageUrl.includes('{{') || response.imageUrl.includes('}}'));
+  
   return <Card className="shadow-md hover:shadow-lg transition-all duration-300">
-      
+      <CardHeader>
+        <CardTitle>Génération d'images avec N8n</CardTitle>
+        <CardDescription>
+          Créez des images à partir de descriptions textuelles
+        </CardDescription>
+      </CardHeader>
       
       <form onSubmit={handleGenerateWithN8n}>
+        <CardContent>
+          <div className="space-y-4">
+            <Textarea 
+              placeholder="Décrivez l'image que vous souhaitez générer..." 
+              className="min-h-[120px] resize-y"
+              value={prompt}
+              onChange={(e) => setPrompt(e.target.value)}
+              disabled={isGenerating}
+            />
+            
+            {hasTemplateError && (
+              <Alert variant="destructive">
+                <AlertCircle className="h-4 w-4" />
+                <AlertTitle>Erreur de modèle</AlertTitle>
+                <AlertDescription>
+                  Le modèle n8n n'est pas correctement configuré. Veuillez contacter l'administrateur.
+                </AlertDescription>
+              </Alert>
+            )}
+            
+            {hasValidImage && (
+              <div className="rounded-md overflow-hidden border">
+                <AspectRatio ratio={16 / 9}>
+                  <img 
+                    src={response?.imageUrl} 
+                    alt="Image générée" 
+                    className="w-full h-full object-cover"
+                  />
+                </AspectRatio>
+              </div>
+            )}
+            
+            {showDebug && response && (
+              <div className="bg-gray-50 rounded-md p-4 text-xs font-mono overflow-auto max-h-[300px]">
+                <pre>{JSON.stringify(response, null, 2)}</pre>
+              </div>
+            )}
+          </div>
+        </CardContent>
         
-
-        
+        <CardFooter className="flex flex-wrap gap-3 justify-between">
+          <div className="flex gap-2">
+            <Button 
+              type="submit" 
+              disabled={isGenerating || !prompt.trim()}
+              className="bg-gradient-to-r from-purple-600 to-pink-500 hover:from-purple-700 hover:to-pink-600"
+            >
+              {isGenerating ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Génération...
+                </>
+              ) : (
+                <>
+                  <ImageIcon className="mr-2 h-4 w-4" />
+                  Générer
+                </>
+              )}
+            </Button>
+            
+            <Button type="button" variant="outline" onClick={resetForm} disabled={isGenerating}>
+              <RefreshCw className="mr-2 h-4 w-4" />
+              Réinitialiser
+            </Button>
+          </div>
+          
+          <div className="flex gap-2">
+            {hasValidImage && (
+              <Button type="button" variant="secondary" onClick={handleDownload}>
+                <Download className="mr-2 h-4 w-4" />
+                Télécharger
+              </Button>
+            )}
+            
+            <Button type="button" variant="ghost" size="sm" onClick={toggleDebug}>
+              {showDebug ? 'Cacher' : 'Debug'}
+            </Button>
+          </div>
+        </CardFooter>
       </form>
     </Card>;
 };

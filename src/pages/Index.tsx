@@ -12,6 +12,7 @@ import { Button } from "@/components/ui/button";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { formatNewsDate } from "@/services/newsService";
 import { N8nImageGeneration } from "@/components/image-generation/N8nImageGeneration";
+import { GoogleFreePix } from "@/components/image-generation/GoogleFreePix";
 
 const Index = () => {
   const [lang, setLang] = useState("fr");
@@ -209,6 +210,14 @@ const Index = () => {
               <span>{isArabic ? "توليد الصور البسيطة" : "Génération d'image"}</span>
             </div>
           </Link>
+        </div>
+
+        {/* Google Free Pix Section */}
+        <div className="w-full max-w-5xl mx-auto mb-8">
+          <h2 className="text-xl font-semibold mb-4 text-gray-800">
+            {isArabic ? "Google Free Pix" : "Google Free Pix"}
+          </h2>
+          <GoogleFreePix />
         </div>
 
         {/* New N8n Image Generation Section */}
