@@ -5,66 +5,36 @@
 
 @layer base {
   :root {
-    --background: 0 0% 100%;
-    --foreground: 222.2 84% 4.9%;
+    --background: 0 0% 7%;
+    --foreground: 0 0% 98%;
 
-    --card: 0 0% 100%;
-    --card-foreground: 222.2 84% 4.9%;
+    --card: 0 0% 10%;
+    --card-foreground: 0 0% 98%;
 
-    --popover: 0 0% 100%;
-    --popover-foreground: 222.2 84% 4.9%;
+    --popover: 0 0% 10%;
+    --popover-foreground: 0 0% 98%;
 
-    /* Updated primary to purple */
-    --primary: 267 83% 60%;
-    --primary-foreground: 210 40% 98%;
+    /* Updated primary to red */
+    --primary: 358 89% 51%;
+    --primary-foreground: 0 0% 100%;
 
-    --secondary: 270 67% 94%;
-    --secondary-foreground: 222.2 47.4% 11.2%;
+    --secondary: 358 70% 40%;
+    --secondary-foreground: 0 0% 100%;
 
-    --muted: 210 40% 96.1%;
-    --muted-foreground: 215.4 16.3% 46.9%;
+    --muted: 0 0% 15%;
+    --muted-foreground: 0 0% 70%;
 
-    --accent: 300 91% 88%;
-    --accent-foreground: 222.2 47.4% 11.2%;
+    --accent: 358 89% 51%;
+    --accent-foreground: 0 0% 100%;
 
     --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 210 40% 98%;
+    --destructive-foreground: 0 0% 98%;
 
-    --border: 270 70% 92%;
-    --input: 214.3 31.8% 91.4%;
-    --ring: 267 83% 60%;
+    --border: 0 0% 20%;
+    --input: 0 0% 25%;
+    --ring: 358 89% 51%;
 
-    --radius: 1rem;
-  }
-
-  .dark {
-    --background: 222.2 84% 4.9%;
-    --foreground: 210 40% 98%;
-
-    --card: 222.2 84% 4.9%;
-    --card-foreground: 210 40% 98%;
-
-    --popover: 222.2 84% 4.9%;
-    --popover-foreground: 210 40% 98%;
-
-    --primary: 270 91% 65%;
-    --primary-foreground: 222.2 47.4% 11.2%;
-
-    --secondary: 217.2 32.6% 17.5%;
-    --secondary-foreground: 210 40% 98%;
-
-    --muted: 217.2 32.6% 17.5%;
-    --muted-foreground: 215 20.2% 65.1%;
-
-    --accent: 300 70% 33%;
-    --accent-foreground: 210 40% 98%;
-
-    --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 210 40% 98%;
-
-    --border: 217.2 32.6% 17.5%;
-    --input: 217.2 32.6% 17.5%;
-    --ring: 270 91% 65%;
+    --radius: 0.5rem;
   }
 }
 
@@ -129,17 +99,17 @@
 
 .card-hover:hover {
   transform: translateY(-5px);
-  box-shadow: 0 10px 25px -5px rgba(156, 39, 176, 0.1), 0 10px 10px -5px rgba(156, 39, 176, 0.04);
+  box-shadow: 0 10px 25px -5px rgba(227, 30, 36, 0.2), 0 10px 10px -5px rgba(227, 30, 36, 0.1);
 }
 
 /* Gradient text */
 .gradient-text {
-  @apply bg-gradient-to-r from-purple-600 to-pink-500 bg-clip-text text-transparent;
+  @apply bg-gradient-to-r from-red-600 to-red-500 bg-clip-text text-transparent;
 }
 
-/* Glass effect */
+/* Glass effect - updated for dark theme */
 .glass-effect {
-  @apply bg-white/80 backdrop-blur-md border border-white/20 shadow-md;
+  @apply bg-black/50 backdrop-blur-md border border-white/10 shadow-md;
 }
 
 /* Fade in animation */
@@ -161,3 +131,37 @@
 .scale-in {
   animation: scaleIn 0.2s ease-out forwards;
 }
+
+/* SNRT News specific styles */
+.snrt-header {
+  @apply bg-black text-white border-b border-red-600;
+}
+
+.snrt-nav {
+  @apply bg-red-600 text-white py-2 px-4;
+}
+
+.snrt-hero {
+  @apply relative overflow-hidden rounded-lg;
+}
+
+.snrt-hero-content {
+  @apply absolute inset-0 flex flex-col justify-end bg-gradient-to-t from-black/80 to-transparent p-6;
+}
+
+.snrt-category {
+  @apply bg-red-600 text-white text-xs font-bold px-2 py-1 rounded-sm uppercase;
+}
+
+.snrt-timestamp {
+  @apply text-gray-400 text-xs font-mono;
+}
+
+.flash-news {
+  @apply bg-black border-l-4 border-red-600 p-4;
+}
+
+.news-grid {
+  @apply grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4;
+}
+

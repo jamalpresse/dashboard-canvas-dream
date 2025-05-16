@@ -1,9 +1,9 @@
+
 import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
-import { Search, ArrowUp, MessageSquare, Users, Newspaper, BarChart, ArrowRight, Globe, AlertCircle, ImageIcon } from "lucide-react";
+import { Search, ArrowRight, Globe, AlertCircle } from "lucide-react";
 import { StatCard } from "@/components/dashboard/StatCard";
 import { ActivityTimeline } from "@/components/dashboard/ActivityTimeline";
-import { LineChart } from "@/components/dashboard/LineChart";
 import { NewsCard } from "@/components/news/NewsCard";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/components/ui/sonner";
@@ -12,12 +12,16 @@ import { Button } from "@/components/ui/button";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { formatNewsDate } from "@/services/newsService";
 import { N8nImageGeneration } from "@/components/image-generation/N8nImageGeneration";
+import { HeroNews } from "@/components/news/HeroNews";
+import { NewsGrid } from "@/components/news/NewsGrid";
+import { FlashNews, FlashNewsItem } from "@/components/news/FlashNews";
 
 const Index = () => {
   const [lang, setLang] = useState("fr");
   const [analytics, setAnalytics] = useState<any[]>([]);
   const [newsArticles, setNewsArticles] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [flashNews, setFlashNews] = useState<FlashNewsItem[]>([]);
   const isArabic = lang === "ar";
   const dir = isArabic ? "rtl" : "ltr";
 
@@ -29,6 +33,7 @@ const Index = () => {
     activeTab,
     setActiveTab
   } = useNews();
+  
   const labels = {
     ar: {
       title: "لوحة تحكم الصحفيين",
@@ -44,7 +49,8 @@ const Index = () => {
       weather: "الطقس",
       analyticsTitle: "تحليلات المستخدم",
       latestNews: "آخر الأخبار",
-      news: "الأخبار"
+      news: "الأخبار",
+      flashNews: "أخبار عاجلة"
     },
     fr: {
       title: "Dashboard Journalistes",
@@ -59,10 +65,12 @@ const Index = () => {
       activity: "Activités récentes",
       weather: "Météo",
       analyticsTitle: "Analyse de l'engagement",
-      latestNews: "Dernières actualités",
-      news: "Actualités"
+      latestNews: "À LA UNE",
+      news: "Actualités",
+      flashNews: "Flash Info"
     }
   };
+  
   const t = labels[lang];
 
   // Fetch data from Supabase
@@ -88,8 +96,23 @@ const Index = () => {
           ascending: false
         }).limit(5);
         if (articlesError) throw articlesError;
+        
         setAnalytics(analyticsData || []);
         setNewsArticles(articlesData || []);
+        
+        // Create flash news from articles
+        if (articlesData) {
+          const flashItems: FlashNewsItem[] = articlesData.slice(0, 6).map(article => ({
+            id: article.id,
+            title: article.title,
+            timestamp: new Date(article.publication_date).toLocaleTimeString(lang === 'ar' ? 'ar-MA' : 'fr-FR', {
+              hour: '2-digit',
+              minute: '2-digit'
+            }),
+            category: article.category || 'ACTUALITÉ'
+          }));
+          setFlashNews(flashItems);
+        }
       } catch (error) {
         console.error('Error fetching data:', error);
         toast.error("Erreur lors du chargement des données");
@@ -98,33 +121,20 @@ const Index = () => {
       }
     };
     fetchData();
-  }, []);
-
-  // Format analytics data for charts
-  const analyticsChartData = analytics.map(item => ({
-    name: new Date(item.date).toLocaleDateString(lang === 'ar' ? 'ar-MA' : 'fr-FR', {
-      day: '2-digit',
-      month: 'short'
-    }),
-    pageViews: item.page_view_count,
-    articles: item.article_view_count,
-    searches: item.search_count,
-    translations: item.translation_count,
-    improvements: item.improve_count
-  }));
+  }, [lang]);
 
   // Create activities from news articles
   const activities = newsArticles.map(article => ({
     id: article.id,
     title: article.title,
-    description: article.content.substring(0, 100) + (article.content.length > 100 ? '...' : ''),
+    description: article.content?.substring(0, 100) + (article.content?.length > 100 ? '...' : ''),
     time: new Date(article.publication_date).toLocaleDateString(lang === 'ar' ? 'ar-MA' : 'fr-FR', {
       day: '2-digit',
       month: 'short',
       hour: '2-digit',
       minute: '2-digit'
     }),
-    icon: <Newspaper className="h-4 w-4" />,
+    icon: <AlertCircle className="h-4 w-4 text-red-600" />,
     type: "default" as "default" | "success" | "warning" | "error"
   }));
 
@@ -148,129 +158,158 @@ const Index = () => {
   const statsData = latestAnalytics ? [{
     title: isArabic ? "الزيارات" : "Visites",
     value: latestAnalytics.page_view_count.toString(),
-    icon: <Users className="h-5 w-5 text-white" />,
+    icon: <Search className="h-5 w-5 text-white" />,
     trend: calculateTrend(latestAnalytics.page_view_count, prevAnalytics?.page_view_count || 0)
   }, {
     title: isArabic ? "المقالات" : "Articles",
     value: latestAnalytics.article_view_count.toString(),
-    icon: <Newspaper className="h-5 w-5 text-white" />,
+    icon: <AlertCircle className="h-5 w-5 text-white" />,
     trend: calculateTrend(latestAnalytics.article_view_count, prevAnalytics?.article_view_count || 0),
     variant: "primary" as const
   }, {
     title: isArabic ? "الترجمات" : "Traductions",
     value: latestAnalytics.translation_count.toString(),
-    icon: <ArrowUp className="h-5 w-5 text-white" />,
+    icon: <Globe className="h-5 w-5 text-white" />,
     trend: calculateTrend(latestAnalytics.translation_count, prevAnalytics?.translation_count || 0),
     variant: "success" as const
   }] : [];
 
-  // Get a limited number of news items for the homepage
-  const displayNews = news.slice(0, 6);
-  return <div className="space-y-6">
-      <div dir={dir} className="flex flex-col px-4 relative animate-fade-in">
+  // Get news items for feature, hero and grid
+  const featuredNews = news.length > 0 ? news[0] : null;
+  const gridNews = news.slice(1, 7);
+
+  return (
+    <div dir={dir} className="space-y-6">
+      <div className="animate-fade-in">
         {/* Language Switcher */}
-        <div className="w-full max-w-5xl mx-auto flex justify-end pt-4">
-          <button onClick={() => setLang(isArabic ? "fr" : "ar")} className="text-sm bg-white/80 backdrop-blur-sm px-4 py-1 rounded-full shadow-sm hover:bg-white transition-all duration-300 text-purple-700">
+        <div className="w-full flex justify-end pt-4">
+          <button 
+            onClick={() => setLang(isArabic ? "fr" : "ar")} 
+            className="text-sm bg-card px-4 py-1 rounded-full shadow-sm hover:bg-gray-900 transition-all duration-300 text-white"
+          >
             {t.switchTo}
           </button>
         </div>
 
-        {/* Welcome Section */}
-        <div className="w-full max-w-5xl mx-auto mt-8">
-          <div className="bg-gradient-to-r from-purple-600 to-pink-500 rounded-xl p-8 shadow-lg text-white mb-8">
-            <h1 className="text-3xl font-bold">{t.welcome}</h1>
-          </div>
-        </div>
+        {/* Main Content Layout with 3-column grid */}
+        <div className="grid grid-cols-1 lg:grid-cols-4 gap-6 mt-4">
+          {/* Main content area - 3 columns */}
+          <div className="lg:col-span-3 space-y-6">
+            {/* Hero Section */}
+            {featuredNews && (
+              <HeroNews 
+                title={featuredNews.title || "Actualité principale"}
+                imageUrl={featuredNews.thumbnail || "https://via.placeholder.com/800x400?text=News"}
+                category={featuredNews.source}
+                timestamp={formatNewsDate(featuredNews.pubDate)}
+                link={featuredNews.link}
+              />
+            )}
 
-        {/* Features Buttons */}
-        <div className="w-full max-w-5xl mx-auto mb-8">
-          <h2 className="text-xl font-semibold mb-4 text-gray-800">{t.subtitle}</h2>
-          <div className="flex flex-col md:flex-row gap-6">
-            <Link to="/search" className="flex-1 bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-700 hover:to-purple-800 text-white font-semibold text-lg py-6 px-4 rounded-xl shadow-lg text-center transition duration-300 flex items-center justify-center gap-3">
-              <Search className="h-5 w-5" />
-              <span>{t.search}</span>
-            </Link>
-
-            <Link to="/improve" className="flex-1 bg-gradient-to-r from-pink-500 to-purple-600 hover:from-pink-600 hover:to-purple-700 text-white font-semibold text-lg py-6 px-4 rounded-xl shadow-lg text-center transition duration-300 flex items-center justify-center gap-3">
-              {t.improve}
-            </Link>
-
-            <Link to="/translation" className="flex-1 bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white font-semibold text-lg py-6 px-4 rounded-xl shadow-lg text-center transition duration-300 flex items-center justify-center gap-3">
-              {t.translate}
-            </Link>
-          </div>
-        </div>
-
-        {/* Image Generation Button */}
-        <div className="w-full max-w-5xl mx-auto mb-8">
-          <div className="flex flex-col md:flex-row gap-4">
-            <Link to="/simple-image-generation" className="flex-1 bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-600 hover:to-purple-600 text-white font-semibold text-xl py-4 px-6 rounded-xl shadow-lg text-center transition duration-300">
-              <div className="flex items-center justify-center gap-3">
-                <ImageIcon className="h-6 w-6" />
-                <span>{isArabic ? "توليد الصور البسيطة" : "Génération d'image"}</span>
-              </div>
-            </Link>
-          </div>
-        </div>
-
-        {/* New N8n Image Generation Section */}
-        <div className="w-full max-w-5xl mx-auto mb-8">
-          <N8nImageGeneration />
-        </div>
-
-        {/* Stats Cards */}
-        {!isLoading && statsData.length > 0 && <div className="w-full max-w-5xl mx-auto mb-8">
+            {/* Features Buttons */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              {statsData.map((stat, index) => <StatCard key={index} title={stat.title} value={stat.value} icon={stat.icon} trend={stat.trend} variant={stat.variant} />)}
+              <Link to="/search" className="bg-red-600 hover:bg-red-700 text-white font-semibold text-lg py-4 px-4 rounded-lg shadow-lg text-center transition duration-300 flex items-center justify-center gap-3">
+                <Search className="h-5 w-5" />
+                <span>{t.search}</span>
+              </Link>
+
+              <Link to="/improve" className="bg-card hover:bg-gray-800 border border-red-600/30 text-white font-semibold text-lg py-4 px-4 rounded-lg shadow-lg text-center transition duration-300 flex items-center justify-center gap-3">
+                {t.improve}
+              </Link>
+
+              <Link to="/translation" className="bg-card hover:bg-gray-800 border border-red-600/30 text-white font-semibold text-lg py-4 px-4 rounded-lg shadow-lg text-center transition duration-300 flex items-center justify-center gap-3">
+                {t.translate}
+              </Link>
             </div>
-          </div>}
-        
-        {/* News Section */}
-        <div className="w-full max-w-5xl mx-auto mb-8">
-          <div className="flex justify-between items-center mb-4">
-            <h2 className="text-xl font-semibold bg-gradient-to-r from-purple-600 to-pink-500 bg-clip-text text-transparent">
-              {t.latestNews}
-            </h2>
-            <Link to="/news" className="px-4 py-1.5 bg-gradient-to-r from-purple-600 to-pink-500 text-white rounded-full flex items-center gap-1 text-sm font-medium hover:shadow-md transition-all duration-300 hover:scale-105">
-              {isArabic ? "عرض المزيد" : "Voir plus"} <ArrowRight className="h-4 w-4 animate-pulse" />
+            
+            {/* Image Generation Button */}
+            <Link to="/image-generation" className="flex bg-red-600 hover:bg-red-700 text-white font-semibold text-xl py-4 px-6 rounded-lg shadow-lg text-center transition duration-300 justify-center items-center gap-2">
+              <span>{isArabic ? "توليد الصور" : "Génération d'image"}</span>
             </Link>
+
+            {/* News Section with Tabs */}
+            <div className="mt-8">
+              <div className="flex justify-between items-center mb-4">
+                <h2 className="text-xl font-bold text-white">
+                  {t.latestNews}
+                </h2>
+                <Link to="/news" className="px-4 py-1.5 bg-red-600 text-white rounded-full flex items-center gap-1 text-sm font-medium hover:bg-red-700 transition-all duration-300">
+                  {isArabic ? "عرض المزيد" : "Voir plus"} <ArrowRight className="h-4 w-4 animate-pulse" />
+                </Link>
+              </div>
+              
+              {/* News Tabs */}
+              <Tabs value={activeTab} onValueChange={value => setActiveTab(value as 'maroc' | 'monde')} className="mb-4">
+                <TabsList className="w-fit bg-card shadow-sm border border-gray-800 p-1 rounded-full">
+                  <TabsTrigger value="maroc" className="text-base rounded-full data-[state=active]:bg-red-600 data-[state=active]:text-white px-4 py-1.5">
+                    <span className="mr-1 text-lg">🇲🇦</span> Maroc
+                  </TabsTrigger>
+                  <TabsTrigger value="monde" className="text-base rounded-full data-[state=active]:bg-red-600 data-[state=active]:text-white px-4 py-1.5">
+                    <Globe className="h-4 w-4 mr-2" /> Monde
+                  </TabsTrigger>
+                </TabsList>
+              </Tabs>
+              
+              {/* News Grid */}
+              {newsLoading ? (
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+                  {[1, 2, 3, 4, 5, 6].map(i => (
+                    <div key={i} className="bg-card rounded-lg shadow-sm p-4 h-[180px] animate-pulse">
+                      <div className="h-5 bg-gray-700 rounded mb-2 w-3/4"></div>
+                      <div className="h-4 bg-gray-700 rounded mb-4 w-1/2"></div>
+                      <div className="h-16 bg-gray-700 rounded"></div>
+                    </div>
+                  ))}
+                </div>
+              ) : newsError ? (
+                <div className="bg-red-900/30 border border-red-900 rounded-lg p-4 text-center">
+                  <div className="flex justify-center items-center mb-2">
+                    <AlertCircle className="h-5 w-5 text-red-600 mr-2" />
+                    <p className="text-red-400 font-medium">Erreur de chargement</p>
+                  </div>
+                  <p className="text-red-300">{newsError}</p>
+                </div>
+              ) : gridNews.length === 0 ? (
+                <div className="bg-gray-900 border border-gray-800 rounded-lg p-8 text-center">
+                  <p className="text-gray-400">Aucune actualité disponible pour le moment</p>
+                </div>
+              ) : (
+                <NewsGrid news={gridNews} />
+              )}
+            </div>
           </div>
           
-          {/* News Tabs */}
-          <Tabs value={activeTab} onValueChange={value => setActiveTab(value as 'maroc' | 'monde')} className="mb-4">
-            <TabsList className="w-fit bg-white shadow-sm border border-purple-100 p-1 rounded-full">
-              <TabsTrigger value="maroc" className="text-base rounded-full data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-600 data-[state=active]:to-pink-500 data-[state=active]:text-white px-4 py-1.5">
-                <span className="mr-1 text-lg">🇲🇦</span> Maroc
-              </TabsTrigger>
-              <TabsTrigger value="monde" className="text-base rounded-full data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-600 data-[state=active]:to-pink-500 data-[state=active]:text-white px-4 py-1.5">
-                <Globe className="h-4 w-4 mr-2" /> Monde
-              </TabsTrigger>
-            </TabsList>
-          </Tabs>
-          
-          {/* News Display */}
-          {newsLoading ? <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-              {[1, 2, 3, 4, 5, 6].map(i => <div key={i} className="bg-white rounded-lg shadow-sm p-4 h-[180px] animate-pulse">
-                  <div className="h-5 bg-gray-200 rounded mb-2 w-3/4"></div>
-                  <div className="h-4 bg-gray-200 rounded mb-4 w-1/2"></div>
-                  <div className="h-16 bg-gray-200 rounded"></div>
-                </div>)}
-            </div> : newsError ? <div className="bg-red-50 border border-red-200 rounded-lg p-4 text-center">
-              <div className="flex justify-center items-center mb-2">
-                <AlertCircle className="h-5 w-5 text-red-500 mr-2" />
-                <p className="text-red-700 font-medium">Erreur de chargement</p>
+          {/* Sidebar/Flash News - 1 column */}
+          <div className="space-y-6">
+            <FlashNews items={flashNews} />
+            
+            {/* Stats Cards */}
+            {!isLoading && statsData.length > 0 && (
+              <div className="space-y-4">
+                {statsData.map((stat, index) => (
+                  <StatCard 
+                    key={index} 
+                    title={stat.title} 
+                    value={stat.value} 
+                    icon={stat.icon} 
+                    trend={stat.trend} 
+                    variant={stat.variant} 
+                  />
+                ))}
               </div>
-              <p className="text-red-600">{newsError}</p>
-            </div> : displayNews.length === 0 ? <div className="bg-gray-50 border border-gray-200 rounded-lg p-8 text-center">
-              <Newspaper className="h-10 w-10 text-gray-400 mx-auto mb-2" />
-              <p className="text-gray-500">Aucune actualité disponible pour le moment</p>
-            </div> : <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-              {displayNews.map(item => <NewsCard key={item.guid} title={item.title || "Titre non disponible"} description={item.description || "Description non disponible"} source={item.source} date={formatNewsDate(item.pubDate)} link={item.link} compact={true} error={item.title?.includes("Impossible de charger") ? "Impossible de charger les actualités de cette source" : undefined} />)}
-            </div>}
+            )}
+            
+            {/* N8n Widget */}
+            <div className="bg-card rounded-lg overflow-hidden border border-gray-800">
+              <div className="bg-red-600 py-2 px-4">
+                <h3 className="font-bold text-white">Image AI</h3>
+              </div>
+              <div className="p-4">
+                <N8nImageGeneration />
+              </div>
+            </div>
+          </div>
         </div>
-
-        {/* Now we remove the Analytics Chart section and keep the Latest News section */}
-        {!isLoading && activities.length > 0 && <ActivityTimeline title={t.activity} items={activities} />}
       </div>
 
       <style>
@@ -294,6 +333,8 @@ const Index = () => {
           }
         `}
       </style>
-    </div>;
+    </div>
+  );
 };
+
 export default Index;

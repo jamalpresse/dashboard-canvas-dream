@@ -1,6 +1,18 @@
+
 import { useState } from "react";
-import { NavLink, Outlet } from "react-router-dom";
-import { LayoutDashboard, Settings, Menu, X, Users, Newspaper, ImageIcon } from "lucide-react";
+import { NavLink, Outlet, Link } from "react-router-dom";
+import { 
+  LayoutDashboard, 
+  Settings, 
+  Menu, 
+  X, 
+  Users, 
+  Newspaper, 
+  ImageIcon,
+  Clock,
+  Bell,
+  Search 
+} from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { useIsMobile } from "@/hooks/use-mobile";
@@ -26,6 +38,14 @@ const navItems = [
   }
 ];
 
+const categories = [
+  { name: "POLITIQUE", href: "/news?category=politique" },
+  { name: "ECONOMIE", href: "/news?category=economie" },
+  { name: "SPORT", href: "/news?category=sport" },
+  { name: "CULTURE", href: "/news?category=culture" },
+  { name: "INTERNATIONAL", href: "/news?category=international" }
+];
+
 export default function DashboardLayout() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [showNewsFrame, setShowNewsFrame] = useState(false);
@@ -39,25 +59,76 @@ export default function DashboardLayout() {
     setShowNewsFrame(!showNewsFrame);
   };
 
+  const currentDate = new Date().toLocaleDateString('fr-FR', { 
+    weekday: 'long', 
+    year: 'numeric', 
+    month: 'long', 
+    day: 'numeric' 
+  });
+  
+  const currentTime = new Date().toLocaleTimeString('fr-FR', { 
+    hour: '2-digit', 
+    minute: '2-digit' 
+  });
+
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-50 to-pink-50">
+    <div className="min-h-screen bg-background text-foreground">
+      {/* SNRT-style header */}
+      <header className="snrt-header flex flex-col">
+        <div className="flex justify-between items-center p-4">
+          <div className="flex items-center gap-2">
+            <h1 className="text-2xl font-bold text-red-600">SNRTnews</h1>
+          </div>
+          <div className="flex items-center gap-4">
+            <div className="hidden md:flex items-center gap-2 text-sm">
+              <Clock className="h-4 w-4 text-red-600" />
+              <span>{currentTime}</span>
+              <span className="text-gray-400">|</span>
+              <span>{currentDate}</span>
+            </div>
+            <WeatherWidget city="Casablanca" className="hidden md:block" />
+            <Button variant="ghost" size="icon" className="text-white hover:text-red-600">
+              <Bell className="h-5 w-5" />
+            </Button>
+            <Button variant="ghost" size="icon" className="text-white hover:text-red-600">
+              <Search className="h-5 w-5" />
+            </Button>
+          </div>
+        </div>
+        
+        {/* SNRT-style category navigation */}
+        <nav className="snrt-nav overflow-x-auto scrollbar-hide">
+          <div className="flex space-x-4 min-w-max">
+            {categories.map((category) => (
+              <Link 
+                key={category.name} 
+                to={category.href}
+                className="text-sm font-bold hover:underline whitespace-nowrap"
+              >
+                {category.name}
+              </Link>
+            ))}
+          </div>
+        </nav>
+      </header>
+
       {/* Mobile menu button */}
       {isMobile && (
         <button 
-          className="fixed top-4 right-4 z-50 bg-white rounded-full p-2 shadow-md text-purple-700" 
+          className="fixed top-4 right-4 z-50 bg-red-600 rounded-full p-2 shadow-md text-white" 
           onClick={toggleSidebar}
         >
           {sidebarOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
         </button>
       )}
       
-      {/* Sidebar */}
+      {/* Sidebar - Updated for dark theme */}
       <aside className={cn(
-        "fixed inset-y-0 left-0 z-40 flex h-full w-64 flex-col bg-white/90 backdrop-blur-md border-r border-purple-100 shadow-lg transition-transform duration-300 ease-in-out", 
+        "fixed inset-y-0 left-0 z-40 flex h-full w-64 flex-col bg-black/90 backdrop-blur-md border-r border-gray-800 shadow-lg transition-transform duration-300 ease-in-out", 
         isMobile && !sidebarOpen ? "-translate-x-full" : "translate-x-0"
       )}>
-        <div className="flex h-16 items-center border-b border-purple-100 px-6">
-          <h1 className="text-2xl font-bold bg-gradient-to-r from-purple-600 to-pink-500 bg-clip-text text-transparent">
+        <div className="flex h-16 items-center border-b border-gray-800 px-6">
+          <h1 className="text-2xl font-bold text-red-600">
             SNRTnews
           </h1>
         </div>
@@ -75,8 +146,8 @@ export default function DashboardLayout() {
                 className={({isActive}) => cn(
                   "flex items-center gap-4 rounded-lg px-4 py-3 text-lg font-medium transition-all duration-200 ease-in-out", 
                   isActive 
-                    ? "bg-gradient-to-r from-purple-500 to-pink-500 text-white shadow-md" 
-                    : "text-gray-700 hover:bg-purple-50 hover:text-purple-700 hover:shadow-sm"
+                    ? "bg-red-600 text-white shadow-md" 
+                    : "text-gray-300 hover:bg-gray-800 hover:text-white hover:shadow-sm"
                 )}
               >
                 <span className="flex-shrink-0">{item.icon}</span>
@@ -87,7 +158,7 @@ export default function DashboardLayout() {
             {/* SNRT News button */}
             <button 
               onClick={toggleNewsFrame} 
-              className="flex items-center gap-4 rounded-lg px-4 py-3 transition-all duration-200 ease-in-out w-full text-left hover:bg-purple-50 hover:shadow-sm text-pink-600 text-xl font-bold"
+              className="flex items-center gap-4 rounded-lg px-4 py-3 transition-all duration-200 ease-in-out w-full text-left hover:bg-gray-800 hover:shadow-sm text-red-600 text-xl font-bold"
             >
               <span className="flex-shrink-0">📰</span>
               <span>SNRT News</span>
@@ -95,13 +166,13 @@ export default function DashboardLayout() {
             
             {/* Weather Widget under Dashboard button */}
             <div className="mt-4 px-2">
-              <WeatherWidget city="Casablanca" className="w-full shadow-sm border border-purple-100" />
+              <WeatherWidget city="Casablanca" className="w-full shadow-sm border border-gray-800" />
             </div>
           </div>
         </nav>
         
-        <div className="border-t border-purple-100 p-4">
-          <Button variant="outline" size="sm" className="w-full justify-start gap-2 text-gray-700 hover:bg-purple-50 hover:text-purple-700">
+        <div className="border-t border-gray-800 p-4">
+          <Button variant="outline" size="sm" className="w-full justify-start gap-2 text-gray-300 hover:bg-gray-800 hover:text-white">
             <Settings className="h-4 w-4" />
             <span>Paramètres</span>
           </Button>
@@ -112,16 +183,16 @@ export default function DashboardLayout() {
       <main className={cn(
         "transition-all duration-300", 
         isMobile ? "ml-0" : "ml-64", 
-        "pb-16"
+        "pb-16 pt-4"
       )}>
-        <div className="p-6">
+        <div className="px-4 md:px-6">
           <Outlet />
         </div>
       </main>
 
       {/* SNRT News Frame Modal */}
       {showNewsFrame && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4">
           <div className="w-full max-w-4xl">
             <SNRTNewsFrame onClose={toggleNewsFrame} />
           </div>
