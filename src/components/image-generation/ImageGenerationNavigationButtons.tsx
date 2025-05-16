@@ -1,7 +1,7 @@
 
 import React from "react";
 import { Button } from "@/components/ui/button";
-import { Search, Pencil, Globe } from "lucide-react";
+import { Search, Pencil, Globe, Image } from "lucide-react";
 import { Link } from "react-router-dom";
 
 const ImageGenerationNavigationButtons = () => {
@@ -27,6 +27,13 @@ const ImageGenerationNavigationButtons = () => {
           <Link to="/translation">
             <Globe className="mr-2 h-4 w-4" />
             Traduction multilingue
+          </Link>
+        </Button>
+        
+        <Button variant="outline" asChild className="flex-1">
+          <Link to="/google-free-pix">
+            <Image className="mr-2 h-4 w-4" />
+            Google Free Pix
           </Link>
         </Button>
       </div>

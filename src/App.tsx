@@ -16,6 +16,7 @@ import Improve from "./pages/Improve";
 import Translation from "./pages/Translation";
 import News from "./pages/News";
 import ImageGeneration from "./pages/ImageGeneration";
+import { GoogleFreePix } from "./components/image-generation/GoogleFreePix";
 
 const queryClient = new QueryClient();
 
@@ -36,6 +37,7 @@ const App = () => (
             <Route path="/translation" element={<Translation />} />
             <Route path="/news" element={<News />} />
             <Route path="/image-generation" element={<ImageGeneration />} />
+            <Route path="/google-free-pix" element={<GoogleFreePix />} />
             <Route path="/simple-image-generation" element={<Navigate to="/image-generation" replace />} />
           </Route>
           <Route path="*" element={<NotFound />} />
