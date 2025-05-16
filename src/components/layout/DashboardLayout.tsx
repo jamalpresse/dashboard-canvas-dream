@@ -1,7 +1,6 @@
-
 import { useState } from "react";
 import { NavLink, Outlet } from "react-router-dom";
-import { LayoutDashboard, Settings, Menu, X, BarChart2, Users, Newspaper, ImageIcon } from "lucide-react";
+import { LayoutDashboard, Settings, Menu, X, Users, Newspaper } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { useIsMobile } from "@/hooks/use-mobile";
@@ -16,19 +15,9 @@ const navItems = [
     icon: <LayoutDashboard className="h-6 w-6" />
   },
   {
-    title: "Google Free Pix",
-    href: "/image-generation",
-    icon: <ImageIcon className="h-6 w-6" />
-  },
-  {
     title: "Actualités",
     href: "/news",
     icon: <Newspaper className="h-6 w-6" />
-  },
-  {
-    title: "Analytics",
-    href: "/analytics",
-    icon: <BarChart2 className="h-6 w-6" />
   },
   {
     title: "Users",

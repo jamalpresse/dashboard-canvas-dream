@@ -182,7 +182,7 @@ const Index = () => {
           </div>
         </div>
 
-        {/* MOVED: Features Buttons */}
+        {/* Features Buttons */}
         <div className="w-full max-w-5xl mx-auto mb-8">
           <h2 className="text-xl font-semibold mb-4 text-gray-800">{t.subtitle}</h2>
           <div className="flex flex-col md:flex-row gap-6">
@@ -198,15 +198,10 @@ const Index = () => {
             <Link to="/translation" className="flex-1 bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white font-semibold text-lg py-6 px-4 rounded-xl shadow-lg text-center transition duration-300 flex items-center justify-center gap-3">
               {t.translate}
             </Link>
-            
-            <Link to="/image-generation" className="flex-1 bg-gradient-to-r from-indigo-500 to-blue-500 hover:from-indigo-600 hover:to-blue-600 text-white font-semibold text-lg py-6 px-4 rounded-xl shadow-lg text-center transition duration-300 flex items-center justify-center gap-3">
-              <ImageIcon className="h-5 w-5" />
-              <span>{isArabic ? "توليد الصور" : "Google Free Pix"}</span>
-            </Link>
           </div>
         </div>
 
-        {/* Nouveau bouton pour la génération d'image simplifiée */}
+        {/* Image Generation Button */}
         <div className="w-full max-w-5xl mx-auto mb-8">
           <Link to="/simple-image-generation" className="block bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-600 hover:to-purple-600 text-white font-semibold text-xl py-4 px-6 rounded-xl shadow-lg text-center transition duration-300">
             <div className="flex items-center justify-center gap-3">
@@ -218,13 +213,11 @@ const Index = () => {
 
         {/* New N8n Image Generation Section */}
         <div className="w-full max-w-5xl mx-auto mb-8">
-          
           <N8nImageGeneration />
         </div>
 
         {/* Stats Cards */}
         {!isLoading && statsData.length > 0 && <div className="w-full max-w-5xl mx-auto mb-8">
-            
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               {statsData.map((stat, index) => <StatCard key={index} title={stat.title} value={stat.value} icon={stat.icon} trend={stat.trend} variant={stat.variant} />)}
             </div>
@@ -273,25 +266,8 @@ const Index = () => {
               {displayNews.map(item => <NewsCard key={item.guid} title={item.title || "Titre non disponible"} description={item.description || "Description non disponible"} source={item.source} date={formatNewsDate(item.pubDate)} link={item.link} compact={true} error={item.title?.includes("Impossible de charger") ? "Impossible de charger les actualités de cette source" : undefined} />)}
             </div>}
         </div>
-        
-        {/* Analytics Chart */}
-        {!isLoading && analyticsChartData.length > 0 && <div className="w-full max-w-5xl mx-auto mb-8">
-            <LineChart title={t.analyticsTitle} data={analyticsChartData} lines={[{
-          dataKey: "pageViews",
-          stroke: "#8884d8",
-          name: isArabic ? "الزيارات" : "Visites"
-        }, {
-          dataKey: "articles",
-          stroke: "#82ca9d",
-          name: isArabic ? "المقالات" : "Articles"
-        }, {
-          dataKey: "translations",
-          stroke: "#ffc658",
-          name: isArabic ? "الترجمات" : "Traductions"
-        }]} className="shadow-md hover:shadow-lg transition-shadow duration-300" />
-          </div>}
 
-        {/* Latest News - Change activities prop to items prop */}
+        {/* Now we remove the Analytics Chart section and keep the Latest News section */}
         {!isLoading && activities.length > 0 && <ActivityTimeline title={t.activity} items={activities} />}
       </div>
 
