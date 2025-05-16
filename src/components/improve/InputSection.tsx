@@ -28,7 +28,7 @@ export function InputSection({
         onChange={(e) => setInputText(e.target.value)}
         placeholder="Collez ici votre article ou brouillon en arabe ou en français"
         dir={dirFrom(inputText)}
-        className={`w-full h-40 p-4 border rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-600 ${alignFrom(
+        className={`w-full h-40 p-4 border rounded-lg focus:outline-none focus:ring-2 focus:ring-snrt-red ${alignFrom(
           inputText
         )}`}
       />
@@ -36,7 +36,7 @@ export function InputSection({
         <button
           type="button"
           onClick={handlePaste}
-          className="px-6 py-2 bg-gradient-to-r from-purple-600 to-purple-700 text-white rounded-md hover:from-purple-700 hover:to-purple-800 shadow-sm transition-colors"
+          className="px-6 py-2 bg-snrt-red text-white rounded-md hover:bg-red-700 shadow-sm transition-colors"
         >
           COLLER
         </button>
@@ -47,7 +47,7 @@ export function InputSection({
           className={`px-6 py-2 text-white rounded-md shadow-sm flex items-center justify-center ${
             loading 
               ? 'bg-gray-400' 
-              : 'bg-gradient-to-r from-purple-600 to-pink-500 hover:from-purple-700 hover:to-pink-600 transition-colors'
+              : 'bg-gradient-to-r from-snrt-red to-red-700 hover:from-red-700 hover:to-red-800 transition-colors'
           }`}
         >
           {loading ? (
@@ -63,7 +63,7 @@ export function InputSection({
 
       {loading && (
         <div className="text-center">
-          <p className="text-purple-700">Traitement en cours... Cela peut prendre jusqu'à une minute.</p>
+          <p className="text-snrt-red">Traitement en cours... Cela peut prendre jusqu'à une minute.</p>
           {requestSent && (
             <p className="text-green-600 flex items-center justify-center mt-2">
               <Check className="h-4 w-4 mr-2" />

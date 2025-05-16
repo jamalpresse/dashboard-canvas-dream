@@ -19,13 +19,13 @@ export default function Improve() {
   } = useImproveText();
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-50 to-pink-50 p-6 animate-fade-in">
+    <div className="min-h-screen bg-background p-6 animate-fade-in">
       <Card className="w-full max-w-3xl mx-auto shadow-md hover:shadow-lg transition-all duration-300">
-        <CardHeader className="border-b border-gray-100">
-          <CardTitle className="text-2xl font-semibold text-gray-800 flex items-center justify-between">
+        <CardHeader className="border-b border-border">
+          <CardTitle className="text-2xl font-semibold text-foreground flex items-center justify-between">
             <span>Améliorer Texte & SEO</span>
             {requestSent && result && (
-              <span className="text-sm font-normal text-green-600 bg-green-50 px-2 py-1 rounded-full">
+              <span className="text-sm font-normal bg-snrt-red/10 text-snrt-red px-2 py-1 rounded-full">
                 Résultats disponibles ✓
               </span>
             )}
@@ -45,10 +45,10 @@ export default function Improve() {
             <>
               <div className="relative py-3">
                 <div className="absolute inset-0 flex items-center">
-                  <div className="w-full border-t border-gray-200"></div>
+                  <div className="w-full border-t border-border"></div>
                 </div>
                 <div className="relative flex justify-center">
-                  <span className="bg-white px-4 text-sm text-gray-500">Résultats</span>
+                  <span className="bg-card px-4 text-sm text-muted-foreground">Résultats</span>
                 </div>
               </div>
               <ResultsSection result={result} handleCopy={handleCopy} />

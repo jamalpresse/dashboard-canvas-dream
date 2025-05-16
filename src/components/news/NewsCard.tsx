@@ -64,14 +64,14 @@ export const NewsCard: React.FC<NewsCardProps> = ({
       )}
       <CardHeader className={compact ? "p-4 pb-1" : "pb-2"}>
         <h3 
-          className={`font-bold ${compact ? "text-base" : "text-lg"} line-clamp-2 group-hover:text-purple-700 transition-colors`}
+          className={`font-bold ${compact ? "text-base" : "text-lg"} line-clamp-2 group-hover:text-snrt-red transition-colors`}
           title={title}
           dir={titleDir}
         >
           {title}
         </h3>
         <div className="flex items-center text-xs text-gray-500 gap-1 flex-wrap">
-          <Badge variant="outline" className="bg-gray-100 font-normal">
+          <Badge variant="outline" className="bg-card font-normal border-border">
             {source}
           </Badge>
           <span>•</span>
@@ -83,7 +83,7 @@ export const NewsCard: React.FC<NewsCardProps> = ({
       </CardHeader>
       <CardContent className={`${compact ? "py-0 px-4" : "py-2"} flex-grow`}>
         <p 
-          className={`text-gray-600 ${compact ? "line-clamp-2 text-sm" : "line-clamp-3"}`}
+          className={`text-muted-foreground ${compact ? "line-clamp-2 text-sm" : "line-clamp-3"}`}
           title={cleanDescription} 
           dir={descDir}
         >
@@ -95,7 +95,7 @@ export const NewsCard: React.FC<NewsCardProps> = ({
           href={link} 
           target="_blank" 
           rel="noopener noreferrer" 
-          className="text-sm text-purple-700 hover:text-purple-900 flex items-center gap-1 transition-colors group-hover:underline"
+          className="text-sm text-snrt-red hover:text-red-700 flex items-center gap-1 transition-colors group-hover:underline"
         >
           {isRTL(title) ? "قراءة المقال الكامل" : "Lire l'article complet"}
           <ExternalLink className="h-3 w-3 transition-transform group-hover:translate-x-0.5" />
