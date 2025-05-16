@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { ArrowRight, Globe, AlertCircle, Search } from "lucide-react"; // Added Search import
@@ -185,7 +186,27 @@ const Index = () => {
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-6 mt-4">
           {/* Main content area - 3 columns */}
           <div className="lg:col-span-3 space-y-6">
-            {/* Hero Section - Now using featuredArticle from SNRT */}
+            {/* MOVED: Features Buttons - Now placed above the Hero Section */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <Link to="/search" className="bg-red-600 hover:bg-red-700 text-white font-semibold text-xl py-6 px-4 rounded-lg shadow-lg text-center transition duration-300 flex items-center justify-center">
+                <span>{t.search}</span>
+              </Link>
+
+              <Link to="/improve" className="bg-red-600 hover:bg-red-700 text-white font-semibold text-xl py-6 px-4 rounded-lg shadow-lg text-center transition duration-300 flex items-center justify-center">
+                {t.improve}
+              </Link>
+
+              <Link to="/translation" className="bg-red-600 hover:bg-red-700 text-white font-semibold text-xl py-6 px-4 rounded-lg shadow-lg text-center transition duration-300 flex items-center justify-center">
+                {t.translate}
+              </Link>
+            </div>
+            
+            {/* MOVED: Image Generation Button - Now placed above the Hero Section */}
+            <Link to="/image-generation" className="flex bg-red-600 hover:bg-red-700 text-white font-semibold text-xl py-6 px-4 rounded-lg shadow-lg text-center transition duration-300 justify-center items-center">
+              <span>{isArabic ? "توليد الصور" : "Génération d'image"}</span>
+            </Link>
+
+            {/* Hero Section - Now displayed after the buttons */}
             {featuredLoading ? (
               <div className="bg-card rounded-lg shadow-sm h-[300px] md:h-[400px] animate-pulse flex items-center justify-center">
                 <p className="text-gray-400">Chargement de l'article à la une...</p>
@@ -210,26 +231,6 @@ const Index = () => {
                 category="SNRT News" 
               />
             )}
-
-            {/* Features Buttons */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <Link to="/search" className="bg-red-600 hover:bg-red-700 text-white font-semibold text-2xl py-8 px-6 rounded-lg shadow-lg text-center transition duration-300 flex items-center justify-center">
-                <span>{t.search}</span>
-              </Link>
-
-              <Link to="/improve" className="bg-red-600 hover:bg-red-700 text-white font-semibold text-2xl py-8 px-6 rounded-lg shadow-lg text-center transition duration-300 flex items-center justify-center">
-                {t.improve}
-              </Link>
-
-              <Link to="/translation" className="bg-red-600 hover:bg-red-700 text-white font-semibold text-2xl py-8 px-6 rounded-lg shadow-lg text-center transition duration-300 flex items-center justify-center">
-                {t.translate}
-              </Link>
-            </div>
-            
-            {/* Image Generation Button */}
-            <Link to="/image-generation" className="flex bg-red-600 hover:bg-red-700 text-white font-semibold text-2xl py-8 px-6 rounded-lg shadow-lg text-center transition duration-300 justify-center items-center">
-              <span>{isArabic ? "توليد الصور" : "Génération d'image"}</span>
-            </Link>
 
             {/* News Section with Tabs */}
             <div className="mt-8">
