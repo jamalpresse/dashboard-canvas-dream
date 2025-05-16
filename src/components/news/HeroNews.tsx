@@ -1,3 +1,4 @@
+
 import React from "react";
 import { ExternalLink } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -19,7 +20,7 @@ export const HeroNews: React.FC<HeroNewsProps> = ({
 }) => {
   return <div className={cn("snrt-hero relative h-[300px] md:h-[400px] overflow-hidden rounded-md", className)}>
       {/* Background Image */}
-      <img src={imageUrl || "/lovable-uploads/c5a1c67b-0dda-4c2f-91cd-643f3280a38a.png"} alt={title} className="w-full h-full object-contain bg-black" />
+      <img src={imageUrl || "/lovable-uploads/32ff14e9-af71-4640-b4c9-583985037c66.png"} alt={title} className="w-full h-full object-contain bg-black" />
       
       {/* Content Overlay - Dark gradient */}
       <div className="absolute inset-0 flex flex-col justify-end bg-gradient-to-t from-black/80 via-black/40 to-transparent p-6">

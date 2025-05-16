@@ -14,6 +14,7 @@ import { N8nImageGeneration } from "@/components/image-generation/N8nImageGenera
 import { HeroNews } from "@/components/news/HeroNews";
 import { NewsGrid } from "@/components/news/NewsGrid";
 import { FlashNews, FlashNewsItem } from "@/components/news/FlashNews";
+
 const Index = () => {
   const [lang, setLang] = useState("fr");
   const [analytics, setAnalytics] = useState<any[]>([]);
@@ -182,7 +183,7 @@ const Index = () => {
           {/* Main content area - 3 columns */}
           <div className="lg:col-span-3 space-y-6">
             {/* Hero Section */}
-            {featuredNews && <HeroNews title={featuredNews.title || "Actualité principale"} imageUrl="/lovable-uploads/c5a1c67b-0dda-4c2f-91cd-643f3280a38a.png" category={featuredNews.source} timestamp={formatNewsDate(featuredNews.pubDate)} link={featuredNews.link} />}
+            {featuredNews && <HeroNews title={featuredNews.title || "Actualité principale"} imageUrl="/lovable-uploads/32ff14e9-af71-4640-b4c9-583985037c66.png" category={featuredNews.source} timestamp={formatNewsDate(featuredNews.pubDate)} link={featuredNews.link} />}
 
             {/* Features Buttons */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
