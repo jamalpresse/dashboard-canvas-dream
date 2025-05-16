@@ -1,4 +1,3 @@
-
 import { toast } from "@/components/ui/sonner";
 
 export interface NewsItem {
@@ -40,13 +39,6 @@ export const newsSources: NewsSource[] = [
     id: "hespress",
     name: "Hespress",
     url: "https://fr.hespress.com/feed/",
-    category: "general",
-    country: "ma"
-  },
-  {
-    id: "le360",
-    name: "Le360",
-    url: "https://fr.le360.ma/rss",
     category: "general",
     country: "ma"
   },
