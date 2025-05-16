@@ -14,7 +14,6 @@ import { N8nImageGeneration } from "@/components/image-generation/N8nImageGenera
 import { HeroNews } from "@/components/news/HeroNews";
 import { NewsGrid } from "@/components/news/NewsGrid";
 import { FlashNews, FlashNewsItem } from "@/components/news/FlashNews";
-
 const Index = () => {
   const [lang, setLang] = useState("fr");
   const [analytics, setAnalytics] = useState<any[]>([]);
@@ -32,7 +31,6 @@ const Index = () => {
     activeTab,
     setActiveTab
   } = useNews();
-  
   const labels = {
     ar: {
       title: "لوحة تحكم الصحفيين",
@@ -177,24 +175,14 @@ const Index = () => {
   return <div dir={dir} className="space-y-6">
       <div className="animate-fade-in">
         {/* Language Switcher */}
-        <div className="w-full flex justify-end pt-4">
-          <button onClick={() => setLang(isArabic ? "fr" : "ar")} className="text-sm bg-card px-4 py-1 rounded-full shadow-sm hover:bg-gray-900 transition-all duration-300 text-white">
-            {t.switchTo}
-          </button>
-        </div>
+        
 
         {/* Main Content Layout with 3-column grid */}
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-6 mt-4">
           {/* Main content area - 3 columns */}
           <div className="lg:col-span-3 space-y-6">
             {/* Hero Section */}
-            {featuredNews && <HeroNews 
-              title={featuredNews.title || "Actualité principale"} 
-              imageUrl="/lovable-uploads/c5a1c67b-0dda-4c2f-91cd-643f3280a38a.png" 
-              category={featuredNews.source} 
-              timestamp={formatNewsDate(featuredNews.pubDate)} 
-              link={featuredNews.link} 
-            />}
+            {featuredNews && <HeroNews title={featuredNews.title || "Actualité principale"} imageUrl="/lovable-uploads/c5a1c67b-0dda-4c2f-91cd-643f3280a38a.png" category={featuredNews.source} timestamp={formatNewsDate(featuredNews.pubDate)} link={featuredNews.link} />}
 
             {/* Features Buttons */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
