@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { ArrowRight, Globe, AlertCircle, Search } from "lucide-react";
@@ -314,7 +313,7 @@ const Index = () => {
               <div>
                 <h3 className="text-lg font-bold mb-3 text-white font-playfair">{t.activity}</h3>
                 <div className="bg-card rounded-lg border border-gray-800 shadow-lg p-3">
-                  <ActivityTimeline activities={activities.slice(0, 3)} showViewAll />
+                  <ActivityTimeline items={activities.slice(0, 3)} showViewAll />
                 </div>
               </div>
             )}

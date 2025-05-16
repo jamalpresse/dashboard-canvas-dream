@@ -3,8 +3,10 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
 import { Separator } from "@/components/ui/separator";
 import { isRTL, dirFrom } from "@/utils/textUtils";
+import { Button } from "@/components/ui/button";
+import { ArrowRight } from "lucide-react";
 
-type TimelineItem = {
+export type TimelineItem = {
   id: string;
   title: string;
   description: string;
@@ -17,12 +19,14 @@ interface TimelineProps {
   items: TimelineItem[];
   className?: string;
   title?: string;
+  showViewAll?: boolean;
 }
 
 export function ActivityTimeline({
   items,
   className,
-  title = "Activités récentes"
+  title = "Activités récentes",
+  showViewAll = false
 }: TimelineProps) {
   return (
     <Card className={cn("overflow-hidden", className)}>
@@ -79,6 +83,13 @@ export function ActivityTimeline({
                 </div>
               );
             })}
+          </div>
+        )}
+        {showViewAll && (
+          <div className="p-4 text-center border-t border-border">
+            <Button variant="link" size="sm" className="text-snrt-red">
+              Voir toutes les activités <ArrowRight className="ml-1 h-4 w-4" />
+            </Button>
           </div>
         )}
       </CardContent>
