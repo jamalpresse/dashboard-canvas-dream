@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
-import { Search, ArrowRight, Globe, AlertCircle } from "lucide-react";
+import { ArrowRight, Globe, AlertCircle } from "lucide-react";
 import { StatCard } from "@/components/dashboard/StatCard";
 import { ActivityTimeline } from "@/components/dashboard/ActivityTimeline";
 import { NewsCard } from "@/components/news/NewsCard";
@@ -14,6 +14,7 @@ import { N8nImageGeneration } from "@/components/image-generation/N8nImageGenera
 import { HeroNews } from "@/components/news/HeroNews";
 import { NewsGrid } from "@/components/news/NewsGrid";
 import { FlashNews, FlashNewsItem } from "@/components/news/FlashNews";
+
 const Index = () => {
   const [lang, setLang] = useState("fr");
   const [analytics, setAnalytics] = useState<any[]>([]);
@@ -31,13 +32,14 @@ const Index = () => {
     activeTab,
     setActiveTab
   } = useNews();
+  
   const labels = {
     ar: {
       title: "لوحة تحكم الصحفيين",
       subtitle: "اختر إحدى الوظائف التالية:",
-      search: "🔍 البحث (بالعربية / الفرنسية)",
-      improve: "🛠️ تحسين النص وتهيئة محركات البحث",
-      translate: "🌍 الترجمة التلقائية",
+      search: "البحث (بالعربية / الفرنسية)",
+      improve: "تحسين النص وتهيئة محركات البحث",
+      translate: "الترجمة التلقائية",
       switchTo: "Français",
       welcome: "مرحباً بك في لوحة تحكم الصحفيين",
       greeting: "أهلاً بك في نظام المعلومات الصحفية",
@@ -52,9 +54,9 @@ const Index = () => {
     fr: {
       title: "Dashboard Journalistes",
       subtitle: "Choisissez une fonctionnalité ci-dessous :",
-      search: "🔍 Recherche (AR / FR)",
-      improve: "🛠️ Améliorer texte & SEO",
-      translate: "🌍 Traduction multilingue",
+      search: "Recherche (AR / FR)",
+      improve: "Améliorer texte & SEO",
+      translate: "Traduction multilingue",
       switchTo: "عربية",
       welcome: "Bienvenue au Dashboard Journalistes",
       greeting: "Bienvenue dans votre système d'information journalistique",
@@ -190,22 +192,21 @@ const Index = () => {
 
             {/* Features Buttons */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <Link to="/search" className="bg-red-600 hover:bg-red-700 text-white font-semibold text-lg py-4 px-4 rounded-lg shadow-lg text-center transition duration-300 flex items-center justify-center gap-3">
-                <Search className="h-5 w-5" />
+              <Link to="/search" className="bg-red-600 hover:bg-red-700 text-white font-semibold text-xl py-6 px-6 rounded-lg shadow-lg text-center transition duration-300 flex items-center justify-center">
                 <span>{t.search}</span>
               </Link>
 
-              <Link to="/improve" className="bg-card hover:bg-gray-800 border border-red-600/30 text-white font-semibold text-lg py-4 px-4 rounded-lg shadow-lg text-center transition duration-300 flex items-center justify-center gap-3">
+              <Link to="/improve" className="bg-card hover:bg-gray-800 border border-red-600/30 text-white font-semibold text-xl py-6 px-6 rounded-lg shadow-lg text-center transition duration-300 flex items-center justify-center">
                 {t.improve}
               </Link>
 
-              <Link to="/translation" className="bg-card hover:bg-gray-800 border border-red-600/30 text-white font-semibold text-lg py-4 px-4 rounded-lg shadow-lg text-center transition duration-300 flex items-center justify-center gap-3">
+              <Link to="/translation" className="bg-card hover:bg-gray-800 border border-red-600/30 text-white font-semibold text-xl py-6 px-6 rounded-lg shadow-lg text-center transition duration-300 flex items-center justify-center">
                 {t.translate}
               </Link>
             </div>
             
             {/* Image Generation Button */}
-            <Link to="/image-generation" className="flex bg-red-600 hover:bg-red-700 text-white font-semibold text-xl py-4 px-6 rounded-lg shadow-lg text-center transition duration-300 justify-center items-center gap-2">
+            <Link to="/image-generation" className="flex bg-red-600 hover:bg-red-700 text-white font-semibold text-xl py-6 px-6 rounded-lg shadow-lg text-center transition duration-300 justify-center items-center">
               <span>{isArabic ? "توليد الصور" : "Génération d'image"}</span>
             </Link>
 
