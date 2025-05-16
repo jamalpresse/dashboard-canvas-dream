@@ -2,7 +2,7 @@
 import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardFooter } from "@/components/ui/card";
-import { toast } from "@/components/ui/sonner";
+import { toast } from "sonner";
 import { Loader2, Copy } from "lucide-react";
 import { AspectRatio } from "@/components/ui/aspect-ratio";
 
@@ -34,8 +34,7 @@ export const GoogleFreePix = () => {
       
       if (data.imageUrl) {
         setImageUrl(data.imageUrl);
-        toast({
-          title: "Succès",
+        toast("Succès", {
           description: "Image téléchargée avec succès!",
         });
       } else {
@@ -44,8 +43,7 @@ export const GoogleFreePix = () => {
     } catch (err) {
       console.error("Erreur lors de la récupération de l'image:", err);
       setError(err instanceof Error ? err.message : "Une erreur inconnue s'est produite");
-      toast({
-        title: "Erreur",
+      toast("Erreur", {
         description: "Impossible de récupérer l'image. Veuillez réessayer.",
         variant: "destructive"
       });
@@ -58,15 +56,13 @@ export const GoogleFreePix = () => {
     if (imageUrl) {
       navigator.clipboard.writeText(imageUrl)
         .then(() => {
-          toast({
-            title: "URL copiée",
+          toast("URL copiée", {
             description: "L'URL de l'image a été copiée dans le presse-papiers",
           });
         })
         .catch((err) => {
           console.error("Erreur lors de la copie:", err);
-          toast({
-            title: "Erreur",
+          toast("Erreur", {
             description: "Impossible de copier l'URL",
             variant: "destructive"
           });
