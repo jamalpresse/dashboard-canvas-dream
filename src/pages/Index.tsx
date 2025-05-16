@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { Search, ArrowRight, Globe, AlertCircle } from "lucide-react";
@@ -15,7 +14,6 @@ import { N8nImageGeneration } from "@/components/image-generation/N8nImageGenera
 import { HeroNews } from "@/components/news/HeroNews";
 import { NewsGrid } from "@/components/news/NewsGrid";
 import { FlashNews, FlashNewsItem } from "@/components/news/FlashNews";
-
 const Index = () => {
   const [lang, setLang] = useState("fr");
   const [analytics, setAnalytics] = useState<any[]>([]);
@@ -33,7 +31,6 @@ const Index = () => {
     activeTab,
     setActiveTab
   } = useNews();
-  
   const labels = {
     ar: {
       title: "لوحة تحكم الصحفيين",
@@ -70,7 +67,6 @@ const Index = () => {
       flashNews: "Flash Info"
     }
   };
-  
   const t = labels[lang];
 
   // Fetch data from Supabase
@@ -96,10 +92,9 @@ const Index = () => {
           ascending: false
         }).limit(5);
         if (articlesError) throw articlesError;
-        
         setAnalytics(analyticsData || []);
         setNewsArticles(articlesData || []);
-        
+
         // Create flash news from articles
         if (articlesData) {
           const flashItems: FlashNewsItem[] = articlesData.slice(0, 6).map(article => ({
@@ -177,16 +172,11 @@ const Index = () => {
   // Get news items for feature, hero and grid
   const featuredNews = news.length > 0 ? news[0] : null;
   const gridNews = news.slice(1, 7);
-
-  return (
-    <div dir={dir} className="space-y-6">
+  return <div dir={dir} className="space-y-6">
       <div className="animate-fade-in">
         {/* Language Switcher */}
         <div className="w-full flex justify-end pt-4">
-          <button 
-            onClick={() => setLang(isArabic ? "fr" : "ar")} 
-            className="text-sm bg-card px-4 py-1 rounded-full shadow-sm hover:bg-gray-900 transition-all duration-300 text-white"
-          >
+          <button onClick={() => setLang(isArabic ? "fr" : "ar")} className="text-sm bg-card px-4 py-1 rounded-full shadow-sm hover:bg-gray-900 transition-all duration-300 text-white">
             {t.switchTo}
           </button>
         </div>
@@ -196,15 +186,7 @@ const Index = () => {
           {/* Main content area - 3 columns */}
           <div className="lg:col-span-3 space-y-6">
             {/* Hero Section */}
-            {featuredNews && (
-              <HeroNews 
-                title={featuredNews.title || "Actualité principale"}
-                imageUrl={featuredNews.thumbnail || "https://via.placeholder.com/800x400?text=News"}
-                category={featuredNews.source}
-                timestamp={formatNewsDate(featuredNews.pubDate)}
-                link={featuredNews.link}
-              />
-            )}
+            {featuredNews && <HeroNews title={featuredNews.title || "Actualité principale"} imageUrl={featuredNews.thumbnail || "https://via.placeholder.com/800x400?text=News"} category={featuredNews.source} timestamp={formatNewsDate(featuredNews.pubDate)} link={featuredNews.link} />}
 
             {/* Features Buttons */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -251,64 +233,26 @@ const Index = () => {
               </Tabs>
               
               {/* News Grid */}
-              {newsLoading ? (
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-                  {[1, 2, 3, 4, 5, 6].map(i => (
-                    <div key={i} className="bg-card rounded-lg shadow-sm p-4 h-[180px] animate-pulse">
+              {newsLoading ? <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+                  {[1, 2, 3, 4, 5, 6].map(i => <div key={i} className="bg-card rounded-lg shadow-sm p-4 h-[180px] animate-pulse">
                       <div className="h-5 bg-gray-700 rounded mb-2 w-3/4"></div>
                       <div className="h-4 bg-gray-700 rounded mb-4 w-1/2"></div>
                       <div className="h-16 bg-gray-700 rounded"></div>
-                    </div>
-                  ))}
-                </div>
-              ) : newsError ? (
-                <div className="bg-red-900/30 border border-red-900 rounded-lg p-4 text-center">
+                    </div>)}
+                </div> : newsError ? <div className="bg-red-900/30 border border-red-900 rounded-lg p-4 text-center">
                   <div className="flex justify-center items-center mb-2">
                     <AlertCircle className="h-5 w-5 text-red-600 mr-2" />
                     <p className="text-red-400 font-medium">Erreur de chargement</p>
                   </div>
                   <p className="text-red-300">{newsError}</p>
-                </div>
-              ) : gridNews.length === 0 ? (
-                <div className="bg-gray-900 border border-gray-800 rounded-lg p-8 text-center">
+                </div> : gridNews.length === 0 ? <div className="bg-gray-900 border border-gray-800 rounded-lg p-8 text-center">
                   <p className="text-gray-400">Aucune actualité disponible pour le moment</p>
-                </div>
-              ) : (
-                <NewsGrid news={gridNews} />
-              )}
+                </div> : <NewsGrid news={gridNews} />}
             </div>
           </div>
           
           {/* Sidebar/Flash News - 1 column */}
-          <div className="space-y-6">
-            <FlashNews items={flashNews} />
-            
-            {/* Stats Cards */}
-            {!isLoading && statsData.length > 0 && (
-              <div className="space-y-4">
-                {statsData.map((stat, index) => (
-                  <StatCard 
-                    key={index} 
-                    title={stat.title} 
-                    value={stat.value} 
-                    icon={stat.icon} 
-                    trend={stat.trend} 
-                    variant={stat.variant} 
-                  />
-                ))}
-              </div>
-            )}
-            
-            {/* N8n Widget */}
-            <div className="bg-card rounded-lg overflow-hidden border border-gray-800">
-              <div className="bg-red-600 py-2 px-4">
-                <h3 className="font-bold text-white">Image AI</h3>
-              </div>
-              <div className="p-4">
-                <N8nImageGeneration />
-              </div>
-            </div>
-          </div>
+          
         </div>
       </div>
 
@@ -333,8 +277,6 @@ const Index = () => {
           }
         `}
       </style>
-    </div>
-  );
+    </div>;
 };
-
 export default Index;
