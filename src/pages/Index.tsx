@@ -1,6 +1,7 @@
+
 import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
-import { ArrowRight, Globe, AlertCircle } from "lucide-react";
+import { ArrowRight, Globe, AlertCircle, Search } from "lucide-react"; // Added Search import
 import { StatCard } from "@/components/dashboard/StatCard";
 import { ActivityTimeline } from "@/components/dashboard/ActivityTimeline";
 import { NewsCard } from "@/components/news/NewsCard";
