@@ -204,15 +204,28 @@ const Index = () => {
 
         {/* Image Generation Button */}
         <div className="w-full max-w-5xl mx-auto mb-8">
-          <Link to="/simple-image-generation" className="block bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-600 hover:to-purple-600 text-white font-semibold text-xl py-4 px-6 rounded-xl shadow-lg text-center transition duration-300">
-            <div className="flex items-center justify-center gap-3">
-              <ImageIcon className="h-6 w-6" />
-              <span>{isArabic ? "توليد الصور البسيطة" : "Génération d'image"}</span>
-            </div>
-          </Link>
+          <div className="flex flex-col md:flex-row gap-4">
+            <Link to="/simple-image-generation" className="flex-1 bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-600 hover:to-purple-600 text-white font-semibold text-xl py-4 px-6 rounded-xl shadow-lg text-center transition duration-300">
+              <div className="flex items-center justify-center gap-3">
+                <ImageIcon className="h-6 w-6" />
+                <span>{isArabic ? "توليد الصور البسيطة" : "Génération d'image"}</span>
+              </div>
+            </Link>
+            
+            <Link to="/google-free-pix" className="flex-1 bg-gradient-to-r from-purple-600 to-pink-500 hover:from-purple-700 hover:to-pink-600 text-white font-semibold text-xl py-4 px-6 rounded-xl shadow-lg text-center transition duration-300">
+              <div className="flex items-center justify-center gap-3">
+                <img 
+                  src="https://upload.wikimedia.org/wikipedia/commons/thumb/5/53/Google_%22G%22_Logo.svg/2008px-Google_%22G%22_Logo.svg.png" 
+                  alt="Google Logo" 
+                  className="h-6 w-6"
+                />
+                <span>{isArabic ? "صور جوجل المجانية" : "Google Free Pix"}</span>
+              </div>
+            </Link>
+          </div>
         </div>
 
-        {/* Google Free Pix Section */}
+        {/* Google Free Pix Section (on the home page) */}
         <div className="w-full max-w-5xl mx-auto mb-8">
           <h2 className="text-xl font-semibold mb-4 text-gray-800">
             {isArabic ? "Google Free Pix" : "Google Free Pix"}
