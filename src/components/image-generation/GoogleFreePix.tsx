@@ -65,7 +65,8 @@ export const GoogleFreePix = () => {
       
       if (extractedImageUrl) {
         setImageUrl(extractedImageUrl);
-        setResponse(response || "Image générée avec succès.");
+        // Here's the fix: Use a string instead of passing the response object
+        setResponse("Image générée avec succès.");
         toast.success("Image générée avec succès!");
       } else {
         throw new Error("URL d'image non trouvée dans la réponse");
