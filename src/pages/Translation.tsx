@@ -3,6 +3,8 @@ import React, { useState } from 'react';
 import TranslationForm from '@/components/translation/TranslationForm';
 import DebugDialog from '@/components/translation/DebugDialog';
 import NavigationButtons from '@/components/translation/NavigationButtons';
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import BreadcrumbNav from '@/components/common/BreadcrumbNav';
 
 export default function Translation() {
   const [debugDialogOpen, setDebugDialogOpen] = useState(false);
@@ -13,25 +15,29 @@ export default function Translation() {
   };
 
   return (
-    <div className="min-h-screen bg-background p-6">
-      <header className="flex items-center mb-6">
-        <h1 className="text-2xl font-semibold text-foreground">Traduction Multilingue</h1>
-      </header>
+    <div className="min-h-screen bg-background p-6 animate-fade-in">
+      <Card className="w-full max-w-4xl mx-auto shadow-md hover:shadow-lg transition-all duration-300">
+        <CardHeader className="border-b border-border">
+          <CardTitle className="text-2xl font-semibold font-playfair text-foreground">
+            Traduction Multilingue
+          </CardTitle>
+        </CardHeader>
 
-      <div className="max-w-4xl mx-auto space-y-6">
-        <TranslationForm 
-          onDebugToggle={handleDebugToggle} 
-          setDebugData={setDebugData} 
-        />
+        <CardContent className="space-y-6 pt-6">
+          <TranslationForm 
+            onDebugToggle={handleDebugToggle} 
+            setDebugData={setDebugData} 
+          />
 
-        <DebugDialog 
-          open={debugDialogOpen} 
-          onOpenChange={setDebugDialogOpen} 
-          debugData={debugData} 
-        />
-        
-        <NavigationButtons />
-      </div>
+          <DebugDialog 
+            open={debugDialogOpen} 
+            onOpenChange={setDebugDialogOpen} 
+            debugData={debugData} 
+          />
+          
+          <NavigationButtons />
+        </CardContent>
+      </Card>
     </div>
   );
 }

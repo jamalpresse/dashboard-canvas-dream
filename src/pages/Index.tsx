@@ -1,7 +1,7 @@
 
 import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
-import { ArrowRight, Globe, AlertCircle, Search } from "lucide-react"; // Added Search import
+import { ArrowRight, Globe, AlertCircle, Search } from "lucide-react";
 import { StatCard } from "@/components/dashboard/StatCard";
 import { ActivityTimeline } from "@/components/dashboard/ActivityTimeline";
 import { NewsCard } from "@/components/news/NewsCard";
@@ -15,6 +15,7 @@ import { N8nImageGeneration } from "@/components/image-generation/N8nImageGenera
 import { HeroNews } from "@/components/news/HeroNews";
 import { NewsGrid } from "@/components/news/NewsGrid";
 import { FlashNews, FlashNewsItem } from "@/components/news/FlashNews";
+import { LanguageSelector } from "@/components/common/LanguageSelector";
 
 const Index = () => {
   const [lang, setLang] = useState("fr");
@@ -73,6 +74,11 @@ const Index = () => {
     }
   };
   const t = labels[lang];
+
+  // Handler pour le changement de langue
+  const handleLanguageChange = (newLang: "fr" | "ar") => {
+    setLang(newLang);
+  };
 
   // Fetch data from Supabase
   useEffect(() => {
@@ -179,34 +185,38 @@ const Index = () => {
   
   return <div dir={dir} className="space-y-6">
       <div className="animate-fade-in">
-        {/* Language Switcher */}
+        {/* Header avec sélecteur de langue */}
+        <div className="flex justify-between items-center">
+          <h1 className="text-3xl font-bold font-playfair text-white">{t.welcome}</h1>
+          <LanguageSelector currentLang={lang} onLanguageChange={handleLanguageChange} />
+        </div>
         
 
         {/* Main Content Layout with 3-column grid */}
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-6 mt-4">
           {/* Main content area - 3 columns */}
           <div className="lg:col-span-3 space-y-6">
-            {/* MOVED: Features Buttons - Now placed above the Hero Section */}
+            {/* Features Buttons */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <Link to="/search" className="bg-red-600 hover:bg-red-700 text-white font-semibold text-xl py-6 px-4 rounded-lg shadow-lg text-center transition duration-300 flex items-center justify-center">
+              <Link to="/search" className="bg-snrt-red hover:bg-red-700 text-white font-semibold text-xl py-6 px-4 rounded-lg shadow-lg text-center transition duration-300 flex items-center justify-center">
                 <span>{t.search}</span>
               </Link>
 
-              <Link to="/improve" className="bg-red-600 hover:bg-red-700 text-white font-semibold text-xl py-6 px-4 rounded-lg shadow-lg text-center transition duration-300 flex items-center justify-center">
+              <Link to="/improve" className="bg-snrt-red hover:bg-red-700 text-white font-semibold text-xl py-6 px-4 rounded-lg shadow-lg text-center transition duration-300 flex items-center justify-center">
                 {t.improve}
               </Link>
 
-              <Link to="/translation" className="bg-red-600 hover:bg-red-700 text-white font-semibold text-xl py-6 px-4 rounded-lg shadow-lg text-center transition duration-300 flex items-center justify-center">
+              <Link to="/translation" className="bg-snrt-red hover:bg-red-700 text-white font-semibold text-xl py-6 px-4 rounded-lg shadow-lg text-center transition duration-300 flex items-center justify-center">
                 {t.translate}
               </Link>
             </div>
             
-            {/* MOVED: Image Generation Button - Now placed above the Hero Section */}
-            <Link to="/image-generation" className="flex bg-red-600 hover:bg-red-700 text-white font-semibold text-xl py-6 px-4 rounded-lg shadow-lg text-center transition duration-300 justify-center items-center">
+            {/* Image Generation Button */}
+            <Link to="/image-generation" className="flex bg-snrt-red hover:bg-red-700 text-white font-semibold text-xl py-6 px-4 rounded-lg shadow-lg text-center transition duration-300 justify-center items-center">
               <span>{isArabic ? "توليد الصور" : "Génération d'image"}</span>
             </Link>
 
-            {/* Hero Section - Now displayed after the buttons */}
+            {/* Hero Section */}
             {featuredLoading ? (
               <div className="bg-card rounded-lg shadow-sm h-[300px] md:h-[400px] animate-pulse flex items-center justify-center">
                 <p className="text-gray-400">Chargement de l'article à la une...</p>
@@ -235,10 +245,10 @@ const Index = () => {
             {/* News Section with Tabs */}
             <div className="mt-8">
               <div className="flex justify-between items-center mb-4">
-                <h2 className="text-xl font-bold text-white">
+                <h2 className="text-xl font-bold font-playfair text-white">
                   {t.latestNews}
                 </h2>
-                <Link to="/news" className="px-4 py-1.5 bg-red-600 text-white rounded-full flex items-center gap-1 text-sm font-medium hover:bg-red-700 transition-all duration-300">
+                <Link to="/news" className="px-4 py-1.5 bg-snrt-red text-white rounded-full flex items-center gap-1 text-sm font-medium hover:bg-red-700 transition-all duration-300">
                   {isArabic ? "عرض المزيد" : "Voir plus"} <ArrowRight className="h-4 w-4 animate-pulse" />
                 </Link>
               </div>
@@ -246,10 +256,10 @@ const Index = () => {
               {/* News Tabs */}
               <Tabs value={activeTab} onValueChange={value => setActiveTab(value as 'maroc' | 'monde')} className="mb-4">
                 <TabsList className="w-fit bg-card shadow-sm border border-gray-800 p-1 rounded-full">
-                  <TabsTrigger value="maroc" className="text-base rounded-full data-[state=active]:bg-red-600 data-[state=active]:text-white px-4 py-1.5">
+                  <TabsTrigger value="maroc" className="text-base rounded-full data-[state=active]:bg-snrt-red data-[state=active]:text-white px-4 py-1.5">
                     <span className="mr-1 text-lg">🇲🇦</span> Maroc
                   </TabsTrigger>
-                  <TabsTrigger value="monde" className="text-base rounded-full data-[state=active]:bg-red-600 data-[state=active]:text-white px-4 py-1.5">
+                  <TabsTrigger value="monde" className="text-base rounded-full data-[state=active]:bg-snrt-red data-[state=active]:text-white px-4 py-1.5">
                     <Globe className="h-4 w-4 mr-2" /> Monde
                   </TabsTrigger>
                 </TabsList>
@@ -264,7 +274,7 @@ const Index = () => {
                     </div>)}
                 </div> : newsError ? <div className="bg-red-900/30 border border-red-900 rounded-lg p-4 text-center">
                   <div className="flex justify-center items-center mb-2">
-                    <AlertCircle className="h-5 w-5 text-red-600 mr-2" />
+                    <AlertCircle className="h-5 w-5 text-snrt-red mr-2" />
                     <p className="text-red-400 font-medium">Erreur de chargement</p>
                   </div>
                   <p className="text-red-300">{newsError}</p>
@@ -274,8 +284,41 @@ const Index = () => {
             </div>
           </div>
           
-          {/* Sidebar/Flash News - 1 column */}
-          
+          {/* Sidebar/Flash News - 1 column - MAINTENANT COMPLÉTÉ */}
+          <div className="space-y-6">
+            {/* Flash News */}
+            <div className="bg-gradient-to-br from-gray-900 to-black rounded-lg overflow-hidden border border-gray-800 shadow-lg animate-fade-in">
+              <div className="bg-snrt-red py-3 px-4">
+                <h3 className="text-lg font-bold text-white font-playfair">{t.flashNews}</h3>
+              </div>
+              
+              <div className="p-0">
+                <FlashNews items={flashNews} className="border-none" />
+              </div>
+            </div>
+            
+            {/* Stats Cards */}
+            {!isLoading && statsData.length > 0 && (
+              <div className="space-y-4">
+                <h3 className="text-lg font-bold text-white font-playfair">{t.stats}</h3>
+                <div className="space-y-3">
+                  {statsData.map((stat, i) => (
+                    <StatCard key={i} {...stat} />
+                  ))}
+                </div>
+              </div>
+            )}
+            
+            {/* Recent Activity */}
+            {activities.length > 0 && (
+              <div>
+                <h3 className="text-lg font-bold mb-3 text-white font-playfair">{t.activity}</h3>
+                <div className="bg-card rounded-lg border border-gray-800 shadow-lg p-3">
+                  <ActivityTimeline activities={activities.slice(0, 3)} showViewAll />
+                </div>
+              </div>
+            )}
+          </div>
         </div>
       </div>
 
