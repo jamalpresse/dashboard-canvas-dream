@@ -12,7 +12,6 @@ import { Button } from "@/components/ui/button";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { formatNewsDate } from "@/services/newsService";
 import { N8nImageGeneration } from "@/components/image-generation/N8nImageGeneration";
-import { GoogleFreePix } from "@/components/image-generation/GoogleFreePix";
 
 const Index = () => {
   const [lang, setLang] = useState("fr");
@@ -211,26 +210,7 @@ const Index = () => {
                 <span>{isArabic ? "توليد الصور البسيطة" : "Génération d'image"}</span>
               </div>
             </Link>
-            
-            <Link to="/google-free-pix" className="flex-1 bg-gradient-to-r from-purple-600 to-pink-500 hover:from-purple-700 hover:to-pink-600 text-white font-semibold text-xl py-4 px-6 rounded-xl shadow-lg text-center transition duration-300">
-              <div className="flex items-center justify-center gap-3">
-                <img 
-                  src="https://upload.wikimedia.org/wikipedia/commons/thumb/5/53/Google_%22G%22_Logo.svg/2008px-Google_%22G%22_Logo.svg.png" 
-                  alt="Google Logo" 
-                  className="h-6 w-6"
-                />
-                <span>{isArabic ? "صور جوجل المجانية" : "Google Free Pix"}</span>
-              </div>
-            </Link>
           </div>
-        </div>
-
-        {/* Google Free Pix Section (on the home page) */}
-        <div className="w-full max-w-5xl mx-auto mb-8">
-          <h2 className="text-xl font-semibold mb-4 text-gray-800">
-            {isArabic ? "Google Free Pix" : "Google Free Pix"}
-          </h2>
-          <GoogleFreePix />
         </div>
 
         {/* New N8n Image Generation Section */}

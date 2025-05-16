@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { NavLink, Outlet } from "react-router-dom";
 import { LayoutDashboard, Settings, Menu, X, Users, Newspaper, ImageIcon } from "lucide-react";
@@ -24,11 +23,6 @@ const navItems = [
     title: "Users",
     href: "/users",
     icon: <Users className="h-6 w-6" />
-  },
-  {
-    title: "Google Free Pix",
-    href: "/google-free-pix",
-    icon: <ImageIcon className="h-6 w-6" />
   }
 ];
 
