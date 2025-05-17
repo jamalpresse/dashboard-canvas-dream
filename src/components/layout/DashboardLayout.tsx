@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { NavLink, Outlet, Link, useLocation } from "react-router-dom";
 import { LayoutDashboard, Settings, Menu, X, Users, Newspaper, ImageIcon, Clock, Bell, Search, Globe, Pencil, Languages } from "lucide-react";
@@ -9,7 +8,6 @@ import { WeatherWidget } from "@/components/dashboard/WeatherWidget";
 import { SNRTNewsFrame } from "@/components/common/SNRTNewsFrame";
 import BreadcrumbNav from "@/components/common/BreadcrumbNav";
 import { RssTickerFloat } from "@/components/common/RssTickerFloat";
-
 const navItems = [{
   title: "Dashboard",
   href: "/",
@@ -23,7 +21,6 @@ const navItems = [{
   href: "/users",
   icon: <Users className="h-6 w-6" />
 }];
-
 const categories = [{
   name: "POLITIQUE",
   href: "/news?category=politique"
@@ -42,39 +39,44 @@ const categories = [{
 }];
 
 // Ajout des liens vers les fonctionnalités
-const utilityLinks = [
-  { title: "Recherche", href: "/search", icon: <Search className="h-5 w-5" /> },
-  { title: "Améliorer Texte", href: "/improve", icon: <Pencil className="h-5 w-5" /> },
-  { title: "Traduction", href: "/translation", icon: <Languages className="h-5 w-5" /> },
-  { title: "Génération d'Images", href: "/image-generation", icon: <ImageIcon className="h-5 w-5" /> },
-];
-
+const utilityLinks = [{
+  title: "Recherche",
+  href: "/search",
+  icon: <Search className="h-5 w-5" />
+}, {
+  title: "Améliorer Texte",
+  href: "/improve",
+  icon: <Pencil className="h-5 w-5" />
+}, {
+  title: "Traduction",
+  href: "/translation",
+  icon: <Languages className="h-5 w-5" />
+}, {
+  title: "Génération d'Images",
+  href: "/image-generation",
+  icon: <ImageIcon className="h-5 w-5" />
+}];
 export default function DashboardLayout() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [showNewsFrame, setShowNewsFrame] = useState(false);
   const isMobile = useIsMobile();
   const location = useLocation();
-  
   const toggleSidebar = () => {
     setSidebarOpen(!sidebarOpen);
   };
-  
   const toggleNewsFrame = () => {
     setShowNewsFrame(!showNewsFrame);
   };
-  
   const currentDate = new Date().toLocaleDateString('fr-FR', {
     weekday: 'long',
     year: 'numeric',
     month: 'long',
     day: 'numeric'
   });
-  
   const currentTime = new Date().toLocaleTimeString('fr-FR', {
     hour: '2-digit',
     minute: '2-digit'
   });
-  
   return <div className="min-h-screen bg-background text-foreground">
       {/* SNRT-style header */}
       <header className="snrt-header flex flex-col">
@@ -105,15 +107,7 @@ export default function DashboardLayout() {
         {/* SNRT-style category navigation - Maintenant complète */}
         <nav className="snrt-nav overflow-x-auto scrollbar-hide bg-snrt-red text-white">
           <div className="flex items-center px-4 py-2 space-x-4">
-            {categories.map((category) => (
-              <Link 
-                key={category.name}
-                to={category.href}
-                className="whitespace-nowrap hover:underline font-medium text-sm"
-              >
-                {category.name}
-              </Link>
-            ))}
+            {categories.map(category => {})}
           </div>
         </nav>
       </header>
@@ -155,20 +149,12 @@ export default function DashboardLayout() {
             <h2 className="text-xs font-semibold text-gray-400 uppercase tracking-wider mt-6 mb-2 px-3">
               OUTILS
             </h2>
-            {utilityLinks.map((item, i) => (
-              <NavLink 
-                key={i} 
-                to={item.href} 
-                onClick={() => isMobile && setSidebarOpen(false)} 
-                className={({isActive}) => cn(
-                  "flex items-center gap-3 rounded-lg px-4 py-2 text-base font-medium transition-all duration-200 ease-in-out", 
-                  isActive ? "bg-snrt-red text-white shadow-md" : "text-gray-300 hover:bg-gray-800 hover:text-white hover:shadow-sm"
-                )}
-              >
+            {utilityLinks.map((item, i) => <NavLink key={i} to={item.href} onClick={() => isMobile && setSidebarOpen(false)} className={({
+            isActive
+          }) => cn("flex items-center gap-3 rounded-lg px-4 py-2 text-base font-medium transition-all duration-200 ease-in-out", isActive ? "bg-snrt-red text-white shadow-md" : "text-gray-300 hover:bg-gray-800 hover:text-white hover:shadow-sm")}>
                 <span className="flex-shrink-0">{item.icon}</span>
                 <span>{item.title}</span>
-              </NavLink>
-            ))}
+              </NavLink>)}
             
             {/* Weather Widget under Dashboard button */}
             <div className="mt-4 px-2">
@@ -189,11 +175,9 @@ export default function DashboardLayout() {
       <main className={cn("transition-all duration-300", isMobile ? "ml-0" : "ml-64", "pb-16 pt-4")}>
         <div className="px-4 md:px-6">
           {/* Fil d'Ariane */}
-          {location.pathname !== '/' && (
-            <div className="mb-4">
+          {location.pathname !== '/' && <div className="mb-4">
               <BreadcrumbNav />
-            </div>
-          )}
+            </div>}
           <Outlet />
         </div>
       </main>
