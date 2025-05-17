@@ -43,7 +43,11 @@ export function RssTickerFloat() {
             📰 {isRTL ? labels.ar : labels.fr} :
           </span>
           <div className="flex-1 overflow-hidden">
-            <div className={cn("marquee whitespace-nowrap", isRTL ? "marquee-rtl" : "marquee-ltr")}>
+            <div className={cn(
+              "marquee whitespace-nowrap", 
+              // Invert the direction: use RTL animation for French and LTR for Arabic
+              lang === "fr" ? "marquee-rtl" : "marquee-ltr"
+            )}>
               {rssItems.length > 0 ? (
                 rssItems.map((item, index) => (
                   <a 

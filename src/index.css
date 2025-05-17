@@ -71,7 +71,7 @@
   scrollbar-width: none;
 }
 
-/* Updated Marquee Animation - reversed direction */
+/* Updated Marquee Animation - slowed down (from 30s to 60s) */
 @keyframes marquee-ltr {
   0% { transform: translateX(-100%); }
   100% { transform: translateX(100%); }
@@ -84,12 +84,12 @@
 
 .marquee-ltr {
   display: inline-block;
-  animation: marquee-ltr 30s linear infinite;
+  animation: marquee-ltr 60s linear infinite; /* Slowed down from 30s to 60s */
 }
 
 .marquee-rtl {
   display: inline-block;
-  animation: marquee-rtl 30s linear infinite;
+  animation: marquee-rtl 60s linear infinite; /* Slowed down from 30s to 60s */
 }
 
 /* Card hover effect */
