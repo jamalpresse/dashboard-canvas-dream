@@ -267,8 +267,8 @@ export default function DashboardLayout() {
         </div>
       )}
         
-      {/* RSS Ticker */}
-      <RssTickerFloat lang={lang} />
+      {/* RSS Ticker - Now using the LanguageContext directly */}
+      <RssTickerFloat />
     </div>
   );
 }
