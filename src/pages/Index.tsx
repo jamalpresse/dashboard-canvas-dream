@@ -15,7 +15,6 @@ import { HeroNews } from "@/components/news/HeroNews";
 import { NewsGrid } from "@/components/news/NewsGrid";
 import { FlashNews, FlashNewsItem } from "@/components/news/FlashNews";
 import { LanguageSelector } from "@/components/common/LanguageSelector";
-
 const Index = () => {
   const [lang, setLang] = useState("fr");
   const [analytics, setAnalytics] = useState<any[]>([]);
@@ -35,7 +34,6 @@ const Index = () => {
     featuredArticle,
     featuredLoading
   } = useNews();
-  
   const labels = {
     ar: {
       title: "لوحة تحكم الصحفيين",
@@ -181,7 +179,6 @@ const Index = () => {
 
   // Get news items for grid only (featuredArticle is now separate)
   const gridNews = news.slice(0, 6);
-  
   return <div dir={dir} className="space-y-6">
       <div className="animate-fade-in">
         {/* Header avec sélecteur de langue */}
@@ -216,30 +213,9 @@ const Index = () => {
             </Link>
 
             {/* Hero Section */}
-            {featuredLoading ? (
-              <div className="bg-card rounded-lg shadow-sm h-[300px] md:h-[400px] animate-pulse flex items-center justify-center">
+            {featuredLoading ? <div className="bg-card rounded-lg shadow-sm h-[300px] md:h-[400px] animate-pulse flex items-center justify-center">
                 <p className="text-gray-400">Chargement de l'article à la une...</p>
-              </div>
-            ) : featuredArticle ? (
-              <HeroNews 
-                title={featuredArticle.title || "Actualité SNRT"} 
-                imageUrl={
-                  featuredArticle.enclosure?.link || 
-                  featuredArticle.thumbnail || 
-                  (featuredArticle.content && featuredArticle.content.match(/src=["'](https?:\/\/[^"']+)["']/)?.[1]) || 
-                  "/lovable-uploads/32ff14e9-af71-4640-b4c9-583985037c66.png"
-                } 
-                category="SNRT News" 
-                timestamp={formatNewsDate(featuredArticle.pubDate)} 
-                link={featuredArticle.link} 
-              />
-            ) : (
-              <HeroNews 
-                title="Actualité SNRT" 
-                imageUrl="/lovable-uploads/32ff14e9-af71-4640-b4c9-583985037c66.png" 
-                category="SNRT News" 
-              />
-            )}
+              </div> : featuredArticle ? <HeroNews title={featuredArticle.title || "Actualité SNRT"} imageUrl={featuredArticle.enclosure?.link || featuredArticle.thumbnail || featuredArticle.content && featuredArticle.content.match(/src=["'](https?:\/\/[^"']+)["']/)?.[1] || "/lovable-uploads/32ff14e9-af71-4640-b4c9-583985037c66.png"} category="SNRT News" timestamp={formatNewsDate(featuredArticle.pubDate)} link={featuredArticle.link} /> : <HeroNews title="Actualité SNRT" imageUrl="/lovable-uploads/32ff14e9-af71-4640-b4c9-583985037c66.png" category="SNRT News" />}
 
             {/* News Section with Tabs */}
             <div className="mt-8">
@@ -284,40 +260,7 @@ const Index = () => {
           </div>
           
           {/* Sidebar/Flash News - 1 column - MAINTENANT COMPLÉTÉ */}
-          <div className="space-y-6">
-            {/* Flash News */}
-            <div className="bg-gradient-to-br from-gray-900 to-black rounded-lg overflow-hidden border border-gray-800 shadow-lg animate-fade-in">
-              <div className="bg-snrt-red py-3 px-4">
-                <h3 className="text-lg font-bold text-white font-playfair">{t.flashNews}</h3>
-              </div>
-              
-              <div className="p-0">
-                <FlashNews items={flashNews} className="border-none" />
-              </div>
-            </div>
-            
-            {/* Stats Cards */}
-            {!isLoading && statsData.length > 0 && (
-              <div className="space-y-4">
-                <h3 className="text-lg font-bold text-white font-playfair">{t.stats}</h3>
-                <div className="space-y-3">
-                  {statsData.map((stat, i) => (
-                    <StatCard key={i} {...stat} />
-                  ))}
-                </div>
-              </div>
-            )}
-            
-            {/* Recent Activity */}
-            {activities.length > 0 && (
-              <div>
-                <h3 className="text-lg font-bold mb-3 text-white font-playfair">{t.activity}</h3>
-                <div className="bg-card rounded-lg border border-gray-800 shadow-lg p-3">
-                  <ActivityTimeline items={activities.slice(0, 3)} showViewAll />
-                </div>
-              </div>
-            )}
-          </div>
+          
         </div>
       </div>
 
