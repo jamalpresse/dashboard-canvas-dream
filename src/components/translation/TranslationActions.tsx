@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { Button } from "@/components/ui/button";
-import { Clipboard, Languages } from "lucide-react";
+import { useLanguage } from '@/context/LanguageContext';
 
 interface TranslationActionsProps {
   text: string;
@@ -18,38 +18,34 @@ const TranslationActions: React.FC<TranslationActionsProps> = ({
   handleTranslate,
   handleClear
 }) => {
+  const { t, isRTL } = useLanguage();
+
   return (
-    <div className="flex flex-wrap gap-2 mt-4 mb-6">
-      <Button
-        onClick={handlePaste}
-        className="bg-snrt-red text-white rounded-md hover:bg-red-700 transition-colors shadow-sm"
+    <section className={`flex flex-wrap gap-3 ${isRTL ? 'flex-row-reverse' : ''}`}>
+      <Button 
+        onClick={handlePaste} 
+        className="bg-snrt-red hover:bg-red-700 text-white"
+        disabled={loading}
       >
-        <Clipboard className="mr-1 h-4 w-4" />
-        COLLER
+        {t('translation', 'paste')}
       </Button>
       
-      <Button
+      <Button 
         onClick={handleTranslate}
-        disabled={loading || !text.trim()}
-        className={`${
-          loading || !text.trim()
-            ? 'bg-gray-400 opacity-70 cursor-not-allowed' 
-            : 'bg-gradient-to-r from-snrt-red to-red-700 hover:from-red-700 hover:to-red-800'
-        } text-white rounded-md transition-colors shadow-sm`}
+        disabled={!text.trim() || loading}
+        className="bg-black hover:bg-gray-800 text-white flex-1"
       >
-        <Languages className="mr-1 h-4 w-4" />
-        {loading ? 'TRADUCTION...' : 'TRADUIRE'}
+        {loading ? t('translation', 'loading') : t('translation', 'translate')}
       </Button>
       
-      <Button
+      <Button 
         onClick={handleClear}
-        variant="outline"
-        disabled={!text.trim()}
-        className={`bg-gray-200 text-snrt-dark rounded-md hover:bg-gray-300 transition-colors shadow-sm ${!text.trim() ? 'opacity-50 cursor-not-allowed' : ''}`}
+        disabled={!text.trim() || loading}
+        className="text-gray-700 border border-gray-300 hover:bg-gray-100"
       >
-        EFFACER
+        {t('translation', 'clear')}
       </Button>
-    </div>
+    </section>
   );
 };
 

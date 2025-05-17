@@ -2,25 +2,24 @@
 import React from 'react';
 import { Button } from '@/components/ui/button';
 import { Globe } from 'lucide-react';
+import { useLanguage } from '@/context/LanguageContext';
 
 interface LanguageSelectorProps {
-  currentLang: string;
-  onLanguageChange: (lang: "fr" | "ar") => void;
   className?: string;
 }
 
 export const LanguageSelector: React.FC<LanguageSelectorProps> = ({
-  currentLang,
-  onLanguageChange,
   className
 }) => {
+  const { lang, setLang, isRTL } = useLanguage();
+
   return (
     <div className={`flex items-center ${className}`}>
       <Button
         variant="ghost"
         size="sm"
-        className={`flex items-center gap-1 px-2 ${currentLang === 'fr' ? 'bg-snrt-red/10 text-snrt-red' : ''}`}
-        onClick={() => onLanguageChange('fr')}
+        className={`flex items-center gap-1 px-2 ${lang === 'fr' ? 'bg-snrt-red/10 text-snrt-red' : ''}`}
+        onClick={() => setLang('fr')}
       >
         <span className="font-medium">FR</span>
       </Button>
@@ -28,8 +27,8 @@ export const LanguageSelector: React.FC<LanguageSelectorProps> = ({
       <Button
         variant="ghost"
         size="sm"
-        className={`flex items-center gap-1 px-2 ${currentLang === 'ar' ? 'bg-snrt-red/10 text-snrt-red' : ''}`}
-        onClick={() => onLanguageChange('ar')}
+        className={`flex items-center gap-1 px-2 ${lang === 'ar' ? 'bg-snrt-red/10 text-snrt-red' : ''}`}
+        onClick={() => setLang('ar')}
         dir="rtl"
       >
         <span className="font-medium">العربية</span>
