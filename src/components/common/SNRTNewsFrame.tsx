@@ -2,7 +2,7 @@
 import React, { useState } from "react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
-import { X } from "lucide-react";
+import { X, ArrowLeft } from "lucide-react";
 
 interface SNRTNewsFrameProps {
   className?: string;
@@ -43,6 +43,21 @@ export function SNRTNewsFrame({ className, onClose }: SNRTNewsFrameProps) {
         title="SNRT News"
         sandbox="allow-same-origin allow-scripts"
       />
+      
+      {/* Large Exit Button */}
+      {onClose && (
+        <div className="fixed bottom-6 left-1/2 transform -translate-x-1/2 z-50">
+          <Button 
+            variant="default" 
+            size="lg" 
+            onClick={onClose}
+            className="bg-snrt-red hover:bg-red-700 text-white font-bold py-3 px-8 rounded-full shadow-lg flex items-center gap-2"
+          >
+            <ArrowLeft className="h-5 w-5" />
+            <span>Retour au tableau de bord</span>
+          </Button>
+        </div>
+      )}
     </div>
   );
 }
