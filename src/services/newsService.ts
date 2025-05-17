@@ -1,3 +1,4 @@
+
 import { toast } from "@/components/ui/sonner";
 
 export interface NewsItem {
@@ -21,7 +22,7 @@ export interface NewsItem {
 export interface NewsSource {
   id: string;
   name: string;
-  url: string;
+  url: string | ((lang: "fr" | "ar") => string);
   category: string;
   country: "ma" | "global";
 }
@@ -31,7 +32,10 @@ export const newsSources: NewsSource[] = [
   {
     id: "snrt",
     name: "SNRT News",
-    url: "https://snrtnews.com/rss.xml",
+    // Use a function that returns the appropriate URL based on language
+    url: (lang: "fr" | "ar") => lang === "fr" 
+      ? "https://snrtnews.com/fr/rss_fr.xml" 
+      : "https://snrtnews.com/rss.xml",
     category: "general",
     country: "ma"
   },
@@ -66,12 +70,13 @@ export const newsSources: NewsSource[] = [
 ];
 
 // Récupérer les actualités d'une source
-export async function fetchNewsFromSource(sourceId: string): Promise<NewsItem[]> {
+export async function fetchNewsFromSource(sourceId: string, lang: "fr" | "ar" = "fr"): Promise<NewsItem[]> {
   try {
     const source = newsSources.find(s => s.id === sourceId);
     if (!source) throw new Error(`Source ${sourceId} not found`);
     
-    const rssUrl = source.url;
+    // Handle URL function or string
+    const rssUrl = typeof source.url === 'function' ? source.url(lang) : source.url;
     const apiUrl = `https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent(rssUrl)}`;
     
     const response = await fetch(apiUrl);
@@ -96,9 +101,9 @@ export async function fetchNewsFromSource(sourceId: string): Promise<NewsItem[]>
 }
 
 // Récupérer les actualités par pays
-export async function fetchNewsByCountry(country: "ma" | "global"): Promise<NewsItem[]> {
+export async function fetchNewsByCountry(country: "ma" | "global", lang: "fr" | "ar" = "fr"): Promise<NewsItem[]> {
   const sourcesForCountry = newsSources.filter(source => source.country === country);
-  const allPromises = sourcesForCountry.map(source => fetchNewsFromSource(source.id));
+  const allPromises = sourcesForCountry.map(source => fetchNewsFromSource(source.id, lang));
   
   try {
     const results = await Promise.all(allPromises);

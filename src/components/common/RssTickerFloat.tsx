@@ -15,7 +15,12 @@ export function RssTickerFloat() {
   useEffect(() => {
     async function fetchRSS() {
       try {
-        const res = await fetch("https://api.rss2json.com/v1/api.json?rss_url=https://snrtnews.com/rss.xml");
+        // Use language-specific RSS URL
+        const rssUrl = lang === "fr" 
+          ? "https://snrtnews.com/fr/rss_fr.xml"
+          : "https://snrtnews.com/rss.xml";
+        
+        const res = await fetch(`https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent(rssUrl)}`);
         const data = await res.json();
         if (data.items) setRssItems(data.items.slice(0, 5));
       } catch (err) {
@@ -23,7 +28,7 @@ export function RssTickerFloat() {
       }
     }
     fetchRSS();
-  }, []);
+  }, [lang]); // Add lang as dependency to refetch when language changes
 
   const labels = {
     fr: "Dernières actualités",
