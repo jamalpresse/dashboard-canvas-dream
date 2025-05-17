@@ -1,11 +1,19 @@
 
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 
+// Define types for our translation structure
+interface TranslationItem {
+  [key: string]: string;
+}
+
+interface LanguageSection {
+  fr: TranslationItem;
+  ar: TranslationItem;
+}
+
 // Define the structure of our translations
 type TranslationLabels = {
-  [key: string]: {
-    [key: string]: string;
-  };
+  [key: string]: LanguageSection;
 };
 
 // All translations for the application
@@ -236,7 +244,7 @@ export const useLanguage = () => useContext(LanguageContext);
 export const LanguageProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
   const [lang, setLang] = useState<"fr" | "ar">("fr");
   const isRTL = lang === "ar";
-  const dir = isRTL ? "rtl" : "ltr";
+  const dir = isRTL ? "rtl" as const : "ltr" as const;
 
   // Function to get translation text
   const t = (section: string, key: string): string => {
@@ -253,7 +261,7 @@ export const LanguageProvider: React.FC<{ children: ReactNode }> = ({ children }
     document.documentElement.lang = lang;
   }, [lang, dir]);
 
-  const value = {
+  const value: LanguageContextType = {
     lang,
     setLang,
     t,

@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { NavLink, Outlet, Link, useLocation } from "react-router-dom";
 import { LayoutDashboard, Settings, Menu, X, Users, Newspaper, ImageIcon, Clock, Bell, Search, Pencil, Languages } from "lucide-react";
@@ -269,7 +268,7 @@ export default function DashboardLayout() {
       )}
         
       {/* RSS Ticker */}
-      <RssTickerFloat lang={lang as "fr" | "ar"} />
+      <RssTickerFloat lang={lang} />
     </div>
   );
 }
