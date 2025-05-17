@@ -38,14 +38,16 @@ export function RssTickerFloat() {
   return (
     <div className="fixed bottom-0 left-0 right-0 z-50 bg-white/90 backdrop-blur-md border-t border-purple-200 shadow-lg">
       <div className="container mx-auto overflow-hidden">
-        <div className={`flex items-center space-x-4 ${isRTL ? 'space-x-reverse flex-row-reverse' : ''} px-6 py-3`}>
-          <span className="text-snrt-red font-semibold whitespace-nowrap flex-shrink-0">
+        {/* Use flex-row-reverse for Arabic (RTL) and normal flex for French (LTR) */}
+        <div className={`flex items-center ${isRTL ? 'flex-row-reverse px-6' : 'flex-row px-6'} py-3`}>
+          {/* Remove space-x classes and manage spacing with specific margin classes */}
+          <span className={`text-snrt-red font-semibold whitespace-nowrap flex-shrink-0 ${isRTL ? 'mr-0 ml-4' : 'ml-0 mr-4'}`}>
             📰 {isRTL ? labels.ar : labels.fr} :
           </span>
           <div className="flex-1 overflow-hidden">
             <div className={cn(
               "marquee whitespace-nowrap", 
-              // Invert the direction: use RTL animation for French and LTR for Arabic
+              // Use RTL animation for French and LTR for Arabic
               lang === "fr" ? "marquee-rtl" : "marquee-ltr"
             )}>
               {rssItems.length > 0 ? (
@@ -55,7 +57,7 @@ export function RssTickerFloat() {
                     href={item.link} 
                     target="_blank" 
                     rel="noopener noreferrer" 
-                    className={`inline-block ${isRTL ? 'ml-12 mr-0' : 'mr-12'} text-snrt-red hover:underline hover:text-red-700`}
+                    className={`inline-block ${isRTL ? 'ml-12' : 'mr-12'} text-snrt-red hover:underline hover:text-red-700`}
                   >
                     {item.title}
                   </a>
