@@ -37,8 +37,8 @@ const LanguageSelector: React.FC<LanguageSelectorProps> = ({
             onClick={() => onLangPairChange(value)}
             className={`py-2 rounded-md border shadow-sm transition-all duration-200 ${
               selectedLangPair === value
-                ? 'bg-gradient-to-r from-purple-600 to-pink-500 text-white ring-2 ring-purple-600'
-                : 'bg-white text-black border-gray-300 hover:bg-purple-50'
+                ? 'bg-gradient-to-r from-snrt-red to-red-700 text-white ring-2 ring-snrt-red'
+                : 'bg-white text-black border-gray-300 hover:bg-gray-100'
             }`}
             variant={selectedLangPair === value ? "default" : "outline"}
           >

@@ -21,7 +21,7 @@ const ResultActions: React.FC<ResultActionsProps> = ({
       <Button 
         onClick={handleCopy} 
         disabled={!result} 
-        className={`bg-gradient-to-r from-purple-500 to-pink-500 text-white rounded-md hover:from-purple-600 hover:to-pink-600 transition-colors shadow-sm ${!result ? 'opacity-50 cursor-not-allowed' : ''}`}
+        className={`bg-gradient-to-r from-snrt-red to-red-700 text-white rounded-md hover:from-red-700 hover:to-red-800 transition-colors shadow-sm ${!result ? 'opacity-50 cursor-not-allowed' : ''}`}
       >
         <Clipboard className="mr-1 h-4 w-4" />
         COPIER

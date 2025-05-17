@@ -8,6 +8,7 @@ import { WeatherWidget } from "@/components/dashboard/WeatherWidget";
 import { SNRTNewsFrame } from "@/components/common/SNRTNewsFrame";
 import BreadcrumbNav from "@/components/common/BreadcrumbNav";
 import { RssTickerFloat } from "@/components/common/RssTickerFloat";
+
 const navItems = [{
   title: "Dashboard",
   href: "/",
@@ -107,7 +108,15 @@ export default function DashboardLayout() {
         {/* SNRT-style category navigation - Maintenant complète */}
         <nav className="snrt-nav overflow-x-auto scrollbar-hide bg-snrt-red text-white">
           <div className="flex items-center px-4 py-2 space-x-4">
-            {categories.map(category => {})}
+            {categories.map(category => (
+              <Link 
+                key={category.name}
+                to={category.href}
+                className="whitespace-nowrap font-medium hover:text-white/80 transition-colors"
+              >
+                {category.name}
+              </Link>
+            ))}
           </div>
         </nav>
       </header>

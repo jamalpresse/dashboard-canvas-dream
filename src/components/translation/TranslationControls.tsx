@@ -22,7 +22,7 @@ const TranslationControls: React.FC<TranslationControlsProps> = ({
         className={`${
           loading 
             ? 'bg-gray-400' 
-            : 'bg-gradient-to-r from-purple-600 to-pink-500 hover:from-purple-700 hover:to-pink-600 transition-colors'
+            : 'bg-gradient-to-r from-snrt-red to-red-700 hover:from-red-700 hover:to-red-800 transition-colors'
         }`}
       >
         <Languages className="mr-1 h-4 w-4" />
