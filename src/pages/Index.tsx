@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { ArrowRight, Globe, AlertCircle, Search } from "lucide-react";
@@ -18,9 +17,13 @@ import { FlashNews, FlashNewsItem } from "@/components/news/FlashNews";
 import { LanguageSelector } from "@/components/common/LanguageSelector";
 import { useLanguage } from "@/context/LanguageContext";
 import { Skeleton } from "@/components/ui/skeleton";
-
 const Index = () => {
-  const { lang, t, isRTL, dir } = useLanguage();
+  const {
+    lang,
+    t,
+    isRTL,
+    dir
+  } = useLanguage();
   const [analytics, setAnalytics] = useState<any[]>([]);
   const [newsArticles, setNewsArticles] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -52,7 +55,6 @@ const Index = () => {
         } = await supabase.from('analytics').select('*').order('date', {
           ascending: true
         });
-        
         if (analyticsError) throw analyticsError;
 
         // Fetch news articles
@@ -62,9 +64,7 @@ const Index = () => {
         } = await supabase.from('news_articles').select('*').order('publication_date', {
           ascending: false
         }).limit(5);
-        
         if (articlesError) throw articlesError;
-        
         setAnalytics(analyticsData || []);
         setNewsArticles(articlesData || []);
 
@@ -73,12 +73,10 @@ const Index = () => {
           const flashItems: FlashNewsItem[] = articlesData.slice(0, 6).map(article => ({
             id: article?.id || `temp-${Math.random().toString(36).substr(2, 9)}`,
             title: article?.title || t('common', 'noTitle'),
-            timestamp: article?.publication_date ? 
-              new Date(article.publication_date).toLocaleTimeString(isRTL ? 'ar-MA' : 'fr-FR', {
-                hour: '2-digit',
-                minute: '2-digit'
-              }) : 
-              '--:--',
+            timestamp: article?.publication_date ? new Date(article.publication_date).toLocaleTimeString(isRTL ? 'ar-MA' : 'fr-FR', {
+              hour: '2-digit',
+              minute: '2-digit'
+            }) : '--:--',
             category: article?.category || t('dashboard', 'news')
           }));
           setFlashNews(flashItems);
@@ -95,7 +93,7 @@ const Index = () => {
         console.error('Error fetching data:', error);
         setError(error?.message || t('common', 'errorLoading'));
         toast.error(isRTL ? "خطأ في تحميل البيانات" : "Erreur lors du chargement des données");
-        
+
         // Provide fallback data when errors occur
         setAnalytics([]);
         setNewsArticles([]);
@@ -109,7 +107,7 @@ const Index = () => {
         setIsLoading(false);
       }
     };
-    
+
     // Wrap in try/catch to prevent any uncaught exceptions
     try {
       fetchData();
@@ -126,17 +124,13 @@ const Index = () => {
     return {
       id: article.id || `temp-${Math.random().toString(36).substr(2, 9)}`,
       title: article.title || t('common', 'noTitle'),
-      description: article.content ? 
-        article.content.substring(0, 100) + (article.content.length > 100 ? '...' : '') : 
-        t('common', 'noDescription'),
-      time: article.publication_date ? 
-        new Date(article.publication_date).toLocaleDateString(isRTL ? 'ar-MA' : 'fr-FR', {
-          day: '2-digit',
-          month: 'short',
-          hour: '2-digit',
-          minute: '2-digit'
-        }) : 
-        '--:--',
+      description: article.content ? article.content.substring(0, 100) + (article.content.length > 100 ? '...' : '') : t('common', 'noDescription'),
+      time: article.publication_date ? new Date(article.publication_date).toLocaleDateString(isRTL ? 'ar-MA' : 'fr-FR', {
+        day: '2-digit',
+        month: 'short',
+        hour: '2-digit',
+        minute: '2-digit'
+      }) : '--:--',
       icon: <AlertCircle className="h-4 w-4 text-red-600" />,
       type: "default" as "default" | "success" | "warning" | "error"
     };
@@ -180,19 +174,17 @@ const Index = () => {
 
   // Get news items for grid only with validation
   const gridNews = news && Array.isArray(news) ? news.slice(0, 6) : [];
-  
+
   // Render loading skeletons while data is fetching
   if (isLoading) {
     return <LoadingState />;
   }
-  
+
   // Render error state if there's an error
   if (error) {
     return <ErrorState message={error} />;
   }
-  
-  return (
-    <div className="space-y-6">
+  return <div className="space-y-6">
       <div className="animate-fade-in">
         {/* Header with language selector */}
         <div className="flex justify-between items-center">
@@ -226,28 +218,9 @@ const Index = () => {
             </Link>
 
             {/* Hero Section */}
-            {featuredLoading ? (
-              <div className="bg-card rounded-lg shadow-sm h-[300px] md:h-[400px] animate-pulse flex items-center justify-center">
+            {featuredLoading ? <div className="bg-card rounded-lg shadow-sm h-[300px] md:h-[400px] animate-pulse flex items-center justify-center">
                 <p className="text-gray-400">{t('common', 'loading')}</p>
-              </div>
-            ) : featuredArticle ? (
-              <HeroNews 
-                title={featuredArticle.title || "Actualité SNRT"} 
-                imageUrl={featuredArticle.enclosure?.link || featuredArticle.thumbnail || 
-                  (featuredArticle.content && featuredArticle.content.match(/src=["'](https?:\/\/[^"']+)["']/)?.[1]) || 
-                  "/lovable-uploads/32ff14e9-af71-4640-b4c9-583985037c66.png"
-                } 
-                category="SNRT News" 
-                timestamp={formatNewsDate(featuredArticle.pubDate)} 
-                link={featuredArticle.link} 
-              />
-            ) : (
-              <HeroNews 
-                title="Actualité SNRT" 
-                imageUrl="/lovable-uploads/32ff14e9-af71-4640-b4c9-583985037c66.png" 
-                category="SNRT News" 
-              />
-            )}
+              </div> : featuredArticle ? <HeroNews title={featuredArticle.title || "Actualité SNRT"} imageUrl={featuredArticle.enclosure?.link || featuredArticle.thumbnail || featuredArticle.content && featuredArticle.content.match(/src=["'](https?:\/\/[^"']+)["']/)?.[1] || "/lovable-uploads/32ff14e9-af71-4640-b4c9-583985037c66.png"} category="SNRT News" timestamp={formatNewsDate(featuredArticle.pubDate)} link={featuredArticle.link} /> : <HeroNews title="Actualité SNRT" imageUrl="/lovable-uploads/32ff14e9-af71-4640-b4c9-583985037c66.png" category="SNRT News" />}
 
             {/* News Section with Tabs */}
             <div className="mt-8">
@@ -274,68 +247,26 @@ const Index = () => {
               </Tabs>
               
               {/* News Grid */}
-              {newsLoading ? (
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-                  {[1, 2, 3, 4, 5, 6].map(i => (
-                    <div key={i} className="bg-card rounded-lg shadow-sm p-4 h-[180px] animate-pulse">
+              {newsLoading ? <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+                  {[1, 2, 3, 4, 5, 6].map(i => <div key={i} className="bg-card rounded-lg shadow-sm p-4 h-[180px] animate-pulse">
                       <div className="h-5 bg-gray-700 rounded mb-2 w-3/4"></div>
                       <div className="h-4 bg-gray-700 rounded mb-4 w-1/2"></div>
                       <div className="h-16 bg-gray-700 rounded"></div>
-                    </div>
-                  ))}
-                </div>
-              ) : newsError ? (
-                <div className="bg-red-900/30 border border-red-900 rounded-lg p-4 text-center">
+                    </div>)}
+                </div> : newsError ? <div className="bg-red-900/30 border border-red-900 rounded-lg p-4 text-center">
                   <div className="flex justify-center items-center mb-2">
                     <AlertCircle className="h-5 w-5 text-snrt-red mr-2" />
                     <p className="text-red-400 font-medium">{t('common', 'loadingError')}</p>
                   </div>
                   <p className="text-red-300">{newsError}</p>
-                </div>
-              ) : !gridNews || gridNews.length === 0 ? (
-                <div className="bg-gray-900 border border-gray-800 rounded-lg p-8 text-center">
+                </div> : !gridNews || gridNews.length === 0 ? <div className="bg-gray-900 border border-gray-800 rounded-lg p-8 text-center">
                   <p className="text-gray-400">{t('common', 'noResults')}</p>
-                </div>
-              ) : (
-                <NewsGrid news={gridNews} />
-              )}
+                </div> : <NewsGrid news={gridNews} />}
             </div>
           </div>
           
           {/* Sidebar/Flash News - 1 column */}
-          <div className="space-y-4">
-            {/* Flash news component */}
-            {isLoading ? (
-              <div className="bg-card rounded-lg shadow-sm h-[400px] animate-pulse flex items-center justify-center">
-                <p className="text-gray-400">{t('common', 'loading')}</p>
-              </div>
-            ) : (
-              <FlashNews 
-                items={flashNews} 
-                className="shadow-lg"
-              />
-            )}
-            
-            {/* Stats cards in sidebar */}
-            <div className="space-y-4">
-              {statsData.length > 0 ? statsData.map((stat, i) => (
-                <StatCard key={i} {...stat} />
-              )) : (
-                // Fallback when no stats are available
-                <div className="bg-card rounded-lg shadow-sm p-4">
-                  <p className="text-sm text-gray-400 text-center">{t('common', 'noStatsAvailable')}</p>
-                </div>
-              )}
-            </div>
-            
-            {/* Activity Timeline */}
-            <div className="bg-card rounded-lg overflow-hidden border border-gray-800">
-              <div className="p-4 border-b border-gray-800">
-                <h3 className="font-semibold">{t('dashboard', 'recentActivity')}</h3>
-              </div>
-              <ActivityTimeline items={timelineItems} />
-            </div>
-          </div>
+          
         </div>
       </div>
 
@@ -360,14 +291,12 @@ const Index = () => {
           }
         `}
       </style>
-    </div>
-  );
+    </div>;
 };
 
 // Loading state component
 const LoadingState = () => {
-  return (
-    <div className="space-y-6">
+  return <div className="space-y-6">
       <div className="flex justify-between items-center">
         <Skeleton className="h-10 w-64" />
         <Skeleton className="h-10 w-32" />
@@ -376,9 +305,7 @@ const LoadingState = () => {
       <div className="grid grid-cols-1 lg:grid-cols-4 gap-6 mt-4">
         <div className="lg:col-span-3 space-y-6">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            {[1, 2, 3].map(i => (
-              <Skeleton key={i} className="h-20" />
-            ))}
+            {[1, 2, 3].map(i => <Skeleton key={i} className="h-20" />)}
           </div>
           <Skeleton className="h-20" />
           <Skeleton className="h-[300px]" />
@@ -388,9 +315,7 @@ const LoadingState = () => {
               <Skeleton className="h-8 w-32" />
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-              {[1, 2, 3, 4, 5, 6].map(i => (
-                <Skeleton key={i} className="h-[180px]" />
-              ))}
+              {[1, 2, 3, 4, 5, 6].map(i => <Skeleton key={i} className="h-[180px]" />)}
             </div>
           </div>
         </div>
@@ -398,21 +323,21 @@ const LoadingState = () => {
         <div className="space-y-4">
           <Skeleton className="h-[400px]" />
           <div className="space-y-4">
-            {[1, 2, 3].map(i => (
-              <Skeleton key={i} className="h-20" />
-            ))}
+            {[1, 2, 3].map(i => <Skeleton key={i} className="h-20" />)}
           </div>
           <Skeleton className="h-[300px]" />
         </div>
       </div>
-    </div>
-  );
+    </div>;
 };
 
 // Error state component
-const ErrorState = ({ message }: { message: string }) => {
-  return (
-    <div className="flex flex-col items-center justify-center py-12">
+const ErrorState = ({
+  message
+}: {
+  message: string;
+}) => {
+  return <div className="flex flex-col items-center justify-center py-12">
       <div className="w-full max-w-md bg-card p-6 rounded-lg border border-red-800 shadow-lg text-center">
         <AlertCircle className="h-12 w-12 text-red-500 mx-auto mb-4" />
         <h2 className="text-xl font-bold mb-2">Erreur de chargement</h2>
@@ -421,8 +346,6 @@ const ErrorState = ({ message }: { message: string }) => {
           Réessayer
         </Button>
       </div>
-    </div>
-  );
+    </div>;
 };
-
 export default Index;
