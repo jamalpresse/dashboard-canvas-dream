@@ -250,8 +250,35 @@ const Index = () => {
             </div>
           </div>
           
-          {/* Sidebar/Flash News - 1 column - MAINTENANT COMPLÉTÉ */}
-          
+          {/* Sidebar/Flash News - 1 column */}
+          <div className="space-y-4">
+            {/* Flash news component */}
+            {isLoading ? (
+              <div className="bg-card rounded-lg shadow-sm h-[400px] animate-pulse flex items-center justify-center">
+                <p className="text-gray-400">{t('common', 'loading')}</p>
+              </div>
+            ) : (
+              <FlashNews 
+                items={flashNews} 
+                className="shadow-lg"
+              />
+            )}
+            
+            {/* Stats cards in sidebar */}
+            <div className="space-y-4">
+              {statsData.map((stat, i) => (
+                <StatCard key={i} {...stat} />
+              ))}
+            </div>
+            
+            {/* Activity Timeline */}
+            <div className="bg-card rounded-lg overflow-hidden border border-gray-800">
+              <div className="p-4 border-b border-gray-800">
+                <h3 className="font-semibold">{t('dashboard', 'recentActivity')}</h3>
+              </div>
+              <ActivityTimeline activities={activities} />
+            </div>
+          </div>
         </div>
       </div>
 

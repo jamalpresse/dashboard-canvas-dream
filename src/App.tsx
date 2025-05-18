@@ -21,7 +21,16 @@ import News from "./pages/News";
 import ImageGeneration from "./pages/ImageGeneration";
 import Auth from "./pages/Auth";
 
-const queryClient = new QueryClient();
+// Configure Query Client with retries for better network resilience
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      retry: 2,
+      staleTime: 30000,
+      refetchOnWindowFocus: false,
+    },
+  },
+});
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
@@ -32,7 +41,10 @@ const App = () => (
             <Toaster />
             <Sonner />
             <Routes>
+              {/* Public route - auth page */}
               <Route path="/auth" element={<Auth />} />
+              
+              {/* Protected routes */}
               <Route element={<ProtectedRoute />}>
                 <Route element={<DashboardLayout />}>
                   <Route path="/" element={<Index />} />
@@ -47,6 +59,8 @@ const App = () => (
                   <Route path="/simple-image-generation" element={<Navigate to="/image-generation" replace />} />
                 </Route>
               </Route>
+              
+              {/* Fallback route */}
               <Route path="*" element={<NotFound />} />
             </Routes>
           </TooltipProvider>

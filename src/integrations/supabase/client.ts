@@ -14,5 +14,27 @@ export const supabase = createClient<Database>(SUPABASE_URL, SUPABASE_PUBLISHABL
     storage: localStorage,
     persistSession: true,
     autoRefreshToken: true,
+    detectSessionInUrl: true,
+    flowType: 'implicit',
   }
 });
+
+// Debug utility to check auth state
+export const checkAuthStatus = async () => {
+  try {
+    const { data, error } = await supabase.auth.getSession();
+    
+    if (error) {
+      console.error('Error checking auth status:', error);
+      return null;
+    }
+    
+    return {
+      session: data.session,
+      user: data.session?.user ?? null
+    };
+  } catch (e) {
+    console.error('Exception checking auth status:', e);
+    return null;
+  }
+};

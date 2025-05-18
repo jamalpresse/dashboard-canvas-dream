@@ -73,15 +73,21 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   };
 
   useEffect(() => {
+    let mounted = true;
+    
     // First set up the auth state change listener
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      async (event, newSession) => {
+      (event, newSession) => {
+        if (!mounted) return;
+        
+        console.log('Auth state changed:', event);
         setSession(newSession);
         setUser(newSession?.user ?? null);
 
-        // Only fetch profile after a short delay
+        // Only fetch profile after a short delay to avoid blocking the main thread
         if (newSession?.user) {
           setTimeout(async () => {
+            if (!mounted) return;
             const profile = await fetchProfile(newSession.user.id);
             setProfile(profile);
             setLoading(false);
@@ -97,23 +103,28 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     const initializeAuth = async () => {
       try {
         const { data: { session } } = await supabase.auth.getSession();
+        if (!mounted) return;
+        
+        console.log('Initial auth session:', session ? 'Found' : 'Not found');
         setSession(session);
         setUser(session?.user ?? null);
 
         if (session?.user) {
           const profile = await fetchProfile(session.user.id);
+          if (!mounted) return;
           setProfile(profile);
         }
       } catch (error) {
         console.error('Error initializing auth:', error);
       } finally {
-        setLoading(false);
+        if (mounted) setLoading(false);
       }
     };
 
     initializeAuth();
 
     return () => {
+      mounted = false;
       subscription.unsubscribe();
     };
   }, []);
@@ -155,6 +166,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         await supabase.auth.signOut({ scope: 'global' });
       } catch (err) {
         // Continue even if this fails
+        console.log('Error during pre-login signout (non-critical):', err);
       }
       
       const { data, error } = await supabase.auth.signInWithPassword({
