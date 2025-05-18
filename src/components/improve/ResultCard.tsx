@@ -39,7 +39,7 @@ export function ResultCard({
           <div key={i} className="flex items-center mb-2">
             <Badge
               variant="outline"
-              className={`px-3 py-1 ${isRTL(item) ? 'text-right' : 'text-left'} bg-purple-50 text-purple-800 border-purple-200 hover:bg-purple-100`}
+              className={`px-3 py-1 ${isRTL(item) ? 'text-right' : 'text-left'} bg-purple-50 text-foreground border-purple-200 hover:bg-purple-100`}
               dir={dirFrom(item)}
             >
               {item}
@@ -67,7 +67,7 @@ export function ResultCard({
       <div className="mb-3">
         <p 
           dir={dirFrom(joinedText)} 
-          className={`${alignFrom(joinedText)} whitespace-pre-wrap text-purple-800`}
+          className={`${alignFrom(joinedText)} whitespace-pre-wrap text-foreground`}
         >
           {joinedText}
         </p>
@@ -91,7 +91,7 @@ export function ResultCard({
           <div key={i} className="flex items-center">
             <span
               dir={dirFrom(item)}
-              className={`${alignFrom(item)} text-purple-600`}
+              className={`${alignFrom(item)} text-foreground`}
             >
               {item}
             </span>
@@ -105,7 +105,7 @@ export function ResultCard({
     return (
       <Card className="overflow-hidden hover:shadow-md transition-shadow duration-300">
         <CardContent className="p-4">
-          <h3 className="font-bold mb-2 text-purple-800">{title}</h3>
+          <h3 className="font-bold mb-2 text-foreground">{title}</h3>
           {isKeywords && renderKeywords(content)}
           {isHashtags && renderHashtags(content)}
           {!isKeywords && !isHashtags && (
@@ -114,7 +114,7 @@ export function ResultCard({
                 <li key={i} className="flex justify-between items-center">
                   <span
                     dir={dirFrom(item)}
-                    className={`${alignFrom(item)} text-gray-900`}
+                    className={`${alignFrom(item)} text-foreground`}
                   >
                     {item}
                   </span>
@@ -149,10 +149,10 @@ export function ResultCard({
   return (
     <Card className="overflow-hidden hover:shadow-md transition-shadow duration-300">
       <CardContent className="p-4">
-        <h3 className="font-bold mb-2 text-purple-800">{title}</h3>
+        <h3 className="font-bold mb-2 text-foreground">{title}</h3>
         <p
           dir={dirFrom(content as string)}
-          className={`${alignFrom(content as string)} whitespace-pre-wrap text-gray-900`}
+          className={`${alignFrom(content as string)} whitespace-pre-wrap text-foreground`}
         >
           {content as string}
         </p>
