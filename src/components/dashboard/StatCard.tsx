@@ -1,6 +1,8 @@
+
 import { cn } from "@/lib/utils";
 import { Card, CardContent } from "@/components/ui/card";
 import { cva, type VariantProps } from "class-variance-authority";
+
 const statCardVariants = cva("flex h-full w-full flex-col justify-between rounded-xl overflow-hidden", {
   variants: {
     variant: {
@@ -15,6 +17,7 @@ const statCardVariants = cva("flex h-full w-full flex-col justify-between rounde
     variant: "default"
   }
 });
+
 export interface StatCardProps extends VariantProps<typeof statCardVariants> {
   title: string;
   value: string | number;
@@ -25,6 +28,7 @@ export interface StatCardProps extends VariantProps<typeof statCardVariants> {
   };
   className?: string;
 }
+
 export function StatCard({
   title,
   value,
@@ -33,7 +37,27 @@ export function StatCard({
   variant,
   className
 }: StatCardProps) {
-  return <Card className={cn("border-none shadow-lg", className)}>
-      
-    </Card>;
+  return (
+    <Card className={cn("border-none shadow-lg h-full", className)}>
+      <CardContent className={cn(statCardVariants({ variant }), "p-0")}>
+        <div className="p-5 flex-1 flex flex-col">
+          <div className="flex justify-between items-start mb-2">
+            <div className="text-sm font-medium opacity-85">{title}</div>
+            <div className="p-2 rounded-full bg-white/10">{icon}</div>
+          </div>
+          <div className="flex-1 flex flex-col justify-end">
+            <div className="text-3xl font-bold">{value}</div>
+            {trend && (
+              <div className="flex items-center text-xs mt-1">
+                <span className={trend.positive ? "text-green-300" : "text-red-300"}>
+                  {trend.positive ? "+" : "-"}{trend.value}%
+                </span>
+                <span className="ml-1 opacity-75">depuis 30j</span>
+              </div>
+            )}
+          </div>
+        </div>
+      </CardContent>
+    </Card>
+  );
 }

@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { NavLink, Outlet, Link, useLocation } from "react-router-dom";
 import { LayoutDashboard, Settings, Menu, X, Users, Newspaper, ImageIcon, Clock, Bell, Search, Pencil, Languages, LogOut, User } from "lucide-react";
@@ -110,16 +109,17 @@ export default function DashboardLayout() {
     icon: <ImageIcon className="h-5 w-5" />
   }];
   
-  return <div className="min-h-screen bg-background text-foreground" dir={dir}>
+  return (
+    <div className="min-h-screen bg-background text-foreground flex flex-col" dir={dir}>
       {/* SNRT-style header */}
-      <header className="snrt-header flex flex-col">
-        <div className="flex justify-between items-center p-4">
+      <header className="snrt-header">
+        <div className="flex justify-between items-center p-3">
           <div className="flex items-center gap-2">
             <Link to="/" className="flex items-center">
               <h1 className="text-2xl font-bold font-playfair text-snrt-red">SNRTnews</h1>
             </Link>
           </div>
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-3">
             <div className="hidden md:flex items-center gap-2 text-sm">
               <Clock className="h-4 w-4 text-snrt-red" />
               <span>{currentTime}</span>
@@ -184,12 +184,21 @@ export default function DashboardLayout() {
       </header>
 
       {/* Mobile menu button */}
-      {isMobile && <button className="fixed top-4 right-4 z-50 bg-snrt-red rounded-full p-2 shadow-md text-white" onClick={toggleSidebar}>
+      {isMobile && (
+        <button 
+          className="fixed top-4 right-4 z-50 bg-snrt-red rounded-full p-2 shadow-md text-white" 
+          onClick={toggleSidebar}
+        >
           {sidebarOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
-        </button>}
+        </button>
+      )}
       
       {/* Sidebar - Updated for RTL support */}
-      <aside className={cn("fixed inset-y-0 flex h-full w-64 flex-col bg-black/90 backdrop-blur-md border-r border-gray-800 shadow-lg transition-transform duration-300 ease-in-out", isRTL ? "right-0" : "left-0", isMobile && !sidebarOpen ? isRTL ? "translate-x-full" : "-translate-x-full" : "translate-x-0")}>
+      <aside className={cn(
+        "fixed inset-y-0 flex h-full w-60 flex-col bg-black/90 backdrop-blur-md border-r border-gray-800 shadow-lg transition-transform duration-300 ease-in-out z-40", 
+        isRTL ? "right-0" : "left-0", 
+        isMobile && !sidebarOpen ? isRTL ? "translate-x-full" : "-translate-x-full" : "translate-x-0"
+      )}>
         <div className="flex h-16 items-center border-b border-gray-800 px-6">
           <Link to="/">
             <h1 className="text-2xl font-bold font-playfair text-snrt-red">
@@ -266,24 +275,33 @@ export default function DashboardLayout() {
       </aside>
 
       {/* Main Content with Breadcrumb - Updated for RTL support */}
-      <main className={cn("transition-all duration-300", isMobile ? "ml-0 mr-0" : isRTL ? "mr-64" : "ml-64", "pb-16 pt-4")}>
-        <div className="px-4 md:px-6">
+      <main className={cn(
+        "flex-1 transition-all duration-300", 
+        isMobile ? "ml-0 mr-0" : isRTL ? "mr-60" : "ml-60", 
+        "pb-4 pt-2"
+      )}>
+        <div className="px-3 md:px-4 w-full">
           {/* Breadcrumb */}
-          {location.pathname !== '/' && <div className="mb-4">
+          {location.pathname !== '/' && (
+            <div className="mb-3">
               <BreadcrumbNav />
-            </div>}
+            </div>
+          )}
           <Outlet />
         </div>
       </main>
 
       {/* SNRT News Frame Modal */}
-      {showNewsFrame && <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4">
+      {showNewsFrame && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4">
           <div className="w-full max-w-4xl">
             <SNRTNewsFrame onClose={toggleNewsFrame} />
           </div>
-        </div>}
+        </div>
+      )}
         
       {/* RSS Ticker - Now using the LanguageContext directly */}
       <RssTickerFloat />
-    </div>;
+    </div>
+  );
 }
