@@ -5,6 +5,8 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { LanguageProvider } from "./context/LanguageContext";
+import { AuthProvider } from "./context/AuthContext";
+import { ProtectedRoute } from "./components/auth/ProtectedRoute";
 
 import DashboardLayout from "./components/layout/DashboardLayout";
 import Index from "./pages/Index";
@@ -17,34 +19,40 @@ import Improve from "./pages/Improve";
 import Translation from "./pages/Translation";
 import News from "./pages/News";
 import ImageGeneration from "./pages/ImageGeneration";
+import Auth from "./pages/Auth";
 
 const queryClient = new QueryClient();
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
-    <LanguageProvider>
-      <TooltipProvider>
-        <Toaster />
-        <Sonner />
-        <BrowserRouter>
-          <Routes>
-            <Route element={<DashboardLayout />}>
-              <Route path="/" element={<Index />} />
-              <Route path="/analytics" element={<Analytics />} />
-              <Route path="/users" element={<Users />} />
-              <Route path="/settings" element={<Settings />} />
-              <Route path="/search" element={<Search />} />
-              <Route path="/improve" element={<Improve />} />
-              <Route path="/translation" element={<Translation />} />
-              <Route path="/news" element={<News />} />
-              <Route path="/image-generation" element={<ImageGeneration />} />
-              <Route path="/simple-image-generation" element={<Navigate to="/image-generation" replace />} />
-            </Route>
-            <Route path="*" element={<NotFound />} />
-          </Routes>
-        </BrowserRouter>
-      </TooltipProvider>
-    </LanguageProvider>
+    <BrowserRouter>
+      <AuthProvider>
+        <LanguageProvider>
+          <TooltipProvider>
+            <Toaster />
+            <Sonner />
+            <Routes>
+              <Route path="/auth" element={<Auth />} />
+              <Route element={<ProtectedRoute />}>
+                <Route element={<DashboardLayout />}>
+                  <Route path="/" element={<Index />} />
+                  <Route path="/analytics" element={<Analytics />} />
+                  <Route path="/users" element={<Users />} />
+                  <Route path="/settings" element={<Settings />} />
+                  <Route path="/search" element={<Search />} />
+                  <Route path="/improve" element={<Improve />} />
+                  <Route path="/translation" element={<Translation />} />
+                  <Route path="/news" element={<News />} />
+                  <Route path="/image-generation" element={<ImageGeneration />} />
+                  <Route path="/simple-image-generation" element={<Navigate to="/image-generation" replace />} />
+                </Route>
+              </Route>
+              <Route path="*" element={<NotFound />} />
+            </Routes>
+          </TooltipProvider>
+        </LanguageProvider>
+      </AuthProvider>
+    </BrowserRouter>
   </QueryClientProvider>
 );
 

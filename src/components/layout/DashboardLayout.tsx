@@ -1,6 +1,7 @@
+
 import { useState } from "react";
 import { NavLink, Outlet, Link, useLocation } from "react-router-dom";
-import { LayoutDashboard, Settings, Menu, X, Users, Newspaper, ImageIcon, Clock, Bell, Search, Pencil, Languages } from "lucide-react";
+import { LayoutDashboard, Settings, Menu, X, Users, Newspaper, ImageIcon, Clock, Bell, Search, Pencil, Languages, LogOut, User } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { useIsMobile } from "@/hooks/use-mobile";
@@ -9,20 +10,28 @@ import { SNRTNewsFrame } from "@/components/common/SNRTNewsFrame";
 import BreadcrumbNav from "@/components/common/BreadcrumbNav";
 import { RssTickerFloat } from "@/components/common/RssTickerFloat";
 import { useLanguage } from "@/context/LanguageContext";
+import { useAuth } from "@/context/AuthContext";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { 
+  DropdownMenu, 
+  DropdownMenuContent, 
+  DropdownMenuItem, 
+  DropdownMenuSeparator, 
+  DropdownMenuTrigger 
+} from "@/components/ui/dropdown-menu";
+
 export default function DashboardLayout() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [showNewsFrame, setShowNewsFrame] = useState(false);
   const isMobile = useIsMobile();
   const location = useLocation();
-  const {
-    t,
-    lang,
-    dir,
-    isRTL
-  } = useLanguage();
+  const { t, lang, dir, isRTL } = useLanguage();
+  const { user, profile, signOut } = useAuth();
+
   const toggleSidebar = () => {
     setSidebarOpen(!sidebarOpen);
   };
+  
   const toggleNewsFrame = () => {
     setShowNewsFrame(!showNewsFrame);
   };
@@ -39,6 +48,17 @@ export default function DashboardLayout() {
     minute: '2-digit'
   });
 
+  // Get user initials for avatar fallback
+  const getInitials = (name?: string | null) => {
+    if (!name) return "U";
+    return name
+      .split(' ')
+      .map(part => part[0])
+      .join('')
+      .toUpperCase()
+      .substring(0, 2);
+  };
+
   // Navigation items using translation context
   const navItems = [{
     title: t('navigation', 'dashboard'),
@@ -53,6 +73,7 @@ export default function DashboardLayout() {
     href: "/users",
     icon: <Users className="h-6 w-6" />
   }];
+  
   const categories = [{
     name: t('categories', 'politique'),
     href: "/news?category=politique"
@@ -88,6 +109,7 @@ export default function DashboardLayout() {
     href: "/image-generation",
     icon: <ImageIcon className="h-5 w-5" />
   }];
+  
   return <div className="min-h-screen bg-background text-foreground" dir={dir}>
       {/* SNRT-style header */}
       <header className="snrt-header flex flex-col">
@@ -112,6 +134,46 @@ export default function DashboardLayout() {
                 <Search className="h-5 w-5" />
               </Button>
             </Link>
+            
+            {/* User profile menu */}
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" size="icon" className="rounded-full">
+                  <Avatar className="h-8 w-8">
+                    <AvatarImage src={profile?.avatar_url || undefined} />
+                    <AvatarFallback className="bg-snrt-red text-white">
+                      {getInitials(profile?.full_name)}
+                    </AvatarFallback>
+                  </Avatar>
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-56">
+                <div className="flex items-center justify-start gap-2 p-2">
+                  <div className="flex flex-col space-y-0.5">
+                    <p className="text-sm font-medium">{profile?.full_name || user?.email}</p>
+                    <p className="text-xs text-muted-foreground">{user?.email}</p>
+                  </div>
+                </div>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem asChild>
+                  <Link to="/settings" className="w-full cursor-pointer">
+                    <User className="mr-2 h-4 w-4" />
+                    <span>Profile</span>
+                  </Link>
+                </DropdownMenuItem>
+                <DropdownMenuItem asChild>
+                  <Link to="/settings" className="w-full cursor-pointer">
+                    <Settings className="mr-2 h-4 w-4" />
+                    <span>Settings</span>
+                  </Link>
+                </DropdownMenuItem>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem onClick={() => signOut()} className="text-red-600 focus:text-red-600 cursor-pointer">
+                  <LogOut className="mr-2 h-4 w-4" />
+                  <span>{t('navigation', 'logout')}</span>
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
           </div>
         </div>
         
@@ -134,6 +196,22 @@ export default function DashboardLayout() {
               SNRTnews
             </h1>
           </Link>
+        </div>
+        
+        {/* User profile in sidebar */}
+        <div className="border-b border-gray-800 p-4">
+          <div className="flex items-center space-x-3">
+            <Avatar className="h-10 w-10">
+              <AvatarImage src={profile?.avatar_url || undefined} />
+              <AvatarFallback className="bg-snrt-red text-white">
+                {getInitials(profile?.full_name)}
+              </AvatarFallback>
+            </Avatar>
+            <div className="space-y-0.5">
+              <p className="text-sm font-medium text-white">{profile?.full_name || "User"}</p>
+              <p className="text-xs text-gray-400">{profile?.role || "User"}</p>
+            </div>
+          </div>
         </div>
         
         <nav className="flex-1 overflow-auto p-4">
@@ -175,9 +253,14 @@ export default function DashboardLayout() {
         </nav>
         
         <div className="border-t border-gray-800 p-4">
-          <Button variant="outline" size="sm" className="w-full justify-start gap-2 text-gray-300 hover:bg-gray-800 hover:text-white">
-            <Settings className="h-4 w-4" />
-            <span>{t('navigation', 'settings')}</span>
+          <Button 
+            variant="outline" 
+            size="sm" 
+            className="w-full justify-start gap-2 text-red-400 hover:bg-gray-800 hover:text-white"
+            onClick={signOut}
+          >
+            <LogOut className="h-4 w-4" />
+            <span>{t('navigation', 'logout')}</span>
           </Button>
         </div>
       </aside>

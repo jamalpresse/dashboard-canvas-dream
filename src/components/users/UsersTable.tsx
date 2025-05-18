@@ -16,13 +16,15 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
 export interface User {
   id: string;
-  name: string;
+  full_name: string | null;
   email: string;
   role: "Admin" | "Editor" | "User";
   status: "Active" | "Inactive" | "Pending";
+  avatar_url?: string | null;
 }
 
 interface UsersTableProps {
@@ -32,11 +34,21 @@ interface UsersTableProps {
 }
 
 export function UsersTable({ users, onEdit, onDelete }: UsersTableProps) {
+  const getInitials = (name?: string | null) => {
+    if (!name) return "U";
+    return name
+      .split(' ')
+      .map(part => part[0])
+      .join('')
+      .toUpperCase()
+      .substring(0, 2);
+  };
+
   return (
     <Table>
       <TableHeader>
         <TableRow>
-          <TableHead>Name</TableHead>
+          <TableHead>User</TableHead>
           <TableHead>Email</TableHead>
           <TableHead>Role</TableHead>
           <TableHead>Status</TableHead>
@@ -53,7 +65,17 @@ export function UsersTable({ users, onEdit, onDelete }: UsersTableProps) {
         ) : (
           users.map((user) => (
             <TableRow key={user.id}>
-              <TableCell className="font-medium">{user.name}</TableCell>
+              <TableCell className="font-medium">
+                <div className="flex items-center gap-3">
+                  <Avatar className="h-8 w-8">
+                    <AvatarImage src={user.avatar_url || undefined} />
+                    <AvatarFallback className="bg-primary/10">
+                      {getInitials(user.full_name)}
+                    </AvatarFallback>
+                  </Avatar>
+                  <span>{user.full_name || "No name"}</span>
+                </div>
+              </TableCell>
               <TableCell>{user.email}</TableCell>
               <TableCell>
                 <Badge variant="outline" className="bg-slate-100">
