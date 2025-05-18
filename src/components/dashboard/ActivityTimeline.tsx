@@ -23,7 +23,7 @@ interface TimelineProps {
 }
 
 export function ActivityTimeline({
-  items,
+  items = [], // Default to empty array to avoid undefined errors
   className,
   title = "Activités récentes",
   showViewAll = false
@@ -34,16 +34,21 @@ export function ActivityTimeline({
         <CardTitle>{title}</CardTitle>
       </CardHeader>
       <CardContent className="p-0">
-        {items.length === 0 ? (
+        {!items || items.length === 0 ? (
           <div className="p-6 text-center text-muted-foreground">
             <p>Aucune activité récente</p>
           </div>
         ) : (
           <div className="space-y-1">
             {items.map((item, index) => {
+              // Safely check for item properties to avoid undefined errors
+              if (!item || !item.id || !item.title) {
+                return null; // Skip invalid items
+              }
+              
               // Determine direction based on content
               const isRtlTitle = isRTL(item.title);
-              const isRtlDesc = isRTL(item.description);
+              const isRtlDesc = item.description ? isRTL(item.description) : false;
               
               return (
                 <div
@@ -71,9 +76,11 @@ export function ActivityTimeline({
                       <h4 className="text-sm font-medium" dir={dirFrom(isRtlTitle ? "rtl" : "ltr")}>
                         {item.title}
                       </h4>
-                      <p className="text-sm text-muted-foreground mt-1" dir={dirFrom(isRtlDesc ? "rtl" : "ltr")}>
-                        {item.description}
-                      </p>
+                      {item.description && (
+                        <p className="text-sm text-muted-foreground mt-1" dir={dirFrom(isRtlDesc ? "rtl" : "ltr")}>
+                          {item.description}
+                        </p>
+                      )}
                     </div>
                     <div className="text-xs text-muted-foreground">
                       {item.time}
@@ -85,7 +92,7 @@ export function ActivityTimeline({
             })}
           </div>
         )}
-        {showViewAll && (
+        {showViewAll && items && items.length > 0 && (
           <div className="p-4 text-center border-t border-border">
             <Button variant="link" size="sm" className="text-snrt-red">
               Voir toutes les activités <ArrowRight className="ml-1 h-4 w-4" />

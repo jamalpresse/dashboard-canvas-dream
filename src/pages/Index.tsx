@@ -17,6 +17,7 @@ import { NewsGrid } from "@/components/news/NewsGrid";
 import { FlashNews, FlashNewsItem } from "@/components/news/FlashNews";
 import { LanguageSelector } from "@/components/common/LanguageSelector";
 import { useLanguage } from "@/context/LanguageContext";
+import { Skeleton } from "@/components/ui/skeleton";
 
 const Index = () => {
   const { lang, t, isRTL, dir } = useLanguage();
@@ -24,6 +25,7 @@ const Index = () => {
   const [newsArticles, setNewsArticles] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [flashNews, setFlashNews] = useState<FlashNewsItem[]>([]);
+  const [error, setError] = useState<string | null>(null);
 
   // Use the useNews hook to fetch news data
   const {
@@ -41,6 +43,7 @@ const Index = () => {
     const fetchData = async () => {
       try {
         setIsLoading(true);
+        setError(null);
 
         // Fetch analytics data
         const {
@@ -49,6 +52,7 @@ const Index = () => {
         } = await supabase.from('analytics').select('*').order('date', {
           ascending: true
         });
+        
         if (analyticsError) throw analyticsError;
 
         // Fetch news articles
@@ -58,51 +62,89 @@ const Index = () => {
         } = await supabase.from('news_articles').select('*').order('publication_date', {
           ascending: false
         }).limit(5);
+        
         if (articlesError) throw articlesError;
+        
         setAnalytics(analyticsData || []);
         setNewsArticles(articlesData || []);
 
-        // Create flash news from articles
-        if (articlesData) {
+        // Create flash news from articles - with validation
+        if (articlesData && Array.isArray(articlesData) && articlesData.length > 0) {
           const flashItems: FlashNewsItem[] = articlesData.slice(0, 6).map(article => ({
-            id: article.id,
-            title: article.title,
-            timestamp: new Date(article.publication_date).toLocaleTimeString(isRTL ? 'ar-MA' : 'fr-FR', {
-              hour: '2-digit',
-              minute: '2-digit'
-            }),
-            category: article.category || t('dashboard', 'news')
+            id: article?.id || `temp-${Math.random().toString(36).substr(2, 9)}`,
+            title: article?.title || t('common', 'noTitle'),
+            timestamp: article?.publication_date ? 
+              new Date(article.publication_date).toLocaleTimeString(isRTL ? 'ar-MA' : 'fr-FR', {
+                hour: '2-digit',
+                minute: '2-digit'
+              }) : 
+              '--:--',
+            category: article?.category || t('dashboard', 'news')
           }));
           setFlashNews(flashItems);
+        } else {
+          // Use fallback data if no articles
+          setFlashNews([{
+            id: 'fallback-1',
+            title: t('common', 'noNewsAvailable'),
+            timestamp: '--:--',
+            category: t('dashboard', 'news')
+          }]);
         }
-      } catch (error) {
+      } catch (error: any) {
         console.error('Error fetching data:', error);
+        setError(error?.message || t('common', 'errorLoading'));
         toast.error(isRTL ? "خطأ في تحميل البيانات" : "Erreur lors du chargement des données");
+        
+        // Provide fallback data when errors occur
+        setAnalytics([]);
+        setNewsArticles([]);
+        setFlashNews([{
+          id: 'error-1',
+          title: t('common', 'errorLoadingNews'),
+          timestamp: '--:--',
+          category: t('dashboard', 'news')
+        }]);
       } finally {
         setIsLoading(false);
       }
     };
-    fetchData();
+    
+    // Wrap in try/catch to prevent any uncaught exceptions
+    try {
+      fetchData();
+    } catch (err) {
+      console.error('Uncaught error in fetchData:', err);
+      setIsLoading(false);
+      setError(t('common', 'unexpectedError'));
+    }
   }, [lang, isRTL, t]);
 
-  // Create timeline items from news articles
-  const timelineItems = newsArticles.map(article => ({
-    id: article.id,
-    title: article.title,
-    description: article.content?.substring(0, 100) + (article.content?.length > 100 ? '...' : ''),
-    time: new Date(article.publication_date).toLocaleDateString(isRTL ? 'ar-MA' : 'fr-FR', {
-      day: '2-digit',
-      month: 'short',
-      hour: '2-digit',
-      minute: '2-digit'
-    }),
-    icon: <AlertCircle className="h-4 w-4 text-red-600" />,
-    type: "default" as "default" | "success" | "warning" | "error"
-  }));
+  // Create timeline items from news articles with validation
+  const timelineItems = newsArticles && Array.isArray(newsArticles) ? newsArticles.map(article => {
+    if (!article) return null;
+    return {
+      id: article.id || `temp-${Math.random().toString(36).substr(2, 9)}`,
+      title: article.title || t('common', 'noTitle'),
+      description: article.content ? 
+        article.content.substring(0, 100) + (article.content.length > 100 ? '...' : '') : 
+        t('common', 'noDescription'),
+      time: article.publication_date ? 
+        new Date(article.publication_date).toLocaleDateString(isRTL ? 'ar-MA' : 'fr-FR', {
+          day: '2-digit',
+          month: 'short',
+          hour: '2-digit',
+          minute: '2-digit'
+        }) : 
+        '--:--',
+      icon: <AlertCircle className="h-4 w-4 text-red-600" />,
+      type: "default" as "default" | "success" | "warning" | "error"
+    };
+  }).filter(Boolean) : [];
 
-  // Calculate stats from the latest analytics entry
-  const latestAnalytics = analytics.length ? analytics[analytics.length - 1] : null;
-  const prevAnalytics = analytics.length > 1 ? analytics[analytics.length - 2] : null;
+  // Calculate stats from the latest analytics entry with validation
+  const latestAnalytics = analytics && analytics.length ? analytics[analytics.length - 1] : null;
+  const prevAnalytics = analytics && analytics.length > 1 ? analytics[analytics.length - 2] : null;
   const calculateTrend = (current: number, previous: number) => {
     if (!previous) return {
       value: 0,
@@ -116,28 +158,38 @@ const Index = () => {
     };
   };
 
-  // Stats data for StatCard components
+  // Stats data for StatCard components with safe defaults
   const statsData = latestAnalytics ? [{
     title: t('dashboard', 'news'),
-    value: latestAnalytics.page_view_count.toString(),
+    value: latestAnalytics.page_view_count?.toString() || "0",
     icon: <Search className="h-5 w-5 text-white" />,
-    trend: calculateTrend(latestAnalytics.page_view_count, prevAnalytics?.page_view_count || 0)
+    trend: calculateTrend(latestAnalytics.page_view_count || 0, prevAnalytics?.page_view_count || 0)
   }, {
     title: isRTL ? t('dashboard', 'news') : "Articles",
-    value: latestAnalytics.article_view_count.toString(),
+    value: latestAnalytics.article_view_count?.toString() || "0",
     icon: <AlertCircle className="h-5 w-5 text-white" />,
-    trend: calculateTrend(latestAnalytics.article_view_count, prevAnalytics?.article_view_count || 0),
+    trend: calculateTrend(latestAnalytics.article_view_count || 0, prevAnalytics?.article_view_count || 0),
     variant: "primary" as const
   }, {
     title: t('dashboard', 'translate'),
-    value: latestAnalytics.translation_count.toString(),
+    value: latestAnalytics.translation_count?.toString() || "0",
     icon: <Globe className="h-5 w-5 text-white" />,
-    trend: calculateTrend(latestAnalytics.translation_count, prevAnalytics?.translation_count || 0),
+    trend: calculateTrend(latestAnalytics.translation_count || 0, prevAnalytics?.translation_count || 0),
     variant: "success" as const
   }] : [];
 
-  // Get news items for grid only (featuredArticle is now separate)
-  const gridNews = news.slice(0, 6);
+  // Get news items for grid only with validation
+  const gridNews = news && Array.isArray(news) ? news.slice(0, 6) : [];
+  
+  // Render loading skeletons while data is fetching
+  if (isLoading) {
+    return <LoadingState />;
+  }
+  
+  // Render error state if there's an error
+  if (error) {
+    return <ErrorState message={error} />;
+  }
   
   return (
     <div className="space-y-6">
@@ -236,11 +288,11 @@ const Index = () => {
                 <div className="bg-red-900/30 border border-red-900 rounded-lg p-4 text-center">
                   <div className="flex justify-center items-center mb-2">
                     <AlertCircle className="h-5 w-5 text-snrt-red mr-2" />
-                    <p className="text-red-400 font-medium">{t('common', 'loading')}</p>
+                    <p className="text-red-400 font-medium">{t('common', 'loadingError')}</p>
                   </div>
                   <p className="text-red-300">{newsError}</p>
                 </div>
-              ) : gridNews.length === 0 ? (
+              ) : !gridNews || gridNews.length === 0 ? (
                 <div className="bg-gray-900 border border-gray-800 rounded-lg p-8 text-center">
                   <p className="text-gray-400">{t('common', 'noResults')}</p>
                 </div>
@@ -266,9 +318,14 @@ const Index = () => {
             
             {/* Stats cards in sidebar */}
             <div className="space-y-4">
-              {statsData.map((stat, i) => (
+              {statsData.length > 0 ? statsData.map((stat, i) => (
                 <StatCard key={i} {...stat} />
-              ))}
+              )) : (
+                // Fallback when no stats are available
+                <div className="bg-card rounded-lg shadow-sm p-4">
+                  <p className="text-sm text-gray-400 text-center">{t('common', 'noStatsAvailable')}</p>
+                </div>
+              )}
             </div>
             
             {/* Activity Timeline */}
@@ -303,6 +360,67 @@ const Index = () => {
           }
         `}
       </style>
+    </div>
+  );
+};
+
+// Loading state component
+const LoadingState = () => {
+  return (
+    <div className="space-y-6">
+      <div className="flex justify-between items-center">
+        <Skeleton className="h-10 w-64" />
+        <Skeleton className="h-10 w-32" />
+      </div>
+      
+      <div className="grid grid-cols-1 lg:grid-cols-4 gap-6 mt-4">
+        <div className="lg:col-span-3 space-y-6">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            {[1, 2, 3].map(i => (
+              <Skeleton key={i} className="h-20" />
+            ))}
+          </div>
+          <Skeleton className="h-20" />
+          <Skeleton className="h-[300px]" />
+          <div className="space-y-4">
+            <div className="flex justify-between">
+              <Skeleton className="h-8 w-48" />
+              <Skeleton className="h-8 w-32" />
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+              {[1, 2, 3, 4, 5, 6].map(i => (
+                <Skeleton key={i} className="h-[180px]" />
+              ))}
+            </div>
+          </div>
+        </div>
+        
+        <div className="space-y-4">
+          <Skeleton className="h-[400px]" />
+          <div className="space-y-4">
+            {[1, 2, 3].map(i => (
+              <Skeleton key={i} className="h-20" />
+            ))}
+          </div>
+          <Skeleton className="h-[300px]" />
+        </div>
+      </div>
+    </div>
+  );
+};
+
+// Error state component
+const ErrorState = ({ message }: { message: string }) => {
+  return (
+    <div className="flex flex-col items-center justify-center py-12">
+      <div className="w-full max-w-md bg-card p-6 rounded-lg border border-red-800 shadow-lg text-center">
+        <AlertCircle className="h-12 w-12 text-red-500 mx-auto mb-4" />
+        <h2 className="text-xl font-bold mb-2">Erreur de chargement</h2>
+        <p className="text-gray-300 mb-4">{message}</p>
+        <Button variant="destructive" onClick={() => window.location.reload()}>
+          Réessayer
+        </Button>
+      </div>
     </div>
   );
 };

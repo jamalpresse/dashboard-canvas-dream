@@ -7,6 +7,7 @@ import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { LanguageProvider } from "./context/LanguageContext";
 import { AuthProvider } from "./context/AuthContext";
 import { ProtectedRoute } from "./components/auth/ProtectedRoute";
+import ErrorBoundary from "./components/common/ErrorBoundary";
 
 import DashboardLayout from "./components/layout/DashboardLayout";
 import Index from "./pages/Index";
@@ -28,6 +29,12 @@ const queryClient = new QueryClient({
       retry: 2,
       staleTime: 30000,
       refetchOnWindowFocus: false,
+      refetchOnReconnect: true,
+      refetchOnMount: true,
+      onError: (error) => {
+        // Global error handling for queries
+        console.error('Query error:', error);
+      }
     },
   },
 });
@@ -38,31 +45,37 @@ const App = () => (
       <AuthProvider>
         <LanguageProvider>
           <TooltipProvider>
-            <Toaster />
-            <Sonner />
-            <Routes>
-              {/* Public route - auth page */}
-              <Route path="/auth" element={<Auth />} />
-              
-              {/* Protected routes */}
-              <Route element={<ProtectedRoute />}>
-                <Route element={<DashboardLayout />}>
-                  <Route path="/" element={<Index />} />
-                  <Route path="/analytics" element={<Analytics />} />
-                  <Route path="/users" element={<Users />} />
-                  <Route path="/settings" element={<Settings />} />
-                  <Route path="/search" element={<Search />} />
-                  <Route path="/improve" element={<Improve />} />
-                  <Route path="/translation" element={<Translation />} />
-                  <Route path="/news" element={<News />} />
-                  <Route path="/image-generation" element={<ImageGeneration />} />
-                  <Route path="/simple-image-generation" element={<Navigate to="/image-generation" replace />} />
+            <ErrorBoundary>
+              <Toaster />
+              <Sonner />
+              <Routes>
+                {/* Public route - auth page */}
+                <Route path="/auth" element={<Auth />} />
+                
+                {/* Protected routes */}
+                <Route element={<ProtectedRoute />}>
+                  <Route element={<DashboardLayout />}>
+                    <Route path="/" element={
+                      <ErrorBoundary>
+                        <Index />
+                      </ErrorBoundary>
+                    } />
+                    <Route path="/analytics" element={<Analytics />} />
+                    <Route path="/users" element={<Users />} />
+                    <Route path="/settings" element={<Settings />} />
+                    <Route path="/search" element={<Search />} />
+                    <Route path="/improve" element={<Improve />} />
+                    <Route path="/translation" element={<Translation />} />
+                    <Route path="/news" element={<News />} />
+                    <Route path="/image-generation" element={<ImageGeneration />} />
+                    <Route path="/simple-image-generation" element={<Navigate to="/image-generation" replace />} />
+                  </Route>
                 </Route>
-              </Route>
-              
-              {/* Fallback route */}
-              <Route path="*" element={<NotFound />} />
-            </Routes>
+                
+                {/* Fallback route */}
+                <Route path="*" element={<NotFound />} />
+              </Routes>
+            </ErrorBoundary>
           </TooltipProvider>
         </LanguageProvider>
       </AuthProvider>

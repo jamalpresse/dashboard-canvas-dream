@@ -19,7 +19,7 @@ export const supabase = createClient<Database>(SUPABASE_URL, SUPABASE_PUBLISHABL
   }
 });
 
-// Debug utility to check auth state
+// Debug utility to check auth status
 export const checkAuthStatus = async () => {
   try {
     const { data, error } = await supabase.auth.getSession();
@@ -37,4 +37,62 @@ export const checkAuthStatus = async () => {
     console.error('Exception checking auth status:', e);
     return null;
   }
+};
+
+// Thorough auth state cleanup utility
+export const cleanupAuthState = () => {
+  try {
+    // Remove standard auth tokens
+    localStorage.removeItem('supabase.auth.token');
+    
+    // Remove all Supabase auth keys from localStorage
+    Object.keys(localStorage).forEach((key) => {
+      if (key.startsWith('supabase.auth.') || key.includes('sb-')) {
+        localStorage.removeItem(key);
+      }
+    });
+    
+    // Remove from sessionStorage if in use
+    Object.keys(sessionStorage || {}).forEach((key) => {
+      if (key.startsWith('supabase.auth.') || key.includes('sb-')) {
+        sessionStorage.removeItem(key);
+      }
+    });
+    
+    console.log('Auth state cleaned up');
+  } catch (err) {
+    console.error('Error cleaning up auth state:', err);
+  }
+};
+
+// Safe sign out function that cleans up state
+export const safeSignOut = async () => {
+  try {
+    // Clean up existing state first
+    cleanupAuthState();
+    
+    // Attempt global sign out
+    await supabase.auth.signOut({ scope: 'global' });
+    
+    return { success: true };
+  } catch (error) {
+    console.error('Error during sign out:', error);
+    return { success: false, error };
+  }
+};
+
+// Handle API errors consistently
+export const handleSupabaseError = (error: any, defaultMessage = "Une erreur est survenue") => {
+  console.error('Supabase error:', error);
+  
+  // Return a user-friendly error message
+  if (error?.message) {
+    return error.message;
+  }
+  
+  if (error?.error_description) {
+    return error.error_description;
+  }
+  
+  return defaultMessage;
 };
