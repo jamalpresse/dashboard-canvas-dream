@@ -108,6 +108,33 @@ function extractPathFromTemplate(template: string): string | null {
   return null;
 }
 
+// Fonction pour vérifier si l'URL est valide (mise à jour pour accepter divers formats)
+function isValidImageUrl(url: any): boolean {
+  if (!url || typeof url !== 'string') {
+    return false;
+  }
+  
+  // Accepter les URL HTTP standard
+  if (url.startsWith('http')) {
+    return true;
+  }
+  
+  // Accepter les URLs de données (data URLs)
+  if (url.startsWith('data:image/')) {
+    return true;
+  }
+  
+  // Vérifier qu'il ne s'agit pas d'un modèle n8n non évalué
+  if (url.includes('{{') || url.includes('}}')) {
+    return false;
+  }
+  
+  // On considère les autres formats comme potentiellement valides
+  // et on laissera l'élément img essayer de les charger
+  console.log("Format d'URL non standard détecté:", url.substring(0, 50) + "...");
+  return true;
+}
+
 // Updated function to handle nested imageUrl structure
 export async function generateImageWithN8n(prompt: string): Promise<ImageGenerationResponse> {
   try {
@@ -125,13 +152,23 @@ export async function generateImageWithN8n(prompt: string): Promise<ImageGenerat
     const data = await response.json();
     console.log("N8n webhook response:", data);
     
+    // Affichage plus détaillé de la réponse pour le débogage
+    console.log("Type de réponse:", typeof data);
+    console.log("Structure de la réponse:", JSON.stringify(data, null, 2));
+    
+    // Vérifier si nous avons reçu un objet 'data' qui contient imageUrl
+    if (data && data.data && data.data.imageUrl) {
+      console.log("Format de réponse détecté: { data: { imageUrl: ... } }");
+      data.imageUrl = data.data.imageUrl;
+    }
+    
     // Handle nested imageUrl structure (when imageUrl is an object that contains imageUrl)
     if (data.imageUrl && typeof data.imageUrl === 'object' && data.imageUrl.imageUrl) {
       console.log("Detected nested imageUrl structure, extracting inner URL");
       data.imageUrl = data.imageUrl.imageUrl;
     }
     
-    // Handle template strings in the response - avec support amélioré pour "={{ $json.xxx }}"
+    // Handle template strings in the response
     if (data.imageUrl && isTemplateString(data.imageUrl)) {
       const templatePath = extractPathFromTemplate(data.imageUrl);
       
@@ -144,8 +181,8 @@ export async function generateImageWithN8n(prompt: string): Promise<ImageGenerat
       };
     }
     
-    // Vérifier si l'URL est valide
-    if (!data.imageUrl || typeof data.imageUrl !== 'string' || !data.imageUrl.startsWith('http')) {
+    // Vérifier si l'URL est valide avec la nouvelle fonction
+    if (!isValidImageUrl(data.imageUrl)) {
       console.warn("URL d'image invalide:", data.imageUrl);
       return { 
         imageUrl: "https://images.unsplash.com/photo-1581091226825-a6a2a5aee158",

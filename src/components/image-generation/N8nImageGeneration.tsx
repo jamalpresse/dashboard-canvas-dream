@@ -3,7 +3,7 @@ import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from "@/components/ui/card";
 import { toast } from "@/components/ui/use-toast";
-import { Loader2, ImageIcon, RefreshCw, Download, AlertCircle } from "lucide-react";
+import { Loader2, ImageIcon, RefreshCw, Download, AlertCircle, Bug } from "lucide-react";
 import { Textarea } from "@/components/ui/textarea";
 import { AspectRatio } from "@/components/ui/aspect-ratio";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
@@ -23,6 +23,7 @@ export const N8nImageGeneration = () => {
   const [isGenerating, setIsGenerating] = useState(false);
   const [response, setResponse] = useState<N8nGenerationResponse | null>(null);
   const [showDebug, setShowDebug] = useState(false);
+  const [rawResponse, setRawResponse] = useState<string>("");
 
   const handleGenerateWithN8n = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -35,10 +36,15 @@ export const N8nImageGeneration = () => {
       return;
     }
     setIsGenerating(true);
+    setShowDebug(false);
     try {
       // Utiliser la fonction du service pour appeler le webhook correctement
       const result = await generateImageWithN8n(prompt);
       console.log("Résultat de la génération d'image:", result);
+      
+      // Stocker la réponse brute pour le débogage
+      setRawResponse(JSON.stringify(result.originalResponse, null, 2));
+      
       setResponse(result);
       if (result.error) {
         toast({
@@ -46,6 +52,8 @@ export const N8nImageGeneration = () => {
           description: result.error,
           variant: "destructive"
         });
+        // Afficher automatiquement les détails de débogage en cas d'erreur
+        setShowDebug(true);
       } else if (result.imageUrl && !result.imageUrl.includes('{{')) {
         toast({
           title: "Succès",
@@ -68,6 +76,7 @@ export const N8nImageGeneration = () => {
     setPrompt("");
     setResponse(null);
     setShowDebug(false);
+    setRawResponse("");
   };
 
   const handleDownload = () => {
@@ -141,6 +150,43 @@ export const N8nImageGeneration = () => {
           </Button>
         </form>
         
+        {/* Information de débogage améliorée */}
+        {response && !hasValidImage && (
+          <Alert variant={response.error ? "destructive" : "default"} className="mt-4">
+            <AlertCircle className="h-4 w-4" />
+            <AlertTitle>{response.error ? "Erreur détectée" : "Information"}</AlertTitle>
+            <AlertDescription className="space-y-2">
+              {response.error && <p className="font-medium">{response.error}</p>}
+              {response.details && <p>{response.details}</p>}
+              
+              <div className="flex justify-between items-center mt-2">
+                <Button 
+                  variant="outline" 
+                  size="sm"
+                  onClick={toggleDebug}
+                  className="mt-2"
+                >
+                  <Bug className="mr-2 h-4 w-4" />
+                  {showDebug ? "Masquer" : "Afficher"} les détails techniques
+                </Button>
+                
+                {response.templatePath && (
+                  <span className="text-xs bg-gray-100 p-1 rounded">
+                    Chemin: {response.templatePath}
+                  </span>
+                )}
+              </div>
+              
+              {showDebug && (
+                <div className="mt-4 text-xs bg-gray-50 p-2 rounded overflow-auto max-h-[200px]">
+                  <div className="font-medium mb-1">Réponse complète du webhook:</div>
+                  <pre className="whitespace-pre-wrap break-words">{rawResponse}</pre>
+                </div>
+              )}
+            </AlertDescription>
+          </Alert>
+        )}
+        
         {hasTemplateError && (
           <Alert variant="destructive">
             <AlertCircle className="h-4 w-4" />
@@ -200,12 +246,14 @@ export const N8nImageGeneration = () => {
                 src={response.imageUrl}
                 alt="Image générée"
                 className="rounded-md w-full h-full object-cover"
-                onError={() => {
+                onError={(e) => {
+                  console.error("Erreur de chargement d'image:", e);
                   toast({
                     title: "Erreur",
-                    description: "Impossible de charger l'image",
+                    description: "Impossible de charger l'image. Format d'URL potentiellement incorrect.",
                     variant: "destructive"
                   });
+                  setShowDebug(true);
                 }}
               />
             </AspectRatio>
