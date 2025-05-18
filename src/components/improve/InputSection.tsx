@@ -28,7 +28,7 @@ export function InputSection({
         onChange={(e) => setInputText(e.target.value)}
         placeholder="Collez ici votre article ou brouillon en arabe ou en français"
         dir={dirFrom(inputText)}
-        className={`w-full h-40 p-4 border rounded-lg focus:outline-none focus:ring-2 focus:ring-snrt-red ${alignFrom(
+        className={`w-full h-40 p-4 border rounded-lg focus:outline-none focus:ring-2 focus:ring-snrt-red text-black ${alignFrom(
           inputText
         )}`}
       />

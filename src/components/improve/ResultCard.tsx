@@ -114,7 +114,7 @@ export function ResultCard({
                 <li key={i} className="flex justify-between items-center">
                   <span
                     dir={dirFrom(item)}
-                    className={alignFrom(item)}
+                    className={`${alignFrom(item)} text-gray-900`}
                   >
                     {item}
                   </span>
@@ -152,7 +152,7 @@ export function ResultCard({
         <h3 className="font-bold mb-2 text-purple-800">{title}</h3>
         <p
           dir={dirFrom(content as string)}
-          className={`${alignFrom(content as string)} whitespace-pre-wrap`}
+          className={`${alignFrom(content as string)} whitespace-pre-wrap text-gray-900`}
         >
           {content as string}
         </p>
