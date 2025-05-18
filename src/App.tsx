@@ -44,10 +44,10 @@ const queryClient = new QueryClient({
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <BrowserRouter>
-      <AuthProvider>
-        <LanguageProvider>
-          <TooltipProvider>
-            <ErrorBoundary>
+      <ErrorBoundary>
+        <AuthProvider>
+          <LanguageProvider>
+            <TooltipProvider>
               <Toaster />
               <Sonner />
               <Routes>
@@ -62,14 +62,46 @@ const App = () => (
                         <Index />
                       </ErrorBoundary>
                     } />
-                    <Route path="/analytics" element={<Analytics />} />
-                    <Route path="/users" element={<Users />} />
-                    <Route path="/settings" element={<Settings />} />
-                    <Route path="/search" element={<Search />} />
-                    <Route path="/improve" element={<Improve />} />
-                    <Route path="/translation" element={<Translation />} />
-                    <Route path="/news" element={<News />} />
-                    <Route path="/image-generation" element={<ImageGeneration />} />
+                    <Route path="/analytics" element={
+                      <ErrorBoundary>
+                        <Analytics />
+                      </ErrorBoundary>
+                    } />
+                    <Route path="/users" element={
+                      <ErrorBoundary>
+                        <Users />
+                      </ErrorBoundary>
+                    } />
+                    <Route path="/settings" element={
+                      <ErrorBoundary>
+                        <Settings />
+                      </ErrorBoundary>
+                    } />
+                    <Route path="/search" element={
+                      <ErrorBoundary>
+                        <Search />
+                      </ErrorBoundary>
+                    } />
+                    <Route path="/improve" element={
+                      <ErrorBoundary>
+                        <Improve />
+                      </ErrorBoundary>
+                    } />
+                    <Route path="/translation" element={
+                      <ErrorBoundary>
+                        <Translation />
+                      </ErrorBoundary>
+                    } />
+                    <Route path="/news" element={
+                      <ErrorBoundary>
+                        <News />
+                      </ErrorBoundary>
+                    } />
+                    <Route path="/image-generation" element={
+                      <ErrorBoundary>
+                        <ImageGeneration />
+                      </ErrorBoundary>
+                    } />
                     <Route path="/simple-image-generation" element={<Navigate to="/image-generation" replace />} />
                   </Route>
                 </Route>
@@ -77,10 +109,10 @@ const App = () => (
                 {/* Fallback route */}
                 <Route path="*" element={<NotFound />} />
               </Routes>
-            </ErrorBoundary>
-          </TooltipProvider>
-        </LanguageProvider>
-      </AuthProvider>
+            </TooltipProvider>
+          </LanguageProvider>
+        </AuthProvider>
+      </ErrorBoundary>
     </BrowserRouter>
   </QueryClientProvider>
 );

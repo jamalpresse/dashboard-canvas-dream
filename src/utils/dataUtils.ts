@@ -85,3 +85,49 @@ export function safeFormatDate(
     return fallback;
   }
 }
+
+/**
+ * Safely checks if a value is defined (not null or undefined)
+ */
+export function isDefined<T>(value: T | null | undefined): value is T {
+  return value !== null && value !== undefined;
+}
+
+/**
+ * Safely checks if an array has items and is valid
+ */
+export function hasItems<T>(arr: T[] | null | undefined): boolean {
+  return Boolean(arr && Array.isArray(arr) && arr.length > 0);
+}
+
+/**
+ * Creates a safe array from potentially invalid input
+ */
+export function safeArray<T>(arr: T[] | null | undefined): T[] {
+  if (!arr || !Array.isArray(arr)) return [];
+  return arr;
+}
+
+/**
+ * Safely access nested objects without throwing
+ */
+export function safeNested<T>(
+  obj: any, 
+  path: string, 
+  fallback: T
+): T {
+  try {
+    const keys = path.split('.');
+    let current = obj;
+    
+    for (const key of keys) {
+      if (current === undefined || current === null) return fallback;
+      current = current[key];
+    }
+    
+    return current !== undefined && current !== null ? current : fallback;
+  } catch (error) {
+    console.error('Error accessing nested property:', error);
+    return fallback;
+  }
+}

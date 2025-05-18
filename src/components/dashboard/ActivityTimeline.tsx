@@ -5,11 +5,12 @@ import { Separator } from "@/components/ui/separator";
 import { isRTL, dirFrom } from "@/utils/textUtils";
 import { Button } from "@/components/ui/button";
 import { ArrowRight } from "lucide-react";
+import { isDefined, hasItems } from "@/utils/dataUtils";
 
 export type TimelineItem = {
   id: string;
   title: string;
-  description: string;
+  description?: string;
   time: string;
   icon?: React.ReactNode;
   type?: "default" | "success" | "warning" | "error";
@@ -28,24 +29,26 @@ export function ActivityTimeline({
   title = "Activités récentes",
   showViewAll = false
 }: TimelineProps) {
+  // Validate items to ensure they're valid before trying to render
+  const validItems = hasItems(items) 
+    ? items.filter(item => isDefined(item) && isDefined(item.id) && isDefined(item.title)) 
+    : [];
+    
+  const hasValidItems = validItems.length > 0;
+  
   return (
     <Card className={cn("overflow-hidden", className)}>
       <CardHeader>
         <CardTitle>{title}</CardTitle>
       </CardHeader>
       <CardContent className="p-0">
-        {!items || items.length === 0 ? (
+        {!hasValidItems ? (
           <div className="p-6 text-center text-muted-foreground">
             <p>Aucune activité récente</p>
           </div>
         ) : (
           <div className="space-y-1">
-            {items.map((item, index) => {
-              // Safely check for item properties to avoid undefined errors
-              if (!item || !item.id || !item.title) {
-                return null; // Skip invalid items
-              }
-              
+            {validItems.map((item, index) => {
               // Determine direction based on content
               const isRtlTitle = isRTL(item.title);
               const isRtlDesc = item.description ? isRTL(item.description) : false;
@@ -86,13 +89,13 @@ export function ActivityTimeline({
                       {item.time}
                     </div>
                   </div>
-                  {index < items.length - 1 && <Separator className="mt-4" />}
+                  {index < validItems.length - 1 && <Separator className="mt-4" />}
                 </div>
               );
             })}
           </div>
         )}
-        {showViewAll && items && items.length > 0 && (
+        {showViewAll && hasValidItems && (
           <div className="p-4 text-center border-t border-border">
             <Button variant="link" size="sm" className="text-snrt-red">
               Voir toutes les activités <ArrowRight className="ml-1 h-4 w-4" />
