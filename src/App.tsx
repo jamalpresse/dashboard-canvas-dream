@@ -31,9 +31,11 @@ const queryClient = new QueryClient({
       refetchOnWindowFocus: false,
       refetchOnReconnect: true,
       refetchOnMount: true,
-      onError: (error) => {
-        // Global error handling for queries
-        console.error('Query error:', error);
+      meta: {
+        onError: (error: any) => {
+          // Global error handling for queries
+          console.error('Query error:', error);
+        }
       }
     },
   },
