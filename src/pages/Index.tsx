@@ -85,8 +85,8 @@ const Index = () => {
     fetchData();
   }, [lang, isRTL, t]);
 
-  // Create activities from news articles
-  const activities = newsArticles.map(article => ({
+  // Create timeline items from news articles
+  const timelineItems = newsArticles.map(article => ({
     id: article.id,
     title: article.title,
     description: article.content?.substring(0, 100) + (article.content?.length > 100 ? '...' : ''),
@@ -276,7 +276,7 @@ const Index = () => {
               <div className="p-4 border-b border-gray-800">
                 <h3 className="font-semibold">{t('dashboard', 'recentActivity')}</h3>
               </div>
-              <ActivityTimeline activities={activities} />
+              <ActivityTimeline items={timelineItems} />
             </div>
           </div>
         </div>
