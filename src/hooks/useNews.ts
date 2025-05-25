@@ -1,7 +1,7 @@
+
 import { useState, useEffect } from 'react';
 import { useAnalytics } from '@/hooks/use-analytics';
 import { NewsItem, fetchNewsByCountry, fetchNewsFromSource, searchNews, filterNewsBySourceId } from '@/services/newsService';
-import { toast } from "@/components/ui/sonner";
 
 export function useNews() {
   const [news, setNews] = useState<NewsItem[]>([]);
@@ -14,13 +14,15 @@ export function useNews() {
   const [featuredArticle, setFeaturedArticle] = useState<NewsItem | null>(null);
   const { trackEvent } = useAnalytics();
 
-  // Charger les actualités en fonction de l'onglet actif
+  // Load news based on active tab with improved error handling
   useEffect(() => {
     const loadNews = async () => {
       setLoading(true);
       setError(null);
       
       try {
+        console.log(`Loading news for ${activeTab}${activeSource ? ` from ${activeSource}` : ''}`);
+        
         let newsData: NewsItem[];
         
         if (activeSource) {
@@ -38,12 +40,19 @@ export function useNews() {
           content: item.content ? sanitizeHtml(item.content) : ''
         }));
         
+        console.log(`Loaded ${newsData.length} news items`);
         setNews(newsData);
         applyFilters(newsData, searchQuery, activeSource);
+        
+        // Only set error if we have no news at all
+        if (newsData.length === 0) {
+          setError('Aucune actualité disponible pour le moment');
+        }
       } catch (err) {
         console.error('Error loading news:', err);
-        setError('Une erreur est survenue lors du chargement des actualités');
-        toast.error('Erreur de chargement des actualités');
+        setError('Erreur lors du chargement des actualités');
+        setNews([]);
+        setFilteredNews([]);
       } finally {
         setLoading(false);
       }
@@ -52,25 +61,16 @@ export function useNews() {
     loadNews();
   }, [activeTab, activeSource, trackEvent]);
 
-  // Load featured SNRT article
+  // Load featured SNRT article with improved error handling
   useEffect(() => {
     const loadFeaturedArticle = async () => {
-      setLoading(true);
       try {
         console.log("Fetching SNRT featured article...");
         const snrtNews = await fetchNewsFromSource('snrt');
-        console.log("SNRT News fetched:", snrtNews);
         
         if (snrtNews && snrtNews.length > 0) {
-          // Get the first article as the featured one
           const featured = snrtNews[0];
-          
-          // Debug the article structure
-          console.log("Featured Article Full Structure:", JSON.stringify(featured, null, 2));
-          console.log("Featured Article Image Sources:", {
-            thumbnail: featured.thumbnail,
-            enclosure: featured.enclosure,
-          });
+          console.log("Featured article loaded:", featured.title);
           
           // Clean HTML from content
           const cleanedFeatured = {
@@ -81,13 +81,12 @@ export function useNews() {
           
           setFeaturedArticle(cleanedFeatured);
         } else {
-          console.log("No SNRT articles found");
+          console.log("No SNRT articles found for featured article");
+          // Don't set error here, just use fallback in UI
         }
       } catch (err) {
-        console.error('Error loading featured article:', err);
-        // We don't show an error toast here to avoid double error messages
-      } finally {
-        setLoading(false);
+        console.warn('Error loading featured article:', err);
+        // Don't show error toast here, let the UI handle fallback
       }
     };
     
@@ -96,9 +95,7 @@ export function useNews() {
 
   // Sanitize HTML content
   const sanitizeHtml = (html: string): string => {
-    // Basic HTML tag removal
     return html.replace(/<\/?[^>]+(>|$)/g, "")
-      // Replace HTML entities
       .replace(/&nbsp;/g, " ")
       .replace(/&amp;/g, "&")
       .replace(/&lt;/g, "<")
@@ -107,7 +104,7 @@ export function useNews() {
       .trim();
   };
 
-  // Appliquer les filtres (recherche et source)
+  // Apply filters
   const applyFilters = (newsItems: NewsItem[], query: string, source: string | null) => {
     let filtered = newsItems;
     
@@ -122,7 +119,7 @@ export function useNews() {
     setFilteredNews(filtered);
   };
 
-  // Mettre à jour la recherche
+  // Handle search
   const handleSearch = (query: string) => {
     setSearchQuery(query);
     applyFilters(news, query, activeSource);

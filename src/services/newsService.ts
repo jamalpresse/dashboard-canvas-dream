@@ -1,4 +1,3 @@
-
 import { toast } from "@/components/ui/sonner";
 
 export interface NewsItem {
@@ -25,101 +24,174 @@ export interface NewsSource {
   url: string | ((lang: "fr" | "ar") => string);
   category: string;
   country: "ma" | "global";
+  priority: number; // Added priority for fallback order
 }
 
-// Liste des sources d'actualités
+// Updated sources list with priority and backup sources
 export const newsSources: NewsSource[] = [
   {
     id: "snrt",
     name: "SNRT News",
-    // Use a function that returns the appropriate URL based on language
     url: (lang: "fr" | "ar") => lang === "fr" 
       ? "https://snrtnews.com/fr/rss_fr.xml" 
       : "https://snrtnews.com/rss.xml",
     category: "general",
-    country: "ma"
-  },
-  {
-    id: "hespress",
-    name: "Hespress",
-    url: "https://fr.hespress.com/feed/",
-    category: "general",
-    country: "ma"
+    country: "ma",
+    priority: 1
   },
   {
     id: "medias24",
     name: "Médias24",
     url: "https://medias24.com/feed/",
     category: "economy",
-    country: "ma"
+    country: "ma",
+    priority: 2
   },
   {
     id: "france24",
     name: "France24",
     url: "https://www.france24.com/fr/rss",
     category: "general",
-    country: "global"
+    country: "global",
+    priority: 1
   },
   {
     id: "bbc",
     name: "BBC Afrique",
     url: "http://feeds.bbci.co.uk/afrique/rss.xml",
     category: "general",
-    country: "global"
+    country: "global",
+    priority: 2
+  },
+  // Backup sources
+  {
+    id: "rfi",
+    name: "RFI Afrique",
+    url: "https://www.rfi.fr/fr/afrique/rss",
+    category: "general",
+    country: "global",
+    priority: 3
   }
 ];
 
-// Récupérer les actualités d'une source
+// Retry mechanism
+async function retryFetch(url: string, maxRetries: number = 2): Promise<Response> {
+  let lastError: Error;
+  
+  for (let attempt = 0; attempt <= maxRetries; attempt++) {
+    try {
+      const response = await fetch(url);
+      if (response.ok) {
+        return response;
+      }
+      throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+    } catch (error) {
+      lastError = error as Error;
+      console.log(`Attempt ${attempt + 1} failed for ${url}:`, error);
+      
+      if (attempt < maxRetries) {
+        // Wait with exponential backoff
+        await new Promise(resolve => setTimeout(resolve, Math.pow(2, attempt) * 1000));
+      }
+    }
+  }
+  
+  throw lastError!;
+}
+
+// Enhanced fetch function with better error handling
 export async function fetchNewsFromSource(sourceId: string, lang: "fr" | "ar" = "fr"): Promise<NewsItem[]> {
   try {
     const source = newsSources.find(s => s.id === sourceId);
-    if (!source) throw new Error(`Source ${sourceId} not found`);
+    if (!source) {
+      console.warn(`Source ${sourceId} not found`);
+      return [];
+    }
     
     // Handle URL function or string
     const rssUrl = typeof source.url === 'function' ? source.url(lang) : source.url;
     const apiUrl = `https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent(rssUrl)}`;
     
-    const response = await fetch(apiUrl);
-    if (!response.ok) throw new Error(`Error fetching ${source.name}: ${response.statusText}`);
-    
+    console.log(`Fetching news from ${source.name}...`);
+    const response = await retryFetch(apiUrl);
     const data = await response.json();
     
     if (data.status !== "ok") {
-      throw new Error(`Error with RSS feed for ${source.name}: ${data.message || 'Unknown error'}`);
+      console.warn(`RSS feed error for ${source.name}:`, data.message);
+      return [];
     }
     
-    // Ajouter la source à chaque élément
-    return data.items.map((item: any) => ({
-      ...item,
-      source: source.name
-    }));
+    if (!data.items || !Array.isArray(data.items)) {
+      console.warn(`Invalid data structure from ${source.name}`);
+      return [];
+    }
+    
+    // Add source to each item and filter out invalid items
+    const validItems = data.items
+      .filter((item: any) => item && item.title && item.link)
+      .map((item: any) => ({
+        ...item,
+        source: source.name,
+        description: item.description || 'Pas de description disponible',
+        content: item.content || item.description || '',
+        categories: item.categories || []
+      }));
+    
+    console.log(`Successfully fetched ${validItems.length} items from ${source.name}`);
+    return validItems;
+    
   } catch (error) {
-    console.error(`Error fetching news from ${sourceId}:`, error);
-    toast.error(`Impossible de charger les actualités de cette source`);
-    return [];
+    console.warn(`Failed to fetch news from ${sourceId}:`, error);
+    return []; // Return empty array instead of throwing
   }
 }
 
-// Récupérer les actualités par pays
+// Enhanced function to fetch news by country with fallback
 export async function fetchNewsByCountry(country: "ma" | "global", lang: "fr" | "ar" = "fr"): Promise<NewsItem[]> {
-  const sourcesForCountry = newsSources.filter(source => source.country === country);
-  const allPromises = sourcesForCountry.map(source => fetchNewsFromSource(source.id, lang));
+  const sourcesForCountry = newsSources
+    .filter(source => source.country === country)
+    .sort((a, b) => a.priority - b.priority); // Sort by priority
   
-  try {
-    const results = await Promise.all(allPromises);
-    // Fusionner et trier par date
-    const allNews = results.flat().sort((a, b) => {
-      return new Date(b.pubDate).getTime() - new Date(a.pubDate).getTime();
-    });
-    return allNews;
-  } catch (error) {
-    console.error(`Error fetching news for ${country}:`, error);
-    toast.error(`Erreur lors du chargement des actualités`);
-    return [];
+  const results: NewsItem[] = [];
+  const failedSources: string[] = [];
+  
+  // Try to fetch from each source
+  for (const source of sourcesForCountry) {
+    try {
+      const sourceNews = await fetchNewsFromSource(source.id, lang);
+      if (sourceNews.length > 0) {
+        results.push(...sourceNews);
+        console.log(`✓ ${source.name}: ${sourceNews.length} articles`);
+      } else {
+        failedSources.push(source.name);
+        console.log(`⚠ ${source.name}: No articles`);
+      }
+    } catch (error) {
+      failedSources.push(source.name);
+      console.log(`✗ ${source.name}: Error`);
+    }
   }
+  
+  // Sort results by date (newest first)
+  const sortedResults = results.sort((a, b) => {
+    return new Date(b.pubDate).getTime() - new Date(a.pubDate).getTime();
+  });
+  
+  // Show appropriate message based on results
+  if (sortedResults.length === 0) {
+    console.error(`No news could be loaded for ${country}. Failed sources:`, failedSources);
+    toast.error(`Impossible de charger les actualités. Veuillez réessayer plus tard.`);
+  } else if (failedSources.length > 0) {
+    console.warn(`Some sources failed for ${country}:`, failedSources);
+    // Don't show error toast if we have some results
+  } else {
+    console.log(`✓ All sources loaded successfully for ${country}`);
+  }
+  
+  return sortedResults;
 }
 
-// Recherche par mot-clé
+// Search function remains the same
 export function searchNews(news: NewsItem[], query: string): NewsItem[] {
   const normalizedQuery = query.toLowerCase().trim();
   if (!normalizedQuery) return news;
@@ -133,7 +205,7 @@ export function searchNews(news: NewsItem[], query: string): NewsItem[] {
   });
 }
 
-// Filtrer par catégorie
+// Filter function remains the same
 export function filterNewsBySourceId(news: NewsItem[], sourceId: string | null): NewsItem[] {
   if (!sourceId) return news;
   
@@ -143,7 +215,7 @@ export function filterNewsBySourceId(news: NewsItem[], sourceId: string | null):
   return news.filter(item => item.source === sourceName);
 }
 
-// Formater la date
+// Date formatting function remains the same
 export function formatNewsDate(dateString: string, locale: string = 'fr-FR'): string {
   try {
     const date = new Date(dateString);
