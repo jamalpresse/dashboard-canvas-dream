@@ -14,14 +14,14 @@ export function useNews() {
   const [featuredArticle, setFeaturedArticle] = useState<NewsItem | null>(null);
   const { trackEvent } = useAnalytics();
 
-  // Load news based on active tab with improved error handling
+  // Charger les actualités selon l'onglet actif
   useEffect(() => {
     const loadNews = async () => {
       setLoading(true);
       setError(null);
       
       try {
-        console.log(`Loading news for ${activeTab}${activeSource ? ` from ${activeSource}` : ''}`);
+        console.log(`Chargement des actualités pour ${activeTab}${activeSource ? ` depuis ${activeSource}` : ''}`);
         
         let newsData: NewsItem[];
         
@@ -33,24 +33,24 @@ export function useNews() {
           trackEvent('article_view', { category: activeTab });
         }
         
-        // Clean HTML tags from descriptions and content
+        // Nettoyer le contenu HTML
         newsData = newsData.map(item => ({
           ...item,
           description: item.description ? sanitizeHtml(item.description) : 'Pas de description disponible',
           content: item.content ? sanitizeHtml(item.content) : ''
         }));
         
-        console.log(`Loaded ${newsData.length} news items`);
+        console.log(`Chargé ${newsData.length} actualités`);
         setNews(newsData);
         applyFilters(newsData, searchQuery, activeSource);
         
-        // Only set error if we have no news at all
+        // Seulement afficher une erreur si vraiment aucune actualité
         if (newsData.length === 0) {
-          setError('Aucune actualité disponible pour le moment');
+          setError('Aucune actualité disponible. Réessayez dans quelques minutes.');
         }
       } catch (err) {
-        console.error('Error loading news:', err);
-        setError('Erreur lors du chargement des actualités');
+        console.error('Erreur lors du chargement:', err);
+        setError('Problème de connexion. Vérifiez votre internet.');
         setNews([]);
         setFilteredNews([]);
       } finally {
@@ -61,18 +61,17 @@ export function useNews() {
     loadNews();
   }, [activeTab, activeSource, trackEvent]);
 
-  // Load featured SNRT article with improved error handling
+  // Charger l'article vedette (utilise Le Monde par défaut)
   useEffect(() => {
     const loadFeaturedArticle = async () => {
       try {
-        console.log("Fetching SNRT featured article...");
-        const snrtNews = await fetchNewsFromSource('snrt');
+        console.log("Récupération de l'article vedette...");
+        const featuredNews = await fetchNewsFromSource('lemonde');
         
-        if (snrtNews && snrtNews.length > 0) {
-          const featured = snrtNews[0];
-          console.log("Featured article loaded:", featured.title);
+        if (featuredNews && featuredNews.length > 0) {
+          const featured = featuredNews[0];
+          console.log("Article vedette chargé:", featured.title);
           
-          // Clean HTML from content
           const cleanedFeatured = {
             ...featured,
             description: featured.description ? sanitizeHtml(featured.description) : 'Pas de description disponible',
@@ -81,19 +80,18 @@ export function useNews() {
           
           setFeaturedArticle(cleanedFeatured);
         } else {
-          console.log("No SNRT articles found for featured article");
-          // Don't set error here, just use fallback in UI
+          console.log("Aucun article vedette trouvé");
         }
       } catch (err) {
-        console.warn('Error loading featured article:', err);
-        // Don't show error toast here, let the UI handle fallback
+        console.warn('Erreur lors du chargement de l\'article vedette:', err);
+        // Pas d'affichage d'erreur pour l'article vedette
       }
     };
     
     loadFeaturedArticle();
   }, []);
 
-  // Sanitize HTML content
+  // Nettoyer le HTML
   const sanitizeHtml = (html: string): string => {
     return html.replace(/<\/?[^>]+(>|$)/g, "")
       .replace(/&nbsp;/g, " ")
@@ -104,7 +102,7 @@ export function useNews() {
       .trim();
   };
 
-  // Apply filters
+  // Appliquer les filtres
   const applyFilters = (newsItems: NewsItem[], query: string, source: string | null) => {
     let filtered = newsItems;
     
@@ -119,7 +117,7 @@ export function useNews() {
     setFilteredNews(filtered);
   };
 
-  // Handle search
+  // Gérer la recherche
   const handleSearch = (query: string) => {
     setSearchQuery(query);
     applyFilters(news, query, activeSource);
