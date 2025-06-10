@@ -1,4 +1,5 @@
 
+
 import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -9,8 +10,10 @@ import { generateImageWithN8n } from "@/services/imageGenerationService";
 import { AspectRatio } from "@/components/ui/aspect-ratio";
 import { createDownloadableImage } from "@/services/imageGenerationService";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { useLanguage } from "@/context/LanguageContext";
 
 const SimpleImageGeneration = () => {
+  const { t, isRTL } = useLanguage();
   const [prompt, setPrompt] = useState("");
   const [isGenerating, setIsGenerating] = useState(false);
   const [imageUrl, setImageUrl] = useState<string | null>(null);
@@ -22,8 +25,8 @@ const SimpleImageGeneration = () => {
     
     if (!prompt.trim()) {
       toast({
-        title: "Erreur",
-        description: "Veuillez saisir une description pour votre image",
+        title: t("imageGeneration", "error"),
+        description: t("imageGeneration", "enterDescription"),
         variant: "destructive"
       });
       return;
@@ -46,22 +49,22 @@ const SimpleImageGeneration = () => {
         setDetails(result.details || null);
         
         toast({
-          title: "Erreur",
+          title: t("imageGeneration", "error"),
           description: result.error,
           variant: "destructive"
         });
       } else {
         toast({
-          title: "Succès",
-          description: "Image générée avec succès!"
+          title: t("imageGeneration", "success"),
+          description: t("imageGeneration", "successMessage")
         });
       }
     } catch (error) {
       console.error("Erreur lors de la génération:", error);
-      setError("Une erreur s'est produite lors de la génération de l'image");
+      setError(t("imageGeneration", "errorMessage"));
       toast({
-        title: "Erreur",
-        description: "Une erreur s'est produite lors de la génération de l'image",
+        title: t("imageGeneration", "error"),
+        description: t("imageGeneration", "errorMessage"),
         variant: "destructive"
       });
     } finally {
@@ -74,13 +77,13 @@ const SimpleImageGeneration = () => {
       try {
         createDownloadableImage(imageUrl, `image-générée-${Date.now()}`);
         toast({
-          title: "Succès",
-          description: "Téléchargement démarré!"
+          title: t("imageGeneration", "success"),
+          description: t("imageGeneration", "downloadStarted")
         });
       } catch (err) {
         toast({
-          title: "Erreur",
-          description: "Erreur lors du téléchargement de l'image",
+          title: t("imageGeneration", "error"),
+          description: t("imageGeneration", "downloadError"),
           variant: "destructive"
         });
       }
@@ -88,11 +91,11 @@ const SimpleImageGeneration = () => {
   };
 
   return (
-    <div className="container mx-auto py-8">
+    <div className={`container mx-auto py-8 ${isRTL ? 'rtl' : 'ltr'}`}>
       <Card className="max-w-2xl mx-auto">
         <CardHeader>
           <CardTitle className="text-2xl font-bold text-center">
-            Génération d'image
+            {t("imageGeneration", "title")}
           </CardTitle>
         </CardHeader>
         
@@ -100,14 +103,15 @@ const SimpleImageGeneration = () => {
           <form onSubmit={handleGenerateImage} className="space-y-6">
             <div className="space-y-2">
               <label htmlFor="prompt" className="text-lg font-medium">
-                Description de l'image
+                {t("imageGeneration", "imageDescription")}
               </label>
               <Input
                 id="prompt"
-                placeholder="Décrivez l'image que vous souhaitez générer..."
+                placeholder={t("imageGeneration", "placeholder")}
                 value={prompt}
                 onChange={(e) => setPrompt(e.target.value)}
                 className="w-full"
+                dir={isRTL ? "rtl" : "ltr"}
               />
             </div>
             
@@ -118,13 +122,13 @@ const SimpleImageGeneration = () => {
             >
               {isGenerating ? (
                 <>
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Génération en cours...
+                  <Loader2 className={`${isRTL ? 'ml-2' : 'mr-2'} h-4 w-4 animate-spin`} />
+                  {t("imageGeneration", "generating")}
                 </>
               ) : (
                 <>
-                  <ImageIcon className="mr-2 h-4 w-4" />
-                  Générer l'image
+                  <ImageIcon className={`${isRTL ? 'ml-2' : 'mr-2'} h-4 w-4`} />
+                  {t("imageGeneration", "generateButton")}
                 </>
               )}
             </Button>
@@ -134,12 +138,12 @@ const SimpleImageGeneration = () => {
             <div className="mt-6">
               <Alert variant="destructive">
                 <AlertTriangle className="h-4 w-4" />
-                <AlertTitle>Erreur</AlertTitle>
+                <AlertTitle>{t("imageGeneration", "error")}</AlertTitle>
                 <AlertDescription>
                   {error}
                   {details && (
                     <div className="mt-2 text-xs bg-red-50 p-2 rounded">
-                      <p className="font-medium">Détails:</p>
+                      <p className="font-medium">{t("imageGeneration", "details")}:</p>
                       <p>{details}</p>
                     </div>
                   )}
@@ -153,7 +157,7 @@ const SimpleImageGeneration = () => {
               <AspectRatio ratio={1}>
                 <img
                   src={imageUrl}
-                  alt="Image générée"
+                  alt={t("imageGeneration", "title")}
                   className="rounded-md w-full h-full object-cover"
                 />
               </AspectRatio>
@@ -163,7 +167,7 @@ const SimpleImageGeneration = () => {
                 className="w-full"
                 onClick={handleDownload}
               >
-                Télécharger l'image
+                {t("imageGeneration", "downloadImage")}
               </Button>
             </div>
           )}
@@ -174,3 +178,4 @@ const SimpleImageGeneration = () => {
 };
 
 export default SimpleImageGeneration;
+
