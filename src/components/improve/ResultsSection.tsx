@@ -61,15 +61,47 @@ export function ResultsSection({ result, handleCopy }: ResultsSectionProps) {
     );
   }
 
-  // Process keywords field - it might be a string that needs to be split
-  // This handles the case where keywords come as a single string with commas or spaces
+  // Process keywords field - improved handling for Arabic commas
   if (processedResult.keywords && typeof processedResult.keywords === 'string') {
-    // Try to split by comma first, then by spaces if no commas
-    const keywordSeparator = processedResult.keywords.includes(',') ? ',' : ' ';
-    processedResult.keywords = processedResult.keywords.split(keywordSeparator)
+    // Clean up double Arabic commas first
+    let cleanedKeywords = processedResult.keywords.replace(/،،/g, '،');
+    
+    // Split by Arabic comma, then by regular comma, then by spaces as fallback
+    let keywordArray;
+    if (cleanedKeywords.includes('،')) {
+      keywordArray = cleanedKeywords.split('،');
+    } else if (cleanedKeywords.includes(',')) {
+      keywordArray = cleanedKeywords.split(',');
+    } else {
+      keywordArray = cleanedKeywords.split(' ');
+    }
+    
+    // Clean up each keyword and filter out empty ones
+    processedResult.keywords = keywordArray
       .map((k: string) => k.trim())
       .filter((k: string) => k.length > 0);
+    
     console.log("Processed keywords from string:", processedResult.keywords);
+  }
+
+  // Process mots_cles field with the same logic
+  if (processedResult.mots_cles && typeof processedResult.mots_cles === 'string') {
+    let cleanedKeywords = processedResult.mots_cles.replace(/،،/g, '،');
+    
+    let keywordArray;
+    if (cleanedKeywords.includes('،')) {
+      keywordArray = cleanedKeywords.split('،');
+    } else if (cleanedKeywords.includes(',')) {
+      keywordArray = cleanedKeywords.split(',');
+    } else {
+      keywordArray = cleanedKeywords.split(' ');
+    }
+    
+    processedResult.mots_cles = keywordArray
+      .map((k: string) => k.trim())
+      .filter((k: string) => k.length > 0);
+    
+    console.log("Processed mots_cles from string:", processedResult.mots_cles);
   }
 
   // If the result is empty or doesn't have any of the expected fields
