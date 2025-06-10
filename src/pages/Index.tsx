@@ -11,7 +11,7 @@ import { ErrorState } from "@/components/dashboard/ErrorState";
 
 const Index = () => {
   // Use custom hooks for data fetching
-  const { isLoading, error } = useIndexStats();
+  const { isLoading, error, statsData } = useIndexStats();
   const {
     news,
     loading: newsLoading,
@@ -24,6 +24,12 @@ const Index = () => {
 
   // Get news items for grid only with validation
   const gridNews = news && Array.isArray(news) ? news.slice(0, 6) : [];
+
+  // Transform statsData to include JSX icons
+  const transformedStatsData = statsData.map(stat => ({
+    ...stat,
+    icon: <stat.icon className="h-5 w-5 text-white" />
+  }));
 
   // Render loading skeletons while data is fetching
   if (isLoading) {

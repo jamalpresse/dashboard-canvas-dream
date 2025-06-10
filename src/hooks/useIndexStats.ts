@@ -113,18 +113,18 @@ export function useIndexStats() {
   const statsData = latestAnalytics ? [{
     title: t('dashboard', 'news'),
     value: latestAnalytics.page_view_count?.toString() || "0",
-    icon: <Search className="h-5 w-5 text-white" />,
+    icon: Search,
     trend: calculateTrend(latestAnalytics.page_view_count || 0, prevAnalytics?.page_view_count || 0)
   }, {
     title: isRTL ? t('dashboard', 'news') : "Articles",
     value: latestAnalytics.article_view_count?.toString() || "0",
-    icon: <AlertCircle className="h-5 w-5 text-white" />,
+    icon: AlertCircle,
     trend: calculateTrend(latestAnalytics.article_view_count || 0, prevAnalytics?.article_view_count || 0),
     variant: "primary" as const
   }, {
     title: t('dashboard', 'translate'),
     value: latestAnalytics.translation_count?.toString() || "0",
-    icon: <Globe className="h-5 w-5 text-white" />,
+    icon: Globe,
     trend: calculateTrend(latestAnalytics.translation_count || 0, prevAnalytics?.translation_count || 0),
     variant: "success" as const
   }] : [];
@@ -142,7 +142,7 @@ export function useIndexStats() {
         hour: '2-digit',
         minute: '2-digit'
       }) : '--:--',
-      icon: <AlertCircle className="h-4 w-4 text-red-600" />,
+      icon: AlertCircle,
       type: "default" as "default" | "success" | "warning" | "error"
     };
   }).filter(Boolean) : [];
