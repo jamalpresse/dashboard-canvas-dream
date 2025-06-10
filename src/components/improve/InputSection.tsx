@@ -3,6 +3,7 @@ import React from 'react';
 import { useToast } from "@/hooks/use-toast";
 import { isRTL, alignFrom, dirFrom } from '@/utils/textUtils';
 import { Loader2, Check } from 'lucide-react';
+import { useLanguage } from '@/context/LanguageContext';
 
 interface InputSectionProps {
   inputText: string;
@@ -21,12 +22,14 @@ export function InputSection({
   loading,
   requestSent = false
 }: InputSectionProps) {
+  const { t } = useLanguage();
+
   return (
     <div className="space-y-6">
       <textarea
         value={inputText}
         onChange={(e) => setInputText(e.target.value)}
-        placeholder="Collez ici votre article ou brouillon en arabe ou en français"
+        placeholder={t('improve', 'placeholder')}
         dir={dirFrom(inputText)}
         className={`w-full h-40 p-4 border rounded-lg focus:outline-none focus:ring-2 focus:ring-snrt-red text-black ${alignFrom(
           inputText
@@ -38,7 +41,7 @@ export function InputSection({
           onClick={handlePaste}
           className="px-6 py-2 bg-snrt-red text-white rounded-md hover:bg-red-700 shadow-sm transition-colors"
         >
-          COLLER
+          {t('improve', 'paste')}
         </button>
         <button
           type="button"
@@ -53,21 +56,21 @@ export function InputSection({
           {loading ? (
             <>
               <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-              CHARGEMENT...
+              {t('improve', 'loadingMessage')}
             </>
           ) : (
-            "AMÉLIORER & SEO"
+            t('improve', 'improveAndSeo')
           )}
         </button>
       </div>
 
       {loading && (
         <div className="text-center">
-          <p className="text-snrt-red">Traitement en cours... Cela peut prendre jusqu'à une minute.</p>
+          <p className="text-snrt-red">{t('improve', 'processingMessage')}</p>
           {requestSent && (
             <p className="text-green-600 flex items-center justify-center mt-2">
               <Check className="h-4 w-4 mr-2" />
-              Requête envoyée avec succès, en attente de réponse...
+              {t('improve', 'successMessage')}
             </p>
           )}
         </div>

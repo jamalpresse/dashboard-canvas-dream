@@ -1,4 +1,3 @@
-
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 
 // Define types for our translation structure
@@ -93,22 +92,34 @@ const translations: TranslationLabels = {
       inputText: "Texte à améliorer:",
       paste: "COLLER",
       improve: "AMÉLIORER",
+      improveAndSeo: "AMÉLIORER & SEO",
       clear: "EFFACER",
       copy: "Copier",
+      copyAll: "Copier tous",
       loading: "Amélioration en cours...",
+      loadingMessage: "CHARGEMENT...",
+      processingMessage: "Traitement en cours... Cela peut prendre jusqu'à une minute.",
+      successMessage: "Requête envoyée avec succès, en attente de réponse...",
       results: "Résultats",
-      resultsAvailable: "Résultats disponibles ✓"
+      resultsAvailable: "Résultats disponibles ✓",
+      placeholder: "Collez ici votre article ou brouillon en arabe ou en français"
     },
     ar: {
       title: "تحسين النص وتهيئة محركات البحث",
       inputText: "النص المراد تحسينه:",
       paste: "لصق",
       improve: "تحسين",
+      improveAndSeo: "تحسين وتهيئة محركات البحث",
       clear: "مسح",
       copy: "نسخ",
+      copyAll: "نسخ الكل",
       loading: "جاري التحسين...",
+      loadingMessage: "جاري التحميل...",
+      processingMessage: "جاري المعالجة... قد يستغرق الأمر دقيقة واحدة.",
+      successMessage: "تم إرسال الطلب بنجاح، في انتظار الرد...",
       results: "النتائج",
-      resultsAvailable: "النتائج متاحة ✓"
+      resultsAvailable: "النتائج متاحة ✓",
+      placeholder: "الصق هنا مقالك أو مسودتك باللغة العربية أو الفرنسية"
     }
   },
   
@@ -277,3 +288,5 @@ export const LanguageProvider: React.FC<{ children: ReactNode }> = ({ children }
 };
 
 export default LanguageContext;
+
+}

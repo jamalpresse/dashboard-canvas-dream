@@ -1,10 +1,10 @@
-
 import React from 'react';
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Copy } from "lucide-react";
 import { isRTL, dirFrom, alignFrom } from '@/utils/textUtils';
 import { Badge } from "@/components/ui/badge";
+import { useLanguage } from '@/context/LanguageContext';
 
 interface ResultCardProps {
   title: string;
@@ -21,6 +21,8 @@ export function ResultCard({
   isArrayContent = false, 
   displayMode = "badges" 
 }: ResultCardProps) {
+  const { t } = useLanguage();
+
   // Check if we're dealing with keywords (both "Keywords" and "Mots-clés" titles)
   const isKeywords = title === "Keywords" || title === "Mots-clés";
   const isHashtags = title === "Hashtags";
@@ -77,7 +79,7 @@ export function ResultCard({
               className="ml-1 p-0 h-auto"
             >
               <Copy className="h-3 w-3 mr-1" /> 
-              <span className="text-xs">Copier</span>
+              <span className="text-xs">{t('improve', 'copy')}</span>
             </Button>
           </div>
         ))}
@@ -134,7 +136,7 @@ export function ResultCard({
           size="sm"
           className="mt-2"
         >
-          <Copy className="h-4 w-4 mr-2" /> Copier
+          <Copy className="h-4 w-4 mr-2" /> {t('improve', 'copy')}
         </Button>
       </div>
     );
@@ -182,7 +184,7 @@ export function ResultCard({
                     className="ml-2"
                   >
                     <Copy className="h-3 w-3 mr-1" />
-                    <span className="text-xs">Copier</span>
+                    <span className="text-xs">{t('improve', 'copy')}</span>
                   </Button>
                 </li>
               ))}
@@ -195,7 +197,7 @@ export function ResultCard({
               size="sm"
               className="mt-3"
             >
-              <Copy className="h-4 w-4 mr-2" /> Copier tous
+              <Copy className="h-4 w-4 mr-2" /> {t('improve', 'copyAll')}
             </Button>
           )}
         </CardContent>
@@ -219,7 +221,7 @@ export function ResultCard({
           size="sm"
           className="mt-3"
         >
-          <Copy className="h-4 w-4 mr-2" /> Copier
+          <Copy className="h-4 w-4 mr-2" /> {t('improve', 'copy')}
         </Button>
       </CardContent>
     </Card>
