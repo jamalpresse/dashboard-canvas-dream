@@ -72,19 +72,18 @@ export function useNews() {
     loadNews();
   }, [activeTab, activeSource, lang, trackEvent]);
 
-  // Charger l'article vedette selon la langue
+  // Charger l'article vedette depuis SNRT News
   useEffect(() => {
     const loadFeaturedArticle = async () => {
       try {
-        console.log(`Récupération de l'article vedette en ${lang}...`);
+        console.log('Récupération de l\'article vedette depuis SNRT News...');
         
-        // Choisir une source appropriée selon la langue
-        const featuredSourceId = lang === 'ar' ? 'aljazeera' : 'lemonde';
-        const featuredNews = await fetchNewsFromSource(featuredSourceId);
+        // Utiliser toujours snrtnews-ar pour l'article vedette
+        const featuredNews = await fetchNewsFromSource('snrtnews-ar');
         
         if (featuredNews && featuredNews.length > 0) {
           const featured = featuredNews[0];
-          console.log("Article vedette chargé:", featured.title);
+          console.log("Article vedette SNRT chargé:", featured.title);
           
           const cleanedFeatured = {
             ...featured,
@@ -94,16 +93,16 @@ export function useNews() {
           
           setFeaturedArticle(cleanedFeatured);
         } else {
-          console.log("Aucun article vedette trouvé");
+          console.log("Aucun article vedette trouvé depuis SNRT News");
         }
       } catch (err) {
-        console.warn('Erreur lors du chargement de l\'article vedette:', err);
+        console.warn('Erreur lors du chargement de l\'article vedette SNRT:', err);
         // Pas d'affichage d'erreur pour l'article vedette
       }
     };
     
     loadFeaturedArticle();
-  }, [lang]);
+  }, []); // Pas de dépendance sur lang car on utilise toujours SNRT
 
   // Nettoyer le HTML
   const sanitizeHtml = (html: string): string => {
