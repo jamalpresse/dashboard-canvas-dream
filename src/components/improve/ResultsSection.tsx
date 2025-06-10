@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { ResultCard } from './ResultCard';
 import ErrorResult from '../translation/ErrorResult';
@@ -61,46 +60,45 @@ export function ResultsSection({ result, handleCopy }: ResultsSectionProps) {
     );
   }
 
-  // Process keywords field - improved handling for Arabic commas
-  if (processedResult.keywords && typeof processedResult.keywords === 'string') {
-    // Clean up double Arabic commas first
-    let cleanedKeywords = processedResult.keywords.replace(/،،/g, '،');
+  // Enhanced cleaning function for keywords
+  const cleanKeywords = (keywordString: string): string[] => {
+    // Multiple passes of cleaning for thorough cleanup
+    let cleaned = keywordString
+      // Remove multiple consecutive Arabic commas
+      .replace(/،{2,}/g, '،')
+      // Remove multiple consecutive regular commas
+      .replace(/,{2,}/g, ',')
+      // Clean up mixed comma patterns
+      .replace(/،\s*,\s*/g, '،')
+      .replace(/,\s*،\s*/g, '،')
+      // Remove commas at start and end
+      .replace(/^[،,\s]+|[،,\s]+$/g, '');
     
-    // Split by Arabic comma, then by regular comma, then by spaces as fallback
+    // Split by Arabic comma first, then regular comma, then spaces
     let keywordArray;
-    if (cleanedKeywords.includes('،')) {
-      keywordArray = cleanedKeywords.split('،');
-    } else if (cleanedKeywords.includes(',')) {
-      keywordArray = cleanedKeywords.split(',');
+    if (cleaned.includes('،')) {
+      keywordArray = cleaned.split('،');
+    } else if (cleaned.includes(',')) {
+      keywordArray = cleaned.split(',');
     } else {
-      keywordArray = cleanedKeywords.split(' ');
+      keywordArray = cleaned.split(/\s+/);
     }
     
-    // Clean up each keyword and filter out empty ones
-    processedResult.keywords = keywordArray
-      .map((k: string) => k.trim())
+    // Final cleanup of each keyword
+    return keywordArray
+      .map((k: string) => k.trim().replace(/^[،,]+|[،,]+$/g, ''))
       .filter((k: string) => k.length > 0);
-    
+  };
+
+  // Process keywords field - enhanced handling for Arabic commas
+  if (processedResult.keywords && typeof processedResult.keywords === 'string') {
+    processedResult.keywords = cleanKeywords(processedResult.keywords);
     console.log("Processed keywords from string:", processedResult.keywords);
   }
 
-  // Process mots_cles field with the same logic
+  // Process mots_cles field with the same enhanced logic
   if (processedResult.mots_cles && typeof processedResult.mots_cles === 'string') {
-    let cleanedKeywords = processedResult.mots_cles.replace(/،،/g, '،');
-    
-    let keywordArray;
-    if (cleanedKeywords.includes('،')) {
-      keywordArray = cleanedKeywords.split('،');
-    } else if (cleanedKeywords.includes(',')) {
-      keywordArray = cleanedKeywords.split(',');
-    } else {
-      keywordArray = cleanedKeywords.split(' ');
-    }
-    
-    processedResult.mots_cles = keywordArray
-      .map((k: string) => k.trim())
-      .filter((k: string) => k.length > 0);
-    
+    processedResult.mots_cles = cleanKeywords(processedResult.mots_cles);
     console.log("Processed mots_cles from string:", processedResult.mots_cles);
   }
 

@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -24,17 +25,30 @@ export function ResultCard({
   const isKeywords = title === "Keywords" || title === "Mots-clés";
   const isHashtags = title === "Hashtags";
 
+  // Enhanced keyword cleaning function as defensive measure
+  const cleanKeywordText = (text: string): string => {
+    return text
+      .replace(/،{2,}/g, '،')  // Remove multiple Arabic commas
+      .replace(/,{2,}/g, ',')   // Remove multiple regular commas
+      .replace(/،\s*,\s*/g, '،') // Clean mixed comma patterns
+      .replace(/,\s*،\s*/g, '،')
+      .trim();
+  };
+
   // Render keywords in a more visual way using badges
   const renderKeywords = (items: string[]) => {
+    // Clean each keyword as defensive measure
+    const cleanedItems = items.map(item => cleanKeywordText(item));
+    
     // If displayMode is paragraph, return keywords as a single paragraph with Arabic commas
     if (displayMode === "paragraph" && isKeywords) {
-      return renderKeywordsAsParagraph(items);
+      return renderKeywordsAsParagraph(cleanedItems);
     }
 
     // Default display as badges
     return (
       <div className="flex flex-wrap gap-2">
-        {items.map((item: string, i: number) => (
+        {cleanedItems.map((item: string, i: number) => (
           <div key={i} className="flex items-center mb-2">
             <Badge
               variant="outline"
@@ -58,9 +72,11 @@ export function ResultCard({
     );
   };
 
-  // New function to render keywords as a paragraph with Arabic commas
+  // Enhanced function to render keywords as a paragraph with Arabic commas
   const renderKeywordsAsParagraph = (items: string[]) => {
-    const joinedText = items.join('، '); // Join with single Arabic comma
+    // Additional defensive cleaning of each item
+    const cleanedItems = items.map(item => cleanKeywordText(item));
+    const joinedText = cleanedItems.join('، '); // Join with single Arabic comma and space
     
     return (
       <div className="mb-3">
