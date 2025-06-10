@@ -225,7 +225,8 @@ const Index = () => {
           ) : featuredArticle ? (
             <HeroNews 
               title={featuredArticle.title || "Actualité SNRT"} 
-              imageUrl={featuredArticle.enclosure?.link || featuredArticle.thumbnail || featuredArticle.content && featuredArticle.content.match(/src=["'](https?:\/\/[^"']+)["']/)?.[1] || "/lovable-uploads/32ff14e9-af71-4640-b4c9-583985037c66.png"} 
+              imageUrl={featuredArticle.enclosure?.link || featuredArticle.thumbnail || ""} 
+              content={featuredArticle.content || featuredArticle.description || ""}
               category="SNRT News" 
               timestamp={formatNewsDate(featuredArticle.pubDate)} 
               link={featuredArticle.link} 
@@ -373,3 +374,5 @@ const ErrorState = ({
 };
 
 export default Index;
+
+}
