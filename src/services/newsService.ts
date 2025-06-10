@@ -200,6 +200,15 @@ export const newsSources: NewsSource[] = [
     language: "fr",
     priority: 2
   },
+  {
+    id: "snrtnews-fr",
+    name: "SNRT News FR",
+    url: "https://snrtnews.com/fr/rss_fr.xml",
+    category: "general",
+    country: "ma",
+    language: "fr",
+    priority: 1
+  },
   
   // Sources marocaines arabes
   {

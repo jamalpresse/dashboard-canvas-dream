@@ -72,14 +72,15 @@ export function useNews() {
     loadNews();
   }, [activeTab, activeSource, lang, trackEvent]);
 
-  // Charger l'article vedette depuis SNRT News
+  // Charger l'article vedette depuis SNRT News selon la langue
   useEffect(() => {
     const loadFeaturedArticle = async () => {
       try {
-        console.log('Récupération de l\'article vedette depuis SNRT News...');
+        console.log(`Récupération de l'article vedette SNRT en ${lang}...`);
         
-        // Utiliser toujours snrtnews-ar pour l'article vedette
-        const featuredNews = await fetchNewsFromSource('snrtnews-ar');
+        // Utiliser la source SNRT appropriée selon la langue
+        const featuredSourceId = lang === 'ar' ? 'snrtnews-ar' : 'snrtnews-fr';
+        const featuredNews = await fetchNewsFromSource(featuredSourceId);
         
         if (featuredNews && featuredNews.length > 0) {
           const featured = featuredNews[0];
@@ -102,7 +103,7 @@ export function useNews() {
     };
     
     loadFeaturedArticle();
-  }, []); // Pas de dépendance sur lang car on utilise toujours SNRT
+  }, [lang]); // Dépendance sur lang pour changer de source selon la langue
 
   // Nettoyer le HTML
   const sanitizeHtml = (html: string): string => {
