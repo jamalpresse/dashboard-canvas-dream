@@ -1,3 +1,4 @@
+
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 
 // Define types for our translation structure
@@ -288,5 +289,3 @@ export const LanguageProvider: React.FC<{ children: ReactNode }> = ({ children }
 };
 
 export default LanguageContext;
-
-}
