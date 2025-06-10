@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -61,7 +60,7 @@ export function ResultCard({
 
   // New function to render keywords as a paragraph with Arabic commas
   const renderKeywordsAsParagraph = (items: string[]) => {
-    const joinedText = items.join('، '); // Join with Arabic comma
+    const joinedText = items.join('،، '); // Join with double Arabic comma
     
     return (
       <div className="mb-3">
