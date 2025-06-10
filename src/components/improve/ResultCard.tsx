@@ -60,7 +60,7 @@ export function ResultCard({
 
   // New function to render keywords as a paragraph with Arabic commas
   const renderKeywordsAsParagraph = (items: string[]) => {
-    const joinedText = items.join('،، '); // Join with double Arabic comma
+    const joinedText = items.join('، '); // Join with single Arabic comma
     
     return (
       <div className="mb-3">
