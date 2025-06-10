@@ -1,3 +1,4 @@
+
 import { toast } from "@/components/ui/sonner";
 
 export interface NewsItem {
@@ -137,13 +138,22 @@ export const newsSources: NewsSource[] = [
   
   // Sources marocaines arabes
   {
+    id: "snrtnews-ar",
+    name: "أخبار SNRT",
+    url: "https://snrtnews.com/rss.xml",
+    category: "general",
+    country: "ma",
+    language: "ar",
+    priority: 1
+  },
+  {
     id: "maroc-news-ar",
     name: "أخبار المغرب",
     url: "https://www.aljazeera.net/rss/all.xml",
     category: "general",
     country: "ma",
     language: "ar",
-    priority: 1
+    priority: 2
   },
   {
     id: "maghreb-info-ar",
@@ -152,7 +162,7 @@ export const newsSources: NewsSource[] = [
     category: "general",
     country: "ma",
     language: "ar",
-    priority: 2
+    priority: 3
   }
 ];
 
