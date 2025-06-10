@@ -1,4 +1,3 @@
-
 import { toast } from "@/components/ui/sonner";
 
 export interface NewsItem {
@@ -27,6 +26,72 @@ export interface NewsSource {
   country: "ma" | "global";
   language: "fr" | "ar";
   priority: number;
+}
+
+// Fonction pour détecter la langue d'un texte
+function detectLanguage(text: string): "fr" | "ar" | "unknown" {
+  if (!text) return "unknown";
+  
+  // Expressions régulières pour détecter l'arabe
+  const arabicRegex = /[\u0600-\u06FF\u0750-\u077F\u08A0-\u08FF\uFB50-\uFDFF\uFE70-\uFEFF]/;
+  
+  // Mots-clés français courants
+  const frenchKeywords = ['le', 'la', 'les', 'de', 'du', 'des', 'un', 'une', 'et', 'ou', 'pour', 'avec', 'dans', 'sur', 'par', 'que', 'qui', 'sont', 'ont', 'est', 'être', 'avoir'];
+  
+  // Mots-clés arabes courants
+  const arabicKeywords = ['في', 'من', 'إلى', 'على', 'عن', 'مع', 'هذا', 'هذه', 'التي', 'الذي', 'وقال', 'قال', 'أن', 'كان', 'كانت', 'يمكن', 'يجب'];
+  
+  const lowerText = text.toLowerCase();
+  
+  // Compter les caractères arabes
+  const arabicMatches = text.match(arabicRegex);
+  const arabicCharCount = arabicMatches ? arabicMatches.length : 0;
+  
+  // Compter les mots-clés français
+  const frenchKeywordCount = frenchKeywords.filter(keyword => 
+    lowerText.includes(' ' + keyword + ' ') || 
+    lowerText.startsWith(keyword + ' ') || 
+    lowerText.endsWith(' ' + keyword)
+  ).length;
+  
+  // Compter les mots-clés arabes
+  const arabicKeywordCount = arabicKeywords.filter(keyword => 
+    text.includes(keyword)
+  ).length;
+  
+  // Logique de détection
+  if (arabicCharCount > 5 || arabicKeywordCount > 0) {
+    return "ar";
+  } else if (frenchKeywordCount > 0) {
+    return "fr";
+  }
+  
+  // Si le texte contient plus de caractères latins, considérer comme français
+  const latinCharCount = text.replace(/[^a-zA-ZÀ-ÿ]/g, '').length;
+  if (latinCharCount > arabicCharCount) {
+    return "fr";
+  }
+  
+  return "unknown";
+}
+
+// Fonction pour filtrer les articles par langue
+function filterArticlesByLanguage(articles: NewsItem[], targetLanguage: "fr" | "ar"): NewsItem[] {
+  return articles.filter(article => {
+    // Détecter la langue du titre et de la description
+    const titleLanguage = detectLanguage(article.title);
+    const descriptionLanguage = detectLanguage(article.description);
+    
+    // L'article est gardé si au moins le titre ou la description correspond à la langue cible
+    const matchesLanguage = titleLanguage === targetLanguage || descriptionLanguage === targetLanguage;
+    
+    // Garder aussi les articles de langue "unknown" pour éviter de perdre du contenu
+    const isUnknown = titleLanguage === "unknown" && descriptionLanguage === "unknown";
+    
+    console.log(`Article: "${article.title.substring(0, 50)}..." - Titre: ${titleLanguage}, Description: ${descriptionLanguage}, Gardé: ${matchesLanguage || isUnknown}`);
+    
+    return matchesLanguage || isUnknown;
+  });
 }
 
 // Sources RSS multilingues - françaises et arabes
@@ -273,8 +338,8 @@ async function fetchWithRetry(url: string, maxRetries: number = 2): Promise<any>
 }
 
 // Récupérer les actualités d'une source
-export async function fetchNewsFromSource(sourceId: string): Promise<NewsItem[]> {
-  const cacheKey = `source_${sourceId}`;
+export async function fetchNewsFromSource(sourceId: string, targetLanguage?: "fr" | "ar"): Promise<NewsItem[]> {
+  const cacheKey = `source_${sourceId}_${targetLanguage || 'all'}`;
   
   // Vérifier le cache d'abord
   const cachedNews = getFromCache(cacheKey);
@@ -292,7 +357,7 @@ export async function fetchNewsFromSource(sourceId: string): Promise<NewsItem[]>
     console.log(`Récupération des actualités de ${source.name}...`);
     const data = await fetchWithRetry(source.url);
     
-    const validItems: NewsItem[] = data.items
+    let validItems: NewsItem[] = data.items
       .filter((item: any) => item && item.title && item.link)
       .map((item: any) => ({
         ...item,
@@ -303,7 +368,14 @@ export async function fetchNewsFromSource(sourceId: string): Promise<NewsItem[]>
         guid: item.guid || item.link || `${sourceId}-${Date.now()}-${Math.random()}`
       }));
     
-    console.log(`✓ ${source.name}: ${validItems.length} articles récupérés`);
+    // Filtrer par langue si spécifiée
+    if (targetLanguage) {
+      const originalCount = validItems.length;
+      validItems = filterArticlesByLanguage(validItems, targetLanguage);
+      console.log(`✓ ${source.name}: ${originalCount} articles récupérés, ${validItems.length} après filtrage langue ${targetLanguage}`);
+    } else {
+      console.log(`✓ ${source.name}: ${validItems.length} articles récupérés (sans filtrage langue)`);
+    }
     
     // Sauvegarder en cache
     if (validItems.length > 0) {
@@ -346,10 +418,10 @@ export async function fetchNewsByLanguageAndCountry(language: "fr" | "ar", count
   const results: NewsItem[] = [];
   const failedSources: string[] = [];
   
-  // Récupérer de chaque source
+  // Récupérer de chaque source avec filtrage par langue
   for (const source of sourcesForLanguage) {
     try {
-      const sourceNews = await fetchNewsFromSource(source.id);
+      const sourceNews = await fetchNewsFromSource(source.id, language);
       if (sourceNews.length > 0) {
         results.push(...sourceNews);
         console.log(`✓ ${source.name}: ${sourceNews.length} articles`);
