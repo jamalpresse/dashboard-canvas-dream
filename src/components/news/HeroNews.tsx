@@ -22,71 +22,19 @@ export const HeroNews: React.FC<HeroNewsProps> = ({
   className,
   content
 }) => {
-  // Fonction pour extraire une image du contenu HTML ou du texte
-  const extractImageFromContent = (htmlContent: string): string | null => {
-    if (!htmlContent) return null;
-    
-    // 1. Chercher des balises img dans le HTML
-    const imgTagRegex = /<img[^>]+src=["']([^"']+)["'][^>]*>/gi;
-    let match;
-    while ((match = imgTagRegex.exec(htmlContent)) !== null) {
-      const imgSrc = match[1];
-      // Vérifier que l'image a une extension valide et n'est pas un pixel de tracking
-      if (imgSrc && 
-          /\.(jpg|jpeg|png|gif|webp|svg)(\?|$)/i.test(imgSrc) && 
-          !imgSrc.includes('1x1') && 
-          !imgSrc.includes('pixel') &&
-          imgSrc.length > 20) {
-        console.log("Image extraite de la balise img:", imgSrc);
-        // S'assurer que l'URL est complète
-        return imgSrc.startsWith('http') ? imgSrc : `https://snrtnews.com${imgSrc}`;
-      }
-    }
-    
-    // 2. Chercher des URLs d'images directes dans le texte
-    const imageUrlRegex = /(https?:\/\/[^\s"'<>]+\.(?:jpg|jpeg|png|gif|webp|svg))(?:\?[^\s"'<>]*)?/gi;
-    match = htmlContent.match(imageUrlRegex);
-    
-    if (match && match[0]) {
-      const imgUrl = match[0];
-      if (!imgUrl.includes('1x1') && !imgUrl.includes('pixel') && imgUrl.length > 20) {
-        console.log("Image extraite de l'URL:", imgUrl);
-        return imgUrl;
-      }
-    }
-    
-    return null;
-  };
+  // Utiliser l'image fournie ou l'image par défaut, sans duplication de logique
+  const finalImageUrl = imageUrl && 
+                        imageUrl.trim() !== "" && 
+                        imageUrl !== "/lovable-uploads/32ff14e9-af71-4640-b4c9-583985037c66.png" 
+                        ? imageUrl 
+                        : "/lovable-uploads/32ff14e9-af71-4640-b4c9-583985037c66.png";
 
-  // Déterminer l'image à utiliser avec une logique améliorée
-  const getImageUrl = (): string => {
-    // 1. Utiliser l'imageUrl fourni s'il existe et n'est pas vide
-    if (imageUrl && imageUrl.trim() !== "" && imageUrl !== "/lovable-uploads/32ff14e9-af71-4640-b4c9-583985037c66.png") {
-      console.log("Utilisation de l'imageUrl fourni:", imageUrl);
-      return imageUrl;
-    }
-    
-    // 2. Essayer d'extraire une image du contenu
-    if (content) {
-      const extractedImage = extractImageFromContent(content);
-      if (extractedImage) {
-        console.log("Image extraite du contenu:", extractedImage);
-        return extractedImage;
-      }
-    }
-    
-    // 3. Utiliser l'image par défaut SNRT
-    console.log("Utilisation de l'image par défaut SNRT");
-    return "/lovable-uploads/32ff14e9-af71-4640-b4c9-583985037c66.png";
-  };
-
-  const finalImageUrl = getImageUrl();
+  console.log("HeroNews - Image reçue:", imageUrl);
   console.log("HeroNews - Image finale utilisée:", finalImageUrl);
-  console.log("HeroNews - Props reçues:", { title, imageUrl, content: content?.substring(0, 100) });
 
   return (
     <div className={cn("snrt-hero relative h-[300px] md:h-[400px] overflow-hidden rounded-md", className)}>
-      {/* Background Image avec fallback amélioré */}
+      {/* Background Image avec fallback */}
       <div 
         className="w-full h-full bg-cover bg-center bg-no-repeat relative"
         style={{
@@ -94,7 +42,7 @@ export const HeroNews: React.FC<HeroNewsProps> = ({
           backgroundColor: '#1a1a1a'
         }}
       >
-        {/* Image de test cachée pour détecter les erreurs */}
+        {/* Image de test pour détecter les erreurs de chargement */}
         <img 
           src={finalImageUrl}
           alt=""
@@ -113,7 +61,7 @@ export const HeroNews: React.FC<HeroNewsProps> = ({
         />
       </div>
       
-      {/* Dark overlay - Reduced opacity for better image visibility */}
+      {/* Dark overlay */}
       <div className="absolute inset-0 bg-black/60" />
       
       {/* Content Overlay */}

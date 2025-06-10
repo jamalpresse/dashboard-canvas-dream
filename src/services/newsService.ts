@@ -1,4 +1,3 @@
-
 import { toast } from "@/components/ui/sonner";
 
 export interface NewsItem {
@@ -29,48 +28,93 @@ export interface NewsSource {
   priority: number;
 }
 
-// Fonction pour extraire une image du contenu HTML
-function extractImageFromContent(htmlContent: string): string | null {
+// Fonction améliorée pour extraire une image du contenu HTML
+function extractImageFromContent(htmlContent: string, sourceId: string = ""): string | null {
   if (!htmlContent) return null;
   
-  // 1. Chercher des balises img dans le HTML
+  console.log(`[${sourceId}] Extraction d'image depuis le contenu (${htmlContent.length} caractères)`);
+  
+  // 1. Patterns spécifiques pour SNRT News
+  if (sourceId.includes('snrt') || htmlContent.includes('snrtnews.com')) {
+    console.log(`[${sourceId}] Contenu SNRT détecté, utilisation de patterns spécifiques`);
+    
+    // Pattern pour les images SNRT avec différents formats d'URL
+    const snrtPatterns = [
+      // URLs complètes SNRT
+      /https?:\/\/(?:www\.)?snrtnews\.com\/[^\s"'<>]*\.(?:jpg|jpeg|png|gif|webp)/gi,
+      // URLs relatives avec /storage ou /uploads
+      /\/(?:storage|uploads|images)\/[^\s"'<>]*\.(?:jpg|jpeg|png|gif|webp)/gi,
+      // Balises img avec src SNRT
+      /<img[^>]+src=["']([^"']*snrtnews\.com[^"']*)["'][^>]*>/gi,
+      // Balises img avec src relatif
+      /<img[^>]+src=["'](\/[^"']*\.(?:jpg|jpeg|png|gif|webp))["'][^>]*>/gi
+    ];
+    
+    for (const pattern of snrtPatterns) {
+      const matches = htmlContent.match(pattern);
+      if (matches) {
+        for (const match of matches) {
+          let imgUrl: string;
+          
+          if (match.includes('<img')) {
+            // Extraire l'URL de la balise img
+            const srcMatch = match.match(/src=["']([^"']*)["']/);
+            if (srcMatch) {
+              imgUrl = srcMatch[1];
+            } else {
+              continue;
+            }
+          } else {
+            imgUrl = match;
+          }
+          
+          // Construire l'URL complète si nécessaire
+          if (imgUrl.startsWith('/')) {
+            imgUrl = `https://snrtnews.com${imgUrl}`;
+          }
+          
+          // Vérifier que l'image n'est pas un pixel de tracking
+          if (imgUrl.length > 30 && 
+              !imgUrl.includes('1x1') && 
+              !imgUrl.includes('pixel') &&
+              !imgUrl.includes('tracking')) {
+            console.log(`[${sourceId}] Image SNRT trouvée:`, imgUrl);
+            return imgUrl;
+          }
+        }
+      }
+    }
+  }
+  
+  // 2. Extraction générale des balises img
   const imgTagRegex = /<img[^>]+src=["']([^"']+)["'][^>]*>/gi;
   let match;
   while ((match = imgTagRegex.exec(htmlContent)) !== null) {
     const imgSrc = match[1];
-    // Vérifier que l'image a une extension valide et n'est pas un pixel de tracking
     if (imgSrc && 
         /\.(jpg|jpeg|png|gif|webp|svg)(\?|$)/i.test(imgSrc) && 
         !imgSrc.includes('1x1') && 
         !imgSrc.includes('pixel') &&
         imgSrc.length > 20) {
-      console.log("Image extraite de la balise img:", imgSrc);
+      console.log(`[${sourceId}] Image générale trouvée:`, imgSrc);
+      // S'assurer que l'URL est complète
       return imgSrc.startsWith('http') ? imgSrc : `https://snrtnews.com${imgSrc}`;
     }
   }
   
-  // 2. Chercher des URLs d'images directes dans le texte
+  // 3. Chercher des URLs d'images directes dans le texte
   const imageUrlRegex = /(https?:\/\/[^\s"'<>]+\.(?:jpg|jpeg|png|gif|webp|svg))(?:\?[^\s"'<>]*)?/gi;
   match = htmlContent.match(imageUrlRegex);
   
   if (match && match[0]) {
     const imgUrl = match[0];
     if (!imgUrl.includes('1x1') && !imgUrl.includes('pixel') && imgUrl.length > 20) {
-      console.log("Image extraite de l'URL:", imgUrl);
+      console.log(`[${sourceId}] URL d'image directe trouvée:`, imgUrl);
       return imgUrl;
     }
   }
   
-  // 3. Pour SNRT News spécifiquement, chercher des patterns spécifiques
-  if (htmlContent.includes('snrtnews.com')) {
-    const snrtImageRegex = /(?:src=["']?|url\(["']?)([^"'\s)]+snrtnews\.com[^"'\s)]*\.(?:jpg|jpeg|png|gif|webp))["']?/gi;
-    match = snrtImageRegex.exec(htmlContent);
-    if (match && match[1]) {
-      console.log("Image SNRT extraite:", match[1]);
-      return match[1];
-    }
-  }
-  
+  console.log(`[${sourceId}] Aucune image trouvée dans le contenu`);
   return null;
 }
 
@@ -415,20 +459,27 @@ export async function fetchNewsFromSource(sourceId: string, targetLanguage?: "fr
     let validItems: NewsItem[] = data.items
       .filter((item: any) => item && item.title && item.link)
       .map((item: any) => {
-        // Extraire l'image du contenu si aucune thumbnail n'est fournie
+        // Extraire l'image avec la fonction améliorée
         let thumbnail = item.thumbnail || item.enclosure?.link;
         
-        // Pour SNRT News, essayer d'extraire l'image du contenu HTML
-        if (!thumbnail && sourceId.includes('snrt') && item.content) {
-          thumbnail = extractImageFromContent(item.content);
+        console.log(`[${sourceId}] Traitement article: "${item.title?.substring(0, 50)}..."`);
+        console.log(`[${sourceId}] Thumbnail initial:`, thumbnail);
+        console.log(`[${sourceId}] Contenu disponible:`, !!item.content);
+        console.log(`[${sourceId}] Description disponible:`, !!item.description);
+        
+        // Essayer d'extraire l'image du contenu si aucune thumbnail n'est fournie
+        if (!thumbnail && item.content) {
+          console.log(`[${sourceId}] Extraction depuis le contenu...`);
+          thumbnail = extractImageFromContent(item.content, sourceId);
         }
         
         // Si toujours pas d'image, essayer avec la description
         if (!thumbnail && item.description) {
-          thumbnail = extractImageFromContent(item.description);
+          console.log(`[${sourceId}] Extraction depuis la description...`);
+          thumbnail = extractImageFromContent(item.description, sourceId);
         }
         
-        console.log(`Article "${item.title?.substring(0, 30)}..." - Image trouvée: ${thumbnail || 'Aucune'}`);
+        console.log(`[${sourceId}] Image finale:`, thumbnail || 'Aucune');
         
         return {
           ...item,

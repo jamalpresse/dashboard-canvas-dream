@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { useAnalytics } from '@/hooks/use-analytics';
 import { useLanguage } from '@/context/LanguageContext';
@@ -22,6 +23,50 @@ export function useNews() {
   const { trackEvent } = useAnalytics();
   const { lang } = useLanguage();
 
+  // Fonction pour extraire l'image AVANT le nettoyage HTML
+  const extractImageBeforeClean = (item: NewsItem): string | null => {
+    // Priorité : thumbnail existant
+    if (item.thumbnail) {
+      return item.thumbnail;
+    }
+    
+    // Sinon, l'extraction a déjà été faite dans newsService.ts
+    return null;
+  };
+
+  // Nettoyer le HTML de manière sélective (préserver les infos d'image)
+  const sanitizeHtmlPreservingImages = (html: string): string => {
+    if (!html) return '';
+    
+    // D'abord extraire les URLs d'images avant de nettoyer
+    const imgUrls: string[] = [];
+    const imgMatches = html.match(/<img[^>]+src=["']([^"']+)["'][^>]*>/gi);
+    if (imgMatches) {
+      imgMatches.forEach(match => {
+        const srcMatch = match.match(/src=["']([^"']+)["']/);
+        if (srcMatch) {
+          imgUrls.push(srcMatch[1]);
+        }
+      });
+    }
+    
+    // Nettoyer le HTML
+    const cleaned = html.replace(/<\/?[^>]+(>|$)/g, "")
+      .replace(/&nbsp;/g, " ")
+      .replace(/&amp;/g, "&")
+      .replace(/&lt;/g, "<")
+      .replace(/&gt;/g, ">")
+      .replace(/&quot;/g, '"')
+      .trim();
+    
+    // Ajouter les URLs d'images en commentaire pour référence future si nécessaire
+    if (imgUrls.length > 0) {
+      console.log('Images extraites avant nettoyage:', imgUrls);
+    }
+    
+    return cleaned;
+  };
+
   // Charger les actualités selon l'onglet actif et la langue
   useEffect(() => {
     const loadNews = async () => {
@@ -44,14 +89,25 @@ export function useNews() {
           trackEvent('article_view', { category: activeTab, language: lang });
         }
         
-        // Nettoyer le contenu HTML
-        newsData = newsData.map(item => ({
-          ...item,
-          description: item.description ? sanitizeHtml(item.description) : 'Pas de description disponible',
-          content: item.content ? sanitizeHtml(item.content) : ''
-        }));
+        // Nettoyer le contenu HTML APRÈS extraction d'image
+        newsData = newsData.map(item => {
+          const extractedImage = extractImageBeforeClean(item);
+          
+          return {
+            ...item,
+            // Utiliser l'image extraite ou celle déjà présente
+            thumbnail: extractedImage || item.thumbnail,
+            description: item.description ? sanitizeHtmlPreservingImages(item.description) : 'Pas de description disponible',
+            content: item.content ? sanitizeHtmlPreservingImages(item.content) : ''
+          };
+        });
         
         console.log(`Chargé ${newsData.length} actualités en ${lang}`);
+        console.log('Premiers articles avec images:', newsData.slice(0, 3).map(item => ({
+          title: item.title.substring(0, 50),
+          thumbnail: item.thumbnail
+        })));
+        
         setNews(newsData);
         applyFilters(newsData, searchQuery, activeSource);
         
@@ -85,11 +141,12 @@ export function useNews() {
         if (featuredNews && featuredNews.length > 0) {
           const featured = featuredNews[0];
           console.log("Article vedette SNRT chargé:", featured.title);
+          console.log("Image de l'article vedette:", featured.thumbnail);
           
           const cleanedFeatured = {
             ...featured,
-            description: featured.description ? sanitizeHtml(featured.description) : 'Pas de description disponible',
-            content: featured.content ? sanitizeHtml(featured.content) : ''
+            description: featured.description ? sanitizeHtmlPreservingImages(featured.description) : 'Pas de description disponible',
+            content: featured.content ? sanitizeHtmlPreservingImages(featured.content) : ''
           };
           
           setFeaturedArticle(cleanedFeatured);
