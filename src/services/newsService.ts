@@ -1,3 +1,4 @@
+
 import { toast } from "@/components/ui/sonner";
 
 export interface NewsItem {
@@ -26,6 +27,51 @@ export interface NewsSource {
   country: "ma" | "global";
   language: "fr" | "ar";
   priority: number;
+}
+
+// Fonction pour extraire une image du contenu HTML
+function extractImageFromContent(htmlContent: string): string | null {
+  if (!htmlContent) return null;
+  
+  // 1. Chercher des balises img dans le HTML
+  const imgTagRegex = /<img[^>]+src=["']([^"']+)["'][^>]*>/gi;
+  let match;
+  while ((match = imgTagRegex.exec(htmlContent)) !== null) {
+    const imgSrc = match[1];
+    // Vérifier que l'image a une extension valide et n'est pas un pixel de tracking
+    if (imgSrc && 
+        /\.(jpg|jpeg|png|gif|webp|svg)(\?|$)/i.test(imgSrc) && 
+        !imgSrc.includes('1x1') && 
+        !imgSrc.includes('pixel') &&
+        imgSrc.length > 20) {
+      console.log("Image extraite de la balise img:", imgSrc);
+      return imgSrc.startsWith('http') ? imgSrc : `https://snrtnews.com${imgSrc}`;
+    }
+  }
+  
+  // 2. Chercher des URLs d'images directes dans le texte
+  const imageUrlRegex = /(https?:\/\/[^\s"'<>]+\.(?:jpg|jpeg|png|gif|webp|svg))(?:\?[^\s"'<>]*)?/gi;
+  match = htmlContent.match(imageUrlRegex);
+  
+  if (match && match[0]) {
+    const imgUrl = match[0];
+    if (!imgUrl.includes('1x1') && !imgUrl.includes('pixel') && imgUrl.length > 20) {
+      console.log("Image extraite de l'URL:", imgUrl);
+      return imgUrl;
+    }
+  }
+  
+  // 3. Pour SNRT News spécifiquement, chercher des patterns spécifiques
+  if (htmlContent.includes('snrtnews.com')) {
+    const snrtImageRegex = /(?:src=["']?|url\(["']?)([^"'\s)]+snrtnews\.com[^"'\s)]*\.(?:jpg|jpeg|png|gif|webp))["']?/gi;
+    match = snrtImageRegex.exec(htmlContent);
+    if (match && match[1]) {
+      console.log("Image SNRT extraite:", match[1]);
+      return match[1];
+    }
+  }
+  
+  return null;
 }
 
 // Fonction pour détecter la langue d'un texte
@@ -368,14 +414,32 @@ export async function fetchNewsFromSource(sourceId: string, targetLanguage?: "fr
     
     let validItems: NewsItem[] = data.items
       .filter((item: any) => item && item.title && item.link)
-      .map((item: any) => ({
-        ...item,
-        source: source.name,
-        description: item.description || 'Pas de description disponible',
-        content: item.content || item.description || '',
-        categories: item.categories || [],
-        guid: item.guid || item.link || `${sourceId}-${Date.now()}-${Math.random()}`
-      }));
+      .map((item: any) => {
+        // Extraire l'image du contenu si aucune thumbnail n'est fournie
+        let thumbnail = item.thumbnail || item.enclosure?.link;
+        
+        // Pour SNRT News, essayer d'extraire l'image du contenu HTML
+        if (!thumbnail && sourceId.includes('snrt') && item.content) {
+          thumbnail = extractImageFromContent(item.content);
+        }
+        
+        // Si toujours pas d'image, essayer avec la description
+        if (!thumbnail && item.description) {
+          thumbnail = extractImageFromContent(item.description);
+        }
+        
+        console.log(`Article "${item.title?.substring(0, 30)}..." - Image trouvée: ${thumbnail || 'Aucune'}`);
+        
+        return {
+          ...item,
+          source: source.name,
+          description: item.description || 'Pas de description disponible',
+          content: item.content || item.description || '',
+          categories: item.categories || [],
+          guid: item.guid || item.link || `${sourceId}-${Date.now()}-${Math.random()}`,
+          thumbnail
+        };
+      });
     
     // Filtrer par langue si spécifiée
     if (targetLanguage) {

@@ -26,22 +26,33 @@ export const HeroNews: React.FC<HeroNewsProps> = ({
   const extractImageFromContent = (htmlContent: string): string | null => {
     if (!htmlContent) return null;
     
-    // Chercher des URLs d'images dans le contenu
-    const imageRegex = /(https?:\/\/[^\s]+\.(?:jpg|jpeg|png|gif|webp|svg))/gi;
-    const match = htmlContent.match(imageRegex);
-    
-    if (match && match[0]) {
-      console.log("Image extraite du contenu:", match[0]);
-      return match[0];
+    // 1. Chercher des balises img dans le HTML
+    const imgTagRegex = /<img[^>]+src=["']([^"']+)["'][^>]*>/gi;
+    let match;
+    while ((match = imgTagRegex.exec(htmlContent)) !== null) {
+      const imgSrc = match[1];
+      // Vérifier que l'image a une extension valide et n'est pas un pixel de tracking
+      if (imgSrc && 
+          /\.(jpg|jpeg|png|gif|webp|svg)(\?|$)/i.test(imgSrc) && 
+          !imgSrc.includes('1x1') && 
+          !imgSrc.includes('pixel') &&
+          imgSrc.length > 20) {
+        console.log("Image extraite de la balise img:", imgSrc);
+        // S'assurer que l'URL est complète
+        return imgSrc.startsWith('http') ? imgSrc : `https://snrtnews.com${imgSrc}`;
+      }
     }
     
-    // Chercher des balises img dans le HTML
-    const imgTagRegex = /<img[^>]+src=["']([^"']+)["'][^>]*>/gi;
-    const imgMatch = imgTagRegex.exec(htmlContent);
+    // 2. Chercher des URLs d'images directes dans le texte
+    const imageUrlRegex = /(https?:\/\/[^\s"'<>]+\.(?:jpg|jpeg|png|gif|webp|svg))(?:\?[^\s"'<>]*)?/gi;
+    match = htmlContent.match(imageUrlRegex);
     
-    if (imgMatch && imgMatch[1]) {
-      console.log("Image extraite de la balise img:", imgMatch[1]);
-      return imgMatch[1];
+    if (match && match[0]) {
+      const imgUrl = match[0];
+      if (!imgUrl.includes('1x1') && !imgUrl.includes('pixel') && imgUrl.length > 20) {
+        console.log("Image extraite de l'URL:", imgUrl);
+        return imgUrl;
+      }
     }
     
     return null;
@@ -59,6 +70,7 @@ export const HeroNews: React.FC<HeroNewsProps> = ({
     if (content) {
       const extractedImage = extractImageFromContent(content);
       if (extractedImage) {
+        console.log("Image extraite du contenu:", extractedImage);
         return extractedImage;
       }
     }
@@ -74,29 +86,24 @@ export const HeroNews: React.FC<HeroNewsProps> = ({
 
   return (
     <div className={cn("snrt-hero relative h-[300px] md:h-[400px] overflow-hidden rounded-md", className)}>
-      {/* Background Image - Forcer l'affichage de l'image par défaut si aucune image valide */}
+      {/* Background Image avec fallback amélioré */}
       <div 
-        className="w-full h-full bg-cover bg-center bg-no-repeat"
+        className="w-full h-full bg-cover bg-center bg-no-repeat relative"
         style={{
           backgroundImage: `url("${finalImageUrl}")`,
-          backgroundColor: '#000'
-        }}
-        onError={(e) => {
-          console.log("Erreur de chargement de l'image de fond:", finalImageUrl);
-          // Fallback vers l'image par défaut
-          e.currentTarget.style.backgroundImage = `url("/lovable-uploads/32ff14e9-af71-4640-b4c9-583985037c66.png")`;
+          backgroundColor: '#1a1a1a'
         }}
       >
-        {/* Image de secours cachée pour détecter les erreurs de chargement */}
+        {/* Image de test cachée pour détecter les erreurs */}
         <img 
           src={finalImageUrl}
           alt=""
-          className="hidden"
+          className="absolute opacity-0 w-1 h-1"
           onError={(e) => {
-            console.log("Image de secours - erreur détectée pour:", finalImageUrl);
-            // Changer l'image de fond du parent
+            console.log("Erreur de chargement détectée pour:", finalImageUrl);
             const parent = e.currentTarget.parentElement;
             if (parent && !finalImageUrl.includes("32ff14e9-af71-4640-b4c9-583985037c66.png")) {
+              console.log("Basculement vers l'image par défaut");
               parent.style.backgroundImage = `url("/lovable-uploads/32ff14e9-af71-4640-b4c9-583985037c66.png")`;
             }
           }}
@@ -134,7 +141,7 @@ export const HeroNews: React.FC<HeroNewsProps> = ({
             rel="noopener noreferrer" 
             className="flex items-center gap-2 bg-snrt-red hover:bg-red-700 text-white py-2 px-4 rounded-md w-fit text-sm font-medium transition-colors duration-200 mt-2"
           >
-            <span>Lire l'article</span>
+            <span>قراءة المقال</span>
             <ExternalLink size={16} />
           </a>
         )}
