@@ -25,14 +25,27 @@ export function ResultCard({
   const isKeywords = title === "Keywords" || title === "Mots-clés";
   const isHashtags = title === "Hashtags";
 
-  // Enhanced keyword cleaning function as defensive measure
+  // Comprehensive keyword cleaning function as ultimate defensive measure
   const cleanKeywordText = (text: string): string => {
-    return text
-      .replace(/،{2,}/g, '،')  // Remove multiple Arabic commas
-      .replace(/,{2,}/g, ',')   // Remove multiple regular commas
-      .replace(/،\s*,\s*/g, '،') // Clean mixed comma patterns
-      .replace(/,\s*،\s*/g, '،')
+    console.log("ResultCard cleaning text:", text);
+    
+    const cleaned = text
+      // Remove multiple consecutive Arabic commas (،،، → ،)
+      .replace(/،{2,}/g, '،')
+      // Remove multiple consecutive regular commas (,,, → ,)
+      .replace(/,{2,}/g, ',')
+      // Clean mixed comma patterns (،, → ،) and (,، → ،)
+      .replace(/،\s*,+\s*/g, '،')
+      .replace(/,+\s*،\s*/g, '،')
+      // Remove commas at start and end
+      .replace(/^[،,\s]+|[،,\s]+$/g, '')
+      // Normalize spacing around commas
+      .replace(/\s*،\s*/g, '،')
+      .replace(/\s*,\s*/g, ',')
       .trim();
+    
+    console.log("ResultCard cleaned text:", cleaned);
+    return cleaned;
   };
 
   // Render keywords in a more visual way using badges
@@ -74,9 +87,38 @@ export function ResultCard({
 
   // Enhanced function to render keywords as a paragraph with Arabic commas
   const renderKeywordsAsParagraph = (items: string[]) => {
-    // Additional defensive cleaning of each item
-    const cleanedItems = items.map(item => cleanKeywordText(item));
-    const joinedText = cleanedItems.join('، '); // Join with single Arabic comma and space
+    console.log("Rendering keywords as paragraph, input items:", items);
+    
+    // Step 1: Clean each individual keyword thoroughly
+    const thoroughlyCleanedItems = items.map(item => {
+      const cleaned = cleanKeywordText(item);
+      // Additional cleanup for individual keywords
+      return cleaned
+        .replace(/[،,]+$/, '') // Remove trailing commas
+        .replace(/^[،,]+/, '') // Remove leading commas
+        .trim();
+    }).filter(item => item.length > 0);
+    
+    console.log("Thoroughly cleaned individual items:", thoroughlyCleanedItems);
+    
+    // Step 2: Join with single Arabic comma and space
+    let joinedText = thoroughlyCleanedItems.join('، ');
+    
+    // Step 3: Final emergency cleanup of the joined text
+    joinedText = joinedText
+      // Remove any double commas that might have slipped through
+      .replace(/،{2,}/g, '،')
+      .replace(/,{2,}/g, ',')
+      // Clean mixed patterns one more time
+      .replace(/،\s*,+\s*/g, '، ')
+      .replace(/,+\s*،\s*/g, '، ')
+      // Ensure proper spacing
+      .replace(/،(?!\s)/g, '، ')
+      .replace(/\s+،/g, '،')
+      .replace(/\s+/g, ' ')
+      .trim();
+    
+    console.log("Final joined text:", joinedText);
     
     return (
       <div className="mb-3">

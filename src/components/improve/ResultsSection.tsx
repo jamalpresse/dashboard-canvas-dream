@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { ResultCard } from './ResultCard';
 import ErrorResult from '../translation/ErrorResult';
@@ -60,34 +61,53 @@ export function ResultsSection({ result, handleCopy }: ResultsSectionProps) {
     );
   }
 
-  // Enhanced cleaning function for keywords
+  // Enhanced and comprehensive cleaning function for keywords
   const cleanKeywords = (keywordString: string): string[] => {
-    // Multiple passes of cleaning for thorough cleanup
-    let cleaned = keywordString
-      // Remove multiple consecutive Arabic commas
-      .replace(/،{2,}/g, '،')
-      // Remove multiple consecutive regular commas
-      .replace(/,{2,}/g, ',')
-      // Clean up mixed comma patterns
-      .replace(/،\s*,\s*/g, '،')
-      .replace(/,\s*،\s*/g, '،')
-      // Remove commas at start and end
-      .replace(/^[،,\s]+|[،,\s]+$/g, '');
+    console.log("Original keyword string:", keywordString);
     
-    // Split by Arabic comma first, then regular comma, then spaces
+    // Step 1: Multiple comprehensive cleaning passes
+    let cleaned = keywordString
+      // Remove multiple consecutive Arabic commas (،،، → ،)
+      .replace(/،{2,}/g, '،')
+      // Remove multiple consecutive regular commas (,,, → ,)
+      .replace(/,{2,}/g, ',')
+      // Clean up mixed comma patterns (،, → ،) and (,، → ،)
+      .replace(/،\s*,+\s*/g, '، ')
+      .replace(/,+\s*،\s*/g, '، ')
+      // Remove commas at start and end of string
+      .replace(/^[،,\s]+|[،,\s]+$/g, '')
+      // Normalize spaces around commas
+      .replace(/\s*،\s*/g, '، ')
+      .replace(/\s*,\s*/g, ', ');
+    
+    console.log("After initial cleaning:", cleaned);
+    
+    // Step 2: Smart splitting logic with fallback options
     let keywordArray;
     if (cleaned.includes('،')) {
-      keywordArray = cleaned.split('،');
+      // Split by Arabic comma first
+      keywordArray = cleaned.split(/،+/);
     } else if (cleaned.includes(',')) {
-      keywordArray = cleaned.split(',');
+      // Split by regular comma if no Arabic comma
+      keywordArray = cleaned.split(/,+/);
     } else {
+      // Split by spaces as last resort
       keywordArray = cleaned.split(/\s+/);
     }
     
-    // Final cleanup of each keyword
-    return keywordArray
-      .map((k: string) => k.trim().replace(/^[،,]+|[،,]+$/g, ''))
-      .filter((k: string) => k.length > 0);
+    // Step 3: Clean each individual keyword thoroughly
+    const finalKeywords = keywordArray
+      .map((keyword: string) => {
+        return keyword
+          .trim()
+          // Remove any remaining commas at start/end of individual keywords
+          .replace(/^[،,]+|[،,]+$/g, '')
+          .trim();
+      })
+      .filter((keyword: string) => keyword.length > 0 && keyword !== '،' && keyword !== ',');
+    
+    console.log("Final processed keywords:", finalKeywords);
+    return finalKeywords;
   };
 
   // Process keywords field - enhanced handling for Arabic commas
