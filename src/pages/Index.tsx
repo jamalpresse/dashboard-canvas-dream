@@ -374,5 +374,3 @@ const ErrorState = ({
 };
 
 export default Index;
-
-}
