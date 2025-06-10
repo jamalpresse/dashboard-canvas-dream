@@ -6,7 +6,8 @@ import { Button } from '@/components/ui/button';
 import { NewsCard } from '@/components/news/NewsCard';
 import { Search, Filter, ChevronDown, Globe, List } from 'lucide-react';
 import { useNews } from '@/hooks/useNews';
-import { newsSources, formatNewsDate } from '@/services/newsService';
+import { formatNewsDate } from '@/services/newsService';
+import { useLanguage } from '@/context/LanguageContext';
 import { Pagination, PaginationContent, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious } from '@/components/ui/pagination';
 
 export default function News() {
@@ -19,17 +20,14 @@ export default function News() {
     activeSource,
     setActiveSource,
     searchQuery,
-    handleSearch
+    handleSearch,
+    availableSources
   } = useNews();
   
+  const { t, lang, isRTL } = useLanguage();
   const [showSourcesDropdown, setShowSourcesDropdown] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 9;
-  
-  // Sources pour l'onglet actif
-  const availableSources = newsSources.filter(
-    source => source.country === (activeTab === 'maroc' ? 'ma' : 'global')
-  );
   
   // Pagination
   const totalPages = Math.ceil(news.length / itemsPerPage);
@@ -49,11 +47,25 @@ export default function News() {
     setCurrentPage(1);
   }, [activeTab, activeSource, searchQuery]);
 
+  // Libellés selon la langue
+  const labels = {
+    title: t('navigation', 'news'),
+    maroc: t('categories', 'maroc'),
+    monde: t('categories', 'monde'),
+    search: lang === 'ar' ? 'البحث في الأخبار...' : 'Rechercher des actualités...',
+    sources: t('common', 'sources'),
+    allSources: t('common', 'allSources'),
+    loading: t('common', 'loading'),
+    tryAgain: t('common', 'tryAgain'),
+    noResults: t('common', 'noResults'),
+    searchNoResults: t('common', 'searchNoResults')
+  };
+
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-50 to-pink-50 px-4 py-6">
+    <div className={`min-h-screen bg-gradient-to-br from-purple-50 to-pink-50 px-4 py-6 ${isRTL ? 'rtl' : 'ltr'}`} dir={isRTL ? 'rtl' : 'ltr'}>
       <div className="max-w-7xl mx-auto">
         <h1 className="text-3xl font-bold mb-6 text-center bg-gradient-to-r from-purple-600 to-pink-500 bg-clip-text text-transparent">
-          Actualités
+          {labels.title}
         </h1>
         
         {/* Tabs principale Maroc/Monde */}
@@ -67,10 +79,10 @@ export default function News() {
         >
           <TabsList className="grid w-full max-w-md mx-auto grid-cols-2">
             <TabsTrigger value="maroc" className="text-lg">
-              <span className="mr-2">🇲🇦</span> Maroc
+              <span className={isRTL ? "ml-2" : "mr-2"}>🇲🇦</span> {labels.maroc}
             </TabsTrigger>
             <TabsTrigger value="monde" className="text-lg">
-              <Globe className="h-4 w-4 mr-2" /> Monde
+              <Globe className={`h-4 w-4 ${isRTL ? "ml-2" : "mr-2"}`} /> {labels.monde}
             </TabsTrigger>
           </TabsList>
         </Tabs>
@@ -78,13 +90,14 @@ export default function News() {
         {/* Barre de recherche et filtres */}
         <div className="mb-6 flex flex-col sm:flex-row gap-3">
           <div className="relative flex-grow">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
+            <Search className={`absolute ${isRTL ? 'right-3' : 'left-3'} top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4`} />
             <Input
               type="text"
-              placeholder="Rechercher des actualités..."
+              placeholder={labels.search}
               value={searchQuery}
               onChange={(e) => handleSearch(e.target.value)}
-              className="pl-10 py-6"
+              className={`${isRTL ? 'pr-10' : 'pl-10'} py-6`}
+              dir={isRTL ? 'rtl' : 'ltr'}
             />
           </div>
           
@@ -96,12 +109,12 @@ export default function News() {
               onClick={() => setShowSourcesDropdown(!showSourcesDropdown)}
             >
               <Filter className="h-4 w-4" />
-              Sources
+              {labels.sources}
               <ChevronDown className="h-4 w-4" />
             </Button>
             
             {showSourcesDropdown && (
-              <div className="absolute top-full right-0 mt-1 bg-white rounded-md shadow-lg z-10 min-w-[200px]">
+              <div className={`absolute top-full ${isRTL ? 'left-0' : 'right-0'} mt-1 bg-white rounded-md shadow-lg z-10 min-w-[200px]`}>
                 <div className="p-2">
                   <Button
                     variant={activeSource === null ? "default" : "ghost"}
@@ -111,8 +124,8 @@ export default function News() {
                       setShowSourcesDropdown(false);
                     }}
                   >
-                    <List className="mr-2 h-4 w-4" />
-                    Toutes les sources
+                    <List className={`${isRTL ? 'ml-2' : 'mr-2'} h-4 w-4`} />
+                    {labels.allSources}
                   </Button>
                   
                   {availableSources.map(source => (
@@ -124,6 +137,7 @@ export default function News() {
                         setActiveSource(source.id);
                         setShowSourcesDropdown(false);
                       }}
+                      dir={isRTL ? 'rtl' : 'ltr'}
                     >
                       {source.name}
                     </Button>
@@ -154,15 +168,13 @@ export default function News() {
               className="mt-4"
               onClick={() => window.location.reload()}
             >
-              Réessayer
+              {labels.tryAgain}
             </Button>
           </div>
         ) : currentNews.length === 0 ? (
           <div className="text-center p-6 bg-gray-50 rounded-lg">
             <p className="text-gray-500">
-              {searchQuery 
-                ? "Aucun résultat ne correspond à votre recherche." 
-                : "Aucune actualité disponible pour le moment."}
+              {searchQuery ? labels.searchNoResults : labels.noResults}
             </p>
           </div>
         ) : (
@@ -175,7 +187,7 @@ export default function News() {
                   description={item.description}
                   imageUrl={item.thumbnail || item.enclosure?.link}
                   source={item.source}
-                  date={formatNewsDate(item.pubDate)}
+                  date={formatNewsDate(item.pubDate, lang === 'ar' ? 'ar-SA' : 'fr-FR')}
                   link={item.link}
                 />
               ))}

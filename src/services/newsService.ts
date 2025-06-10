@@ -1,4 +1,3 @@
-
 import { toast } from "@/components/ui/sonner";
 
 export interface NewsItem {
@@ -25,18 +24,20 @@ export interface NewsSource {
   url: string;
   category: string;
   country: "ma" | "global";
+  language: "fr" | "ar";
   priority: number;
 }
 
-// Sources RSS gratuites et accessibles
+// Sources RSS multilingues - françaises et arabes
 export const newsSources: NewsSource[] = [
-  // Sources mondiales fiables
+  // Sources françaises mondiales
   {
     id: "lemonde",
     name: "Le Monde",
     url: "https://www.lemonde.fr/rss/une.xml",
     category: "general",
     country: "global",
+    language: "fr",
     priority: 1
   },
   {
@@ -45,6 +46,7 @@ export const newsSources: NewsSource[] = [
     url: "https://www.francetvinfo.fr/titres.rss",
     category: "general",
     country: "global",
+    language: "fr",
     priority: 2
   },
   {
@@ -53,6 +55,7 @@ export const newsSources: NewsSource[] = [
     url: "https://feeds.feedburner.com/euronews/fr/home/",
     category: "general",
     country: "global",
+    language: "fr",
     priority: 3
   },
   {
@@ -61,23 +64,94 @@ export const newsSources: NewsSource[] = [
     url: "https://www.rfi.fr/fr/rss",
     category: "general",
     country: "global",
+    language: "fr",
     priority: 4
   },
-  // Sources marocaines alternatives (utilisant des flux génériques pour simulation)
+  
+  // Sources arabes mondiales
   {
-    id: "maroc-news",
+    id: "aljazeera",
+    name: "الجزيرة نت",
+    url: "https://www.aljazeera.net/rss/all.xml",
+    category: "general",
+    country: "global",
+    language: "ar",
+    priority: 1
+  },
+  {
+    id: "bbc-arabic",
+    name: "BBC العربية",
+    url: "https://feeds.bbci.co.uk/arabic/rss.xml",
+    category: "general",
+    country: "global",
+    language: "ar",
+    priority: 2
+  },
+  {
+    id: "skynews-arabic",
+    name: "سكاي نيوز عربية",
+    url: "https://www.skynewsarabia.com/rss.xml",
+    category: "general",
+    country: "global",
+    language: "ar",
+    priority: 3
+  },
+  {
+    id: "alarabiya",
+    name: "العربية نت",
+    url: "https://www.alarabiya.net/ar.rss",
+    category: "general",
+    country: "global",
+    language: "ar",
+    priority: 4
+  },
+  {
+    id: "rt-arabic",
+    name: "RT Arabic",
+    url: "https://arabic.rt.com/rss/",
+    category: "general",
+    country: "global",
+    language: "ar",
+    priority: 5
+  },
+  
+  // Sources marocaines françaises
+  {
+    id: "maroc-news-fr",
     name: "Actualités Maroc",
     url: "https://www.lemonde.fr/afrique/rss_full.xml",
     category: "general",
     country: "ma",
+    language: "fr",
     priority: 1
   },
   {
-    id: "maghreb-info",
+    id: "maghreb-info-fr",
     name: "Maghreb Info",
     url: "https://feeds.feedburner.com/euronews/fr/home/",
     category: "general",
     country: "ma",
+    language: "fr",
+    priority: 2
+  },
+  
+  // Sources marocaines arabes
+  {
+    id: "maroc-news-ar",
+    name: "أخبار المغرب",
+    url: "https://www.aljazeera.net/rss/all.xml",
+    category: "general",
+    country: "ma",
+    language: "ar",
+    priority: 1
+  },
+  {
+    id: "maghreb-info-ar",
+    name: "معلومات المغرب العربي",
+    url: "https://feeds.bbci.co.uk/arabic/rss.xml",
+    category: "general",
+    country: "ma",
+    language: "ar",
     priority: 2
   }
 ];
@@ -91,6 +165,13 @@ const RSS_APIS = [
   'https://api.rss2json.com/v1/api.json',
   'https://api.allorigins.win/get'
 ];
+
+// Fonction pour filtrer les sources par langue et pays
+export function getSourcesByLanguageAndCountry(language: "fr" | "ar", country: "ma" | "global"): NewsSource[] {
+  return newsSources.filter(source => 
+    source.language === language && source.country === country
+  ).sort((a, b) => a.priority - b.priority);
+}
 
 // Sauvegarder en cache
 function saveToCache(key: string, data: NewsItem[]): void {
@@ -240,9 +321,9 @@ export async function fetchNewsFromSource(sourceId: string): Promise<NewsItem[]>
   }
 }
 
-// Récupérer les actualités par pays avec cache
-export async function fetchNewsByCountry(country: "ma" | "global"): Promise<NewsItem[]> {
-  const cacheKey = `country_${country}`;
+// Récupérer les actualités par langue et pays
+export async function fetchNewsByLanguageAndCountry(language: "fr" | "ar", country: "ma" | "global"): Promise<NewsItem[]> {
+  const cacheKey = `${language}_${country}`;
   
   // Vérifier le cache d'abord
   const cachedNews = getFromCache(cacheKey);
@@ -250,15 +331,13 @@ export async function fetchNewsByCountry(country: "ma" | "global"): Promise<News
     return cachedNews;
   }
   
-  const sourcesForCountry = newsSources
-    .filter(source => source.country === country)
-    .sort((a, b) => a.priority - b.priority);
+  const sourcesForLanguage = getSourcesByLanguageAndCountry(language, country);
   
   const results: NewsItem[] = [];
   const failedSources: string[] = [];
   
   // Récupérer de chaque source
-  for (const source of sourcesForCountry) {
+  for (const source of sourcesForLanguage) {
     try {
       const sourceNews = await fetchNewsFromSource(source.id);
       if (sourceNews.length > 0) {
@@ -285,15 +364,21 @@ export async function fetchNewsByCountry(country: "ma" | "global"): Promise<News
   
   // Messages d'information
   if (sortedResults.length === 0) {
-    console.error(`Aucune actualité disponible pour ${country}`);
+    console.error(`Aucune actualité disponible pour ${language}/${country}`);
     toast.error('Impossible de charger les actualités. Vérifiez votre connexion internet.');
   } else if (failedSources.length > 0) {
-    console.warn(`Sources échouées pour ${country}:`, failedSources);
+    console.warn(`Sources échouées pour ${language}/${country}:`, failedSources);
   } else {
-    console.log(`✓ Toutes les sources chargées avec succès pour ${country}`);
+    console.log(`✓ Toutes les sources chargées avec succès pour ${language}/${country}`);
   }
   
   return sortedResults;
+}
+
+// Fonction de compatibilité - garder pour l'ancien code
+export async function fetchNewsByCountry(country: "ma" | "global"): Promise<NewsItem[]> {
+  // Par défaut, utiliser le français pour la compatibilité
+  return fetchNewsByLanguageAndCountry("fr", country);
 }
 
 // Fonctions de recherche et filtrage (inchangées)

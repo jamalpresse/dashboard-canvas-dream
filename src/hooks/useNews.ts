@@ -1,7 +1,14 @@
-
 import { useState, useEffect } from 'react';
 import { useAnalytics } from '@/hooks/use-analytics';
-import { NewsItem, fetchNewsByCountry, fetchNewsFromSource, searchNews, filterNewsBySourceId } from '@/services/newsService';
+import { useLanguage } from '@/context/LanguageContext';
+import { 
+  NewsItem, 
+  fetchNewsByLanguageAndCountry, 
+  fetchNewsFromSource, 
+  searchNews, 
+  filterNewsBySourceId,
+  getSourcesByLanguageAndCountry 
+} from '@/services/newsService';
 
 export function useNews() {
   const [news, setNews] = useState<NewsItem[]>([]);
@@ -13,24 +20,28 @@ export function useNews() {
   const [searchQuery, setSearchQuery] = useState<string>('');
   const [featuredArticle, setFeaturedArticle] = useState<NewsItem | null>(null);
   const { trackEvent } = useAnalytics();
+  const { lang } = useLanguage();
 
-  // Charger les actualités selon l'onglet actif
+  // Charger les actualités selon l'onglet actif et la langue
   useEffect(() => {
     const loadNews = async () => {
       setLoading(true);
       setError(null);
       
       try {
-        console.log(`Chargement des actualités pour ${activeTab}${activeSource ? ` depuis ${activeSource}` : ''}`);
+        console.log(`Chargement des actualités pour ${activeTab} en ${lang}${activeSource ? ` depuis ${activeSource}` : ''}`);
         
         let newsData: NewsItem[];
         
         if (activeSource) {
           newsData = await fetchNewsFromSource(activeSource);
-          trackEvent('article_view', { source: activeSource });
+          trackEvent('article_view', { source: activeSource, language: lang });
         } else {
-          newsData = await fetchNewsByCountry(activeTab === 'maroc' ? 'ma' : 'global');
-          trackEvent('article_view', { category: activeTab });
+          newsData = await fetchNewsByLanguageAndCountry(
+            lang, 
+            activeTab === 'maroc' ? 'ma' : 'global'
+          );
+          trackEvent('article_view', { category: activeTab, language: lang });
         }
         
         // Nettoyer le contenu HTML
@@ -40,7 +51,7 @@ export function useNews() {
           content: item.content ? sanitizeHtml(item.content) : ''
         }));
         
-        console.log(`Chargé ${newsData.length} actualités`);
+        console.log(`Chargé ${newsData.length} actualités en ${lang}`);
         setNews(newsData);
         applyFilters(newsData, searchQuery, activeSource);
         
@@ -59,14 +70,17 @@ export function useNews() {
     };
     
     loadNews();
-  }, [activeTab, activeSource, trackEvent]);
+  }, [activeTab, activeSource, lang, trackEvent]);
 
-  // Charger l'article vedette (utilise Le Monde par défaut)
+  // Charger l'article vedette selon la langue
   useEffect(() => {
     const loadFeaturedArticle = async () => {
       try {
-        console.log("Récupération de l'article vedette...");
-        const featuredNews = await fetchNewsFromSource('lemonde');
+        console.log(`Récupération de l'article vedette en ${lang}...`);
+        
+        // Choisir une source appropriée selon la langue
+        const featuredSourceId = lang === 'ar' ? 'aljazeera' : 'lemonde';
+        const featuredNews = await fetchNewsFromSource(featuredSourceId);
         
         if (featuredNews && featuredNews.length > 0) {
           const featured = featuredNews[0];
@@ -89,7 +103,7 @@ export function useNews() {
     };
     
     loadFeaturedArticle();
-  }, []);
+  }, [lang]);
 
   // Nettoyer le HTML
   const sanitizeHtml = (html: string): string => {
@@ -123,8 +137,13 @@ export function useNews() {
     applyFilters(news, query, activeSource);
     
     if (query) {
-      trackEvent('search', { query });
+      trackEvent('search', { query, language: lang });
     }
+  };
+
+  // Obtenir les sources disponibles pour la langue et l'onglet actuels
+  const getAvailableSources = () => {
+    return getSourcesByLanguageAndCountry(lang, activeTab === 'maroc' ? 'ma' : 'global');
   };
 
   return {
@@ -138,6 +157,7 @@ export function useNews() {
     searchQuery,
     handleSearch,
     featuredArticle,
-    featuredLoading: loading && !featuredArticle
+    featuredLoading: loading && !featuredArticle,
+    availableSources: getAvailableSources()
   };
 }
