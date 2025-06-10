@@ -10,7 +10,7 @@ interface HeroNewsProps {
   timestamp?: string;
   link?: string;
   className?: string;
-  content?: string; // Ajouter le contenu pour extraire les images
+  content?: string;
 }
 
 export const HeroNews: React.FC<HeroNewsProps> = ({
@@ -49,8 +49,8 @@ export const HeroNews: React.FC<HeroNewsProps> = ({
 
   // Déterminer l'image à utiliser avec une logique améliorée
   const getImageUrl = (): string => {
-    // 1. Utiliser l'imageUrl fourni s'il existe et n'est pas l'image par défaut
-    if (imageUrl && imageUrl !== "/lovable-uploads/32ff14e9-af71-4640-b4c9-583985037c66.png") {
+    // 1. Utiliser l'imageUrl fourni s'il existe et n'est pas vide
+    if (imageUrl && imageUrl.trim() !== "" && imageUrl !== "/lovable-uploads/32ff14e9-af71-4640-b4c9-583985037c66.png") {
       console.log("Utilisation de l'imageUrl fourni:", imageUrl);
       return imageUrl;
     }
@@ -70,25 +70,41 @@ export const HeroNews: React.FC<HeroNewsProps> = ({
 
   const finalImageUrl = getImageUrl();
   console.log("HeroNews - Image finale utilisée:", finalImageUrl);
+  console.log("HeroNews - Props reçues:", { title, imageUrl, content: content?.substring(0, 100) });
 
   return (
     <div className={cn("snrt-hero relative h-[300px] md:h-[400px] overflow-hidden rounded-md", className)}>
-      {/* Background Image - Amélioration de la gestion des erreurs */}
-      <img 
-        src={finalImageUrl}
-        alt={title} 
-        className="w-full h-full object-cover object-center bg-black" 
-        onError={(e) => {
-          console.log("Erreur de chargement de l'image:", finalImageUrl);
-          // Si l'image échoue et que ce n'est pas déjà l'image par défaut, utiliser l'image par défaut
-          if (e.currentTarget.src !== "/lovable-uploads/32ff14e9-af71-4640-b4c9-583985037c66.png") {
-            e.currentTarget.src = "/lovable-uploads/32ff14e9-af71-4640-b4c9-583985037c66.png";
-          }
-        }} 
-        onLoad={() => {
-          console.log("Image chargée avec succès:", finalImageUrl);
+      {/* Background Image - Forcer l'affichage de l'image par défaut si aucune image valide */}
+      <div 
+        className="w-full h-full bg-cover bg-center bg-no-repeat"
+        style={{
+          backgroundImage: `url("${finalImageUrl}")`,
+          backgroundColor: '#000'
         }}
-      />
+        onError={(e) => {
+          console.log("Erreur de chargement de l'image de fond:", finalImageUrl);
+          // Fallback vers l'image par défaut
+          e.currentTarget.style.backgroundImage = `url("/lovable-uploads/32ff14e9-af71-4640-b4c9-583985037c66.png")`;
+        }}
+      >
+        {/* Image de secours cachée pour détecter les erreurs de chargement */}
+        <img 
+          src={finalImageUrl}
+          alt=""
+          className="hidden"
+          onError={(e) => {
+            console.log("Image de secours - erreur détectée pour:", finalImageUrl);
+            // Changer l'image de fond du parent
+            const parent = e.currentTarget.parentElement;
+            if (parent && !finalImageUrl.includes("32ff14e9-af71-4640-b4c9-583985037c66.png")) {
+              parent.style.backgroundImage = `url("/lovable-uploads/32ff14e9-af71-4640-b4c9-583985037c66.png")`;
+            }
+          }}
+          onLoad={() => {
+            console.log("Image chargée avec succès:", finalImageUrl);
+          }}
+        />
+      </div>
       
       {/* Dark overlay - Reduced opacity for better image visibility */}
       <div className="absolute inset-0 bg-black/60" />

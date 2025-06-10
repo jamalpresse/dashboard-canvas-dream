@@ -34,10 +34,22 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
   }
 
   if (featuredArticle) {
+    // Construire l'URL de l'image avec une logique améliorée
+    const imageUrl = featuredArticle.enclosure?.link || 
+                    featuredArticle.thumbnail || 
+                    "/lovable-uploads/32ff14e9-af71-4640-b4c9-583985037c66.png";
+
+    console.log("HeroSection - Article vedette:", {
+      title: featuredArticle.title,
+      imageUrl,
+      hasContent: !!featuredArticle.content,
+      hasDescription: !!featuredArticle.description
+    });
+
     return (
       <HeroNews 
         title={featuredArticle.title || "Actualité SNRT"} 
-        imageUrl={featuredArticle.enclosure?.link || featuredArticle.thumbnail || ""} 
+        imageUrl={imageUrl}
         content={featuredArticle.content || featuredArticle.description || ""}
         category="SNRT News" 
         timestamp={formatNewsDate(featuredArticle.pubDate)} 
@@ -46,6 +58,7 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
     );
   }
 
+  // Fallback par défaut
   return (
     <HeroNews 
       title="Actualité SNRT" 
