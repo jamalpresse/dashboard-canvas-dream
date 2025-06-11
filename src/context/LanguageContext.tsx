@@ -1,10 +1,12 @@
+
 import React, { createContext, useContext, useState, ReactNode } from "react";
 
 interface LanguageContextProps {
-  lang: string;
-  setLang: (lang: string) => void;
+  lang: "fr" | "ar";
+  setLang: (lang: "fr" | "ar") => void;
   t: (namespace: string, key: string) => string;
   isRTL: boolean;
+  dir: "ltr" | "rtl";
 }
 
 const LanguageContext = createContext<LanguageContextProps | undefined>(undefined);
@@ -103,9 +105,10 @@ const translations = {
 };
 
 const LanguageProvider = ({ children }: { children: ReactNode }) => {
-  const [lang, setLang] = useState<string>('fr');
+  const [lang, setLang] = useState<"fr" | "ar">('fr');
 
   const isRTL = lang === 'ar';
+  const dir = isRTL ? 'rtl' : 'ltr';
 
   const t = (namespace: string, key: string): string => {
     if (translations[lang] && translations[lang][namespace] && translations[lang][namespace][key]) {
@@ -120,7 +123,7 @@ const LanguageProvider = ({ children }: { children: ReactNode }) => {
   };
 
   return (
-    <LanguageContext.Provider value={{ lang, setLang, t, isRTL }}>
+    <LanguageContext.Provider value={{ lang, setLang, t, isRTL, dir }}>
       {children}
     </LanguageContext.Provider>
   );

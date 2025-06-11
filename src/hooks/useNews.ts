@@ -83,7 +83,7 @@ export function useNews() {
           trackEvent('article_view', { source: activeSource, language: lang });
         } else {
           newsData = await fetchNewsByLanguageAndCountry(
-            lang, 
+            lang as "fr" | "ar", 
             activeTab === 'maroc' ? 'ma' : 'global'
           );
           trackEvent('article_view', { category: activeTab, language: lang });
@@ -135,7 +135,7 @@ export function useNews() {
         console.log(`Récupération de l'article vedette SNRT en ${lang}...`);
         
         // Utiliser la source SNRT appropriée selon la langue
-        const featuredSourceId = lang === 'ar' ? 'snrtnews-ar' : 'snrtnews-fr';
+        const featuredSourceId = (lang as "fr" | "ar") === 'ar' ? 'snrtnews-ar' : 'snrtnews-fr';
         const featuredNews = await fetchNewsFromSource(featuredSourceId);
         
         if (featuredNews && featuredNews.length > 0) {
