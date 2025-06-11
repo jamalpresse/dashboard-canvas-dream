@@ -140,7 +140,7 @@ export const N8nImageGeneration = () => {
                 placeholder={t("imageGeneration", "placeholder")}
                 value={prompt}
                 onChange={(e) => setPrompt(e.target.value)}
-                className="min-h-[100px] resize-y"
+                className="min-h-[100px] resize-y bg-white text-black border-gray-300 placeholder:text-gray-500 focus:border-primary focus:ring-primary"
                 dir={isRTL ? "rtl" : "ltr"}
               />
             </div>

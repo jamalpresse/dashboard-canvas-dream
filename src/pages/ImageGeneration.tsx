@@ -1,5 +1,3 @@
-
-
 import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -122,7 +120,7 @@ const ImageGeneration = () => {
                   placeholder={t("imageGeneration", "placeholder")} 
                   value={prompt} 
                   onChange={e => setPrompt(e.target.value)} 
-                  className="w-full" 
+                  className="w-full bg-white text-black border-gray-300 placeholder:text-gray-500 focus:border-primary focus:ring-primary" 
                   dir={isRTL ? "rtl" : "ltr"}
                 />
               </div>
@@ -205,4 +203,3 @@ const ImageGeneration = () => {
 };
 
 export default ImageGeneration;
-
