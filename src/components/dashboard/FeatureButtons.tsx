@@ -7,7 +7,7 @@ export const FeatureButtons: React.FC = () => {
   const { t, isRTL } = useLanguage();
 
   return (
-    <>
+    <div className="mx-8 md:mx-20">
       {/* Features Buttons - Small size with RTL support */}
       <div className={`grid grid-cols-1 md:grid-cols-3 gap-3 mb-3 ${isRTL ? 'rtl' : ''}`}>
         <Link 
@@ -39,6 +39,6 @@ export const FeatureButtons: React.FC = () => {
       >
         <span>{t('dashboard', 'imageGeneration')}</span>
       </Link>
-    </>
+    </div>
   );
 };
