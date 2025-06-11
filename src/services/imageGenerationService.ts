@@ -1,20 +1,34 @@
 // Service for image generation using the external webhook
+import { translatePromptIfNeeded } from './promptTranslationService';
+
 export interface ImageGenerationResponse {
   imageUrl: string;
   error?: string;
   details?: string;
   templatePath?: string;
   originalResponse?: any;
+  translationInfo?: {
+    originalPrompt: string;
+    translatedPrompt: string;
+    detectedLanguage: string;
+    wasTranslated: boolean;
+  };
 }
 
 export async function generateImage(prompt: string): Promise<ImageGenerationResponse> {
   try {
+    // Translate prompt if needed
+    const translationResult = await translatePromptIfNeeded(prompt);
+    const finalPrompt = translationResult.translatedPrompt;
+    
+    console.log("Using prompt for generation:", finalPrompt);
+    
     const response = await fetch('https://jajkfzwzmogpkwzclisv.supabase.co/functions/v1/image-generation', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({ prompt }),
+      body: JSON.stringify({ prompt: finalPrompt }),
     });
 
     if (!response.ok) {
@@ -33,7 +47,13 @@ export async function generateImage(prompt: string): Promise<ImageGenerationResp
         error: "Le modèle n8n n'a pas été évalué correctement",
         details: `L'URL contient un modèle non évalué: ${data.imageUrl}. Ajoutez un nœud 'Set' dans n8n pour évaluer cette expression.`,
         templatePath: templatePath,
-        originalResponse: data
+        originalResponse: data,
+        translationInfo: {
+          originalPrompt: translationResult.originalPrompt,
+          translatedPrompt: translationResult.translatedPrompt,
+          detectedLanguage: translationResult.detectedLanguage,
+          wasTranslated: translationResult.wasTranslated
+        }
       };
     }
     
@@ -49,7 +69,13 @@ export async function generateImage(prompt: string): Promise<ImageGenerationResp
       error: data.error,
       details: data.details,
       templatePath: data.templatePath,
-      originalResponse: data.originalResponse
+      originalResponse: data,
+      translationInfo: {
+        originalPrompt: translationResult.originalPrompt,
+        translatedPrompt: translationResult.translatedPrompt,
+        detectedLanguage: translationResult.detectedLanguage,
+        wasTranslated: translationResult.wasTranslated
+      }
     };
     
     return result;
@@ -135,11 +161,16 @@ function isValidImageUrl(url: any): boolean {
   return true;
 }
 
-// Updated function to handle nested imageUrl structure
+// Updated function to handle nested imageUrl structure with automatic translation
 export async function generateImageWithN8n(prompt: string): Promise<ImageGenerationResponse> {
   try {
-    // URL du webhook harmonisée
-    const webhookUrl = `https://n8n-jamal-u38598.vm.elestio.app/webhook/generate-image?prompt=${encodeURIComponent(prompt)}`;
+    // Translate prompt if needed
+    const translationResult = await translatePromptIfNeeded(prompt);
+    const finalPrompt = translationResult.translatedPrompt;
+    
+    console.log("Using translated prompt for n8n generation:", finalPrompt);
+    
+    const webhookUrl = `https://n8n-jamal-u38598.vm.elestio.app/webhook/generate-image?prompt=${encodeURIComponent(finalPrompt)}`;
     
     const response = await fetch(webhookUrl, {
       method: 'GET',
@@ -177,7 +208,13 @@ export async function generateImageWithN8n(prompt: string): Promise<ImageGenerat
         error: "Le modèle n8n n'a pas été évalué correctement",
         details: `L'URL contient un modèle non évalué: ${data.imageUrl}. Ajoutez un nœud 'Set' dans n8n pour évaluer cette expression avant le nœud 'Répondre Webhook'.`,
         templatePath: templatePath,
-        originalResponse: data
+        originalResponse: data,
+        translationInfo: {
+          originalPrompt: translationResult.originalPrompt,
+          translatedPrompt: translationResult.translatedPrompt,
+          detectedLanguage: translationResult.detectedLanguage,
+          wasTranslated: translationResult.wasTranslated
+        }
       };
     }
     
@@ -187,13 +224,25 @@ export async function generateImageWithN8n(prompt: string): Promise<ImageGenerat
       return { 
         imageUrl: "https://images.unsplash.com/photo-1581091226825-a6a2a5aee158",
         error: "URL d'image invalide dans la réponse",
-        details: "Le webhook a retourné: " + JSON.stringify(data)
+        details: "Le webhook a retourné: " + JSON.stringify(data),
+        translationInfo: {
+          originalPrompt: translationResult.originalPrompt,
+          translatedPrompt: translationResult.translatedPrompt,
+          detectedLanguage: translationResult.detectedLanguage,
+          wasTranslated: translationResult.wasTranslated
+        }
       };
     }
     
     return {
       imageUrl: data.imageUrl,
-      originalResponse: data
+      originalResponse: data,
+      translationInfo: {
+        originalPrompt: translationResult.originalPrompt,
+        translatedPrompt: translationResult.translatedPrompt,
+        detectedLanguage: translationResult.detectedLanguage,
+        wasTranslated: translationResult.wasTranslated
+      }
     };
   } catch (error) {
     console.error('Error calling n8n webhook:', error);

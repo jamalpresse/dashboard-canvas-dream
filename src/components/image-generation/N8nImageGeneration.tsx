@@ -1,10 +1,8 @@
-
-
 import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from "@/components/ui/card";
 import { toast } from "@/components/ui/use-toast";
-import { Loader2, ImageIcon, RefreshCw, Download, AlertCircle, Bug } from "lucide-react";
+import { Loader2, ImageIcon, RefreshCw, Download, AlertCircle, Bug, Languages } from "lucide-react";
 import { Textarea } from "@/components/ui/textarea";
 import { AspectRatio } from "@/components/ui/aspect-ratio";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
@@ -18,6 +16,12 @@ interface N8nGenerationResponse {
   details?: string;
   templatePath?: string;
   originalResponse?: any;
+  translationInfo?: {
+    originalPrompt: string;
+    translatedPrompt: string;
+    detectedLanguage: string;
+    wasTranslated: boolean;
+  };
 }
 
 export const N8nImageGeneration = () => {
@@ -41,11 +45,9 @@ export const N8nImageGeneration = () => {
     setIsGenerating(true);
     setShowDebug(false);
     try {
-      // Utiliser la fonction du service pour appeler le webhook correctement
       const result = await generateImageWithN8n(prompt);
       console.log("Résultat de la génération d'image:", result);
       
-      // Stocker la réponse brute pour le débogage
       setRawResponse(JSON.stringify(result.originalResponse, null, 2));
       
       setResponse(result);
@@ -55,13 +57,20 @@ export const N8nImageGeneration = () => {
           description: result.error,
           variant: "destructive"
         });
-        // Afficher automatiquement les détails de débogage en cas d'erreur
         setShowDebug(true);
       } else if (result.imageUrl && !result.imageUrl.includes('{{')) {
         toast({
           title: t("imageGeneration", "success"),
           description: t("imageGeneration", "successMessage")
         });
+        
+        // Show translation info if available
+        if (result.translationInfo?.wasTranslated) {
+          toast({
+            title: t("imageGeneration", "promptTranslated"),
+            description: `${t("imageGeneration", "detectedLanguage")}: ${result.translationInfo.detectedLanguage}`,
+          });
+        }
       }
     } catch (err) {
       console.error("Erreur lors de la génération:", err);
@@ -154,6 +163,21 @@ export const N8nImageGeneration = () => {
               )}
             </Button>
           </form>
+          
+          {/* Translation information display */}
+          {response?.translationInfo?.wasTranslated && (
+            <Alert className="bg-blue-50 border-blue-200">
+              <Languages className="h-4 w-4 text-blue-600" />
+              <AlertTitle className="text-blue-800">{t("imageGeneration", "promptTranslated")}</AlertTitle>
+              <AlertDescription className="text-blue-700">
+                <div className="space-y-1 text-sm">
+                  <p><strong>{t("imageGeneration", "detectedLanguage")}:</strong> {response.translationInfo.detectedLanguage.toUpperCase()}</p>
+                  <p><strong>{t("imageGeneration", "originalPrompt")}:</strong> {response.translationInfo.originalPrompt}</p>
+                  <p><strong>{t("imageGeneration", "translatedPrompt")}:</strong> {response.translationInfo.translatedPrompt}</p>
+                </div>
+              </AlertDescription>
+            </Alert>
+          )}
           
           {/* Information de débogage améliorée */}
           {response && !hasValidImage && (
@@ -299,4 +323,3 @@ export const N8nImageGeneration = () => {
     </div>
   );
 };
-
