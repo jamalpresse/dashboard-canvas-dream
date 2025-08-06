@@ -5,30 +5,30 @@
 
 @layer base {
   :root {
-    /* Base theme - Modern dark with elegant purple accents */
-    --background: 222 84% 5%;           /* Deep dark blue */
-    --foreground: 210 40% 98%;          /* Pure white with slight blue tint */
+    /* Base theme - Fond sombre + accents éclatants */
+    --background: 0 0% 4%;              /* Noir profond */
+    --foreground: 0 0% 98%;             /* Blanc pur */
 
-    /* Card styles */
-    --card: 222 84% 8%;                 /* Slightly lighter than background */
-    --card-foreground: 210 40% 98%;
+    /* Card styles - cartes modulaires */
+    --card: 0 0% 8%;                    /* Gris très foncé pour contraste */
+    --card-foreground: 0 0% 98%;
 
     /* Popover styles */
-    --popover: 222 84% 10%;
-    --popover-foreground: 210 40% 98%;
+    --popover: 0 0% 10%;
+    --popover-foreground: 0 0% 98%;
 
-    /* Primary - Elegant purple gradient */
-    --primary: 267 57% 50%;             /* Rich purple */
-    --primary-glow: 280 100% 70%;       /* Bright purple glow */
+    /* Primary - Rouge SNRT éclatant */
+    --primary: 0 84% 60%;               /* Rouge SNRT vibrant */
+    --primary-glow: 0 100% 70%;         /* Rouge éclatant */
     --primary-foreground: 0 0% 100%;
 
-    /* Secondary - Complementary blue */
-    --secondary: 217 91% 60%;           /* Vibrant blue */
+    /* Secondary - Bleu électrique */
+    --secondary: 210 100% 60%;          /* Bleu électrique */
     --secondary-foreground: 0 0% 100%;
 
-    /* Accent - Gold accent for highlights */
-    --accent: 43 96% 56%;               /* Golden yellow */
-    --accent-foreground: 222 84% 5%;    /* Dark text on gold */
+    /* Accent - Jaune étincelle */
+    --accent: 60 100% 50%;              /* Jaune éclatant */
+    --accent-foreground: 0 0% 0%;       /* Texte noir sur jaune */
 
     /* Muted tones */
     --muted: 215 13.8% 15%;             /* Subtle gray-blue */
@@ -53,16 +53,23 @@
     --radius: 0.75rem;                  /* Increased border radius */
     --shadow-color: 267 57% 50%;        /* Purple shadow base */
     
-    /* Gradients */
-    --gradient-primary: linear-gradient(135deg, hsl(267, 57%, 50%), hsl(280, 100%, 70%));
-    --gradient-secondary: linear-gradient(135deg, hsl(217, 91%, 60%), hsl(267, 57%, 50%));
-    --gradient-accent: linear-gradient(135deg, hsl(43, 96%, 56%), hsl(38, 92%, 50%));
-    --gradient-background: linear-gradient(180deg, hsl(222, 84%, 5%), hsl(222, 84%, 8%));
+    /* Gradients éclatants */
+    --gradient-primary: linear-gradient(135deg, hsl(0, 84%, 60%), hsl(0, 100%, 70%));
+    --gradient-secondary: linear-gradient(135deg, hsl(210, 100%, 60%), hsl(200, 100%, 50%));
+    --gradient-accent: linear-gradient(135deg, hsl(60, 100%, 50%), hsl(45, 100%, 55%));
+    --gradient-background: linear-gradient(180deg, hsl(0, 0%, 4%), hsl(0, 0%, 8%));
     
-    /* Shadows */
-    --shadow-elegant: 0 10px 30px -10px hsl(var(--shadow-color) / 0.3);
-    --shadow-glow: 0 0 40px hsl(var(--primary-glow) / 0.4);
-    --shadow-card: 0 4px 20px -2px hsl(var(--shadow-color) / 0.2);
+    /* Gradients pour visualisations modernes */
+    --gradient-chart: linear-gradient(135deg, hsl(0, 84%, 60%), hsl(210, 100%, 60%));
+    --gradient-stats: linear-gradient(135deg, hsl(60, 100%, 50%), hsl(0, 84%, 60%));
+    --gradient-data: linear-gradient(135deg, hsl(210, 100%, 60%), hsl(60, 100%, 50%));
+    
+    /* Shadows pour cartes modulaires */
+    --shadow-elegant: 0 10px 30px -10px hsl(0, 84%, 60% / 0.3);
+    --shadow-glow: 0 0 40px hsl(var(--primary-glow) / 0.6);
+    --shadow-card: 0 8px 32px -4px hsl(0, 0%, 0% / 0.4);
+    --shadow-widget: 0 4px 20px -2px hsl(0, 84%, 60% / 0.2);
+    --shadow-accent: 0 0 30px hsl(60, 100%, 50% / 0.4);
     
     /* Transitions */
     --transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
@@ -134,12 +141,40 @@
   box-shadow: var(--shadow-glow);
 }
 
-/* Glass effect - enhanced */
+/* Glass effect - cartes modulaires */
 .glass-effect {
-  background: hsl(var(--card) / 0.8);
-  backdrop-filter: blur(12px);
-  border: 1px solid hsl(var(--border) / 0.5);
+  background: hsl(var(--card) / 0.9);
+  backdrop-filter: blur(16px);
+  border: 1px solid hsl(var(--primary) / 0.2);
   box-shadow: var(--shadow-card);
+}
+
+/* Styles pour widgets modulaires */
+.widget-card {
+  background: hsl(var(--card) / 0.95);
+  border: 1px solid hsl(var(--primary) / 0.1);
+  box-shadow: var(--shadow-widget);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.widget-card:hover {
+  border-color: hsl(var(--primary) / 0.3);
+  box-shadow: var(--shadow-glow);
+  transform: translateY(-4px);
+}
+
+/* Grille fluide pour cartes */
+.cards-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 1.5rem;
+}
+
+@media (max-width: 768px) {
+  .cards-grid {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
 }
 
 /* Button effects */
@@ -253,6 +288,43 @@
 
 .gradient-accent {
   background: var(--gradient-accent);
+}
+
+.gradient-chart {
+  background: var(--gradient-chart);
+}
+
+.gradient-stats {
+  background: var(--gradient-stats);
+}
+
+.gradient-data {
+  background: var(--gradient-data);
+}
+
+/* Visualisations modernes */
+.modern-chart {
+  background: linear-gradient(135deg, hsl(var(--card) / 0.8), hsl(var(--card) / 0.4));
+  border: 1px solid hsl(var(--primary) / 0.2);
+  border-radius: 0.75rem;
+  backdrop-filter: blur(8px);
+}
+
+.stats-counter {
+  background: var(--gradient-stats);
+  background-clip: text;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  font-weight: 700;
+  font-size: 2rem;
+}
+
+.timeline-indicator {
+  background: var(--gradient-primary);
+  border-radius: 50%;
+  width: 12px;
+  height: 12px;
+  box-shadow: 0 0 20px hsl(var(--primary) / 0.5);
 }
 
 .gradient-text-primary {
