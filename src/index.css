@@ -137,7 +137,7 @@
 /* Glass effect - enhanced */
 .glass-effect {
   background: hsl(var(--card) / 0.8);
-  backdrop-blur-xl;
+  backdrop-filter: blur(12px);
   border: 1px solid hsl(var(--border) / 0.5);
   box-shadow: var(--shadow-card);
 }
