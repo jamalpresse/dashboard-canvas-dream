@@ -8,9 +8,14 @@ export const IndexHeader: React.FC = () => {
 
   return (
     <div className="flex justify-between items-center">
-      <h1 className="text-3xl font-bold font-playfair text-white">
-        {t('dashboard', 'welcome')}
-      </h1>
+      <div>
+        <h1 className="text-3xl font-bold font-playfair text-white">
+          SPARK
+        </h1>
+        <p className="text-lg text-white/80 font-light">
+          L'IA au service de votre plume
+        </p>
+      </div>
       <LanguageSelector />
     </div>
   );
