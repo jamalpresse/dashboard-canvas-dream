@@ -20,12 +20,8 @@ const LanguageSelector: React.FC<LanguageSelectorProps> = ({
   const { t, isRTL } = useLanguage();
 
   const langs: LanguagePair[] = [
-    { label: 'AR → FR', value: 'ar-fr' },
-    { label: 'FR → AR', value: 'fr-ar' },
-    { label: 'ANG → AR', value: 'en-ar' },
-    { label: 'ANG → FR', value: 'en-fr' },
-    { label: 'ES → AR', value: 'es-ar' },
-    { label: 'ES → FR', value: 'es-fr' },
+    { label: 'N\'importe quelle langue → FR', value: 'any-fr' },
+    { label: 'N\'importe quelle langue → AR', value: 'any-ar' },
   ];
 
   return (
@@ -33,7 +29,7 @@ const LanguageSelector: React.FC<LanguageSelectorProps> = ({
       <div className="mb-2">
         <span className="text-sm font-medium">{t('translation', 'selectLanguagePair')}:</span>
       </div>
-      <div className={`grid grid-cols-2 sm:grid-cols-3 gap-2 ${isRTL ? 'text-right' : 'text-left'}`}>
+      <div className={`grid grid-cols-1 sm:grid-cols-2 gap-2 ${isRTL ? 'text-right' : 'text-left'}`}>
         {langs.map(({ label, value }) => (
           <Button
             key={value}
