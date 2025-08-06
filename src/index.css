@@ -5,73 +5,83 @@
 
 @layer base {
   :root {
-    /* Palette SNRT/SPARK - Couleurs exactes */
-    --background: 0 0% 5%;              /* #0D0D0D - Noir profond */
-    --foreground: 0 0% 100%;            /* #FFFFFF - Blanc pur */
+    /* Modern Dashboard Palette - Dark Navy Theme */
+    --background: 222 23% 11%;          /* #1A1D29 - Dark navy background */
+    --foreground: 0 0% 100%;            /* #FFFFFF - Pure white text */
 
-    /* Card styles - cartes modulaires */
-    --card: 0 0% 18%;                   /* #2F2F2F - Gris doux */
-    --card-foreground: 0 0% 100%;       /* #FFFFFF - Blanc pur */
+    /* Card styles - gradient cards */
+    --card: 222 23% 16%;                /* #252A3A - Darker navy for cards */
+    --card-foreground: 0 0% 100%;       /* #FFFFFF - White text */
 
     /* Popover styles */
-    --popover: 0 0% 18%;                /* #2F2F2F - Gris doux */
-    --popover-foreground: 0 0% 100%;    /* #FFFFFF - Blanc pur */
+    --popover: 222 23% 16%;             /* #252A3A - Dark navy */
+    --popover-foreground: 0 0% 100%;    /* #FFFFFF - White text */
 
-    /* Primary - Rouge SNRT (identité) */
-    --primary: 350 85% 43%;             /* #C8102E - Rouge royal SNRT */
-    --primary-glow: 350 85% 60%;        /* Version plus claire */
-    --primary-foreground: 0 0% 100%;    /* #FFFFFF - Blanc pur */
+    /* Primary - Purple gradient */
+    --primary: 258 89% 66%;             /* #8B5CF6 - Purple primary */
+    --primary-glow: 258 89% 76%;        /* Lighter purple */
+    --primary-foreground: 0 0% 100%;    /* #FFFFFF - White text */
 
-    /* Secondary - Bleu électrique */
-    --secondary: 201 100% 56%;          /* #1FB6FF - Bleu électrique */
-    --secondary-foreground: 0 0% 100%;  /* #FFFFFF - Blanc pur */
+    /* Secondary - Coral/Red */
+    --secondary: 14 83% 60%;            /* #F56565 - Coral red */
+    --secondary-foreground: 0 0% 100%;  /* #FFFFFF - White text */
 
-    /* Accent - Jaune SPARK (étincelle) */
-    --accent: 51 100% 50%;              /* #FFD700 - Jaune électrique */
-    --accent-foreground: 0 0% 5%;       /* #0D0D0D - Noir sur jaune */
+    /* Accent - Bright green (chart color) */
+    --accent: 142 76% 36%;              /* #10B981 - Bright green */
+    --accent-foreground: 0 0% 100%;     /* #FFFFFF - White text */
 
     /* Muted tones */
-    --muted: 0 0% 18%;                  /* #2F2F2F - Gris doux */
-    --muted-foreground: 0 0% 80%;       /* #CCCCCC - Gris clair neutre */
+    --muted: 222 23% 16%;               /* #252A3A - Dark navy */
+    --muted-foreground: 215 16% 47%;    /* #6B7280 - Gray text */
 
-    /* Success and error - États spécifiques */
-    --success: 160 100% 38%;            /* #00C17D - Vert menthe */
-    --success-foreground: 0 0% 100%;    /* #FFFFFF - Blanc pur */
-    --destructive: 4 100% 59%;          /* #FF3B30 - Rouge vif erreur */
-    --destructive-foreground: 0 0% 100%; /* #FFFFFF - Blanc pur */
+    /* Success - Bright green */
+    --success: 142 76% 36%;             /* #10B981 - Bright green */
+    --success-foreground: 0 0% 100%;    /* #FFFFFF - White text */
+    --destructive: 14 83% 60%;          /* #F56565 - Coral red */
+    --destructive-foreground: 0 0% 100%; /* #FFFFFF - White text */
 
     /* Borders and inputs */
-    --border: 0 0% 80%;                 /* #CCCCCC - Gris clair bordures */
-    --input: 0 0% 18%;                  /* #2F2F2F - Gris doux */
-    --ring: 350 85% 43%;                /* #C8102E - Rouge SNRT focus */
+    --border: 222 23% 23%;              /* #2D3748 - Dark border */
+    --input: 222 23% 16%;               /* #252A3A - Dark input background */
+    --ring: 258 89% 66%;                /* #8B5CF6 - Purple focus ring */
 
-    /* Warning */
-    --warning: 51 100% 50%;             /* #FFD700 - Jaune étincelle */
-    --warning-foreground: 0 0% 5%;      /* #0D0D0D - Noir sur jaune */
+    /* Warning - Orange */
+    --warning: 25 95% 53%;              /* #F59E0B - Orange warning */
+    --warning-foreground: 0 0% 100%;    /* #FFFFFF - White text */
+
+    /* Additional gradient colors for cards */
+    --gradient-purple: 258 89% 66%;     /* #8B5CF6 - Purple */
+    --gradient-coral: 14 83% 60%;       /* #F56565 - Coral */
+    --gradient-blue: 217 91% 60%;       /* #3B82F6 - Blue */
+    --gradient-orange: 25 95% 53%;      /* #F59E0B - Orange */
 
     /* Design system variables */
     --radius: 0.75rem;                  /* Increased border radius */
     --shadow-color: 267 57% 50%;        /* Purple shadow base */
     
-    /* Gradients SNRT/SPARK */
-    --gradient-primary: linear-gradient(135deg, hsl(350, 85%, 43%), hsl(350, 85%, 60%));
-    --gradient-secondary: linear-gradient(135deg, hsl(201, 100%, 56%), hsl(201, 100%, 70%));
-    --gradient-accent: linear-gradient(135deg, hsl(51, 100%, 50%), hsl(51, 100%, 60%));
-    --gradient-background: linear-gradient(180deg, hsl(0, 0%, 5%), hsl(0, 0%, 18%));
+    /* Modern Dashboard Gradients */
+    --gradient-primary: linear-gradient(135deg, hsl(258, 89%, 66%), hsl(258, 89%, 76%));
+    --gradient-secondary: linear-gradient(135deg, hsl(14, 83%, 60%), hsl(14, 83%, 70%));
+    --gradient-accent: linear-gradient(135deg, hsl(142, 76%, 36%), hsl(142, 76%, 46%));
+    --gradient-background: linear-gradient(180deg, hsl(222, 23%, 11%), hsl(222, 23%, 16%));
     
-    /* Gradients pour visualisations modernes */
-    --gradient-chart: linear-gradient(135deg, hsl(350, 85%, 43%), hsl(201, 100%, 56%));
-    --gradient-stats: linear-gradient(135deg, hsl(51, 100%, 50%), hsl(350, 85%, 43%));
-    --gradient-data: linear-gradient(135deg, hsl(201, 100%, 56%), hsl(51, 100%, 50%));
-    --gradient-success: linear-gradient(135deg, hsl(160, 100%, 38%), hsl(160, 100%, 50%));
+    /* Card gradients matching dashboard */
+    --gradient-purple: linear-gradient(135deg, hsl(258, 89%, 66%), hsl(276, 100%, 75%));
+    --gradient-coral: linear-gradient(135deg, hsl(14, 83%, 60%), hsl(339, 90%, 68%));
+    --gradient-blue: linear-gradient(135deg, hsl(217, 91%, 60%), hsl(213, 97%, 87%));
+    --gradient-orange: linear-gradient(135deg, hsl(25, 95%, 53%), hsl(45, 100%, 70%));
+    --gradient-chart: linear-gradient(135deg, hsl(142, 76%, 36%), hsl(258, 89%, 66%));
+    --gradient-stats: linear-gradient(135deg, hsl(25, 95%, 53%), hsl(14, 83%, 60%));
+    --gradient-data: linear-gradient(135deg, hsl(217, 91%, 60%), hsl(142, 76%, 36%));
+    --gradient-success: linear-gradient(135deg, hsl(142, 76%, 36%), hsl(142, 76%, 46%));
     
-    /* Shadows SNRT/SPARK */
-    --shadow-elegant: 0 10px 30px -10px hsl(350, 85%, 43% / 0.3);
-    --shadow-glow: 0 0 40px hsl(350, 85%, 60% / 0.6);
-    --shadow-card: 0 8px 32px -4px hsl(0, 0%, 0% / 0.4);
-    --shadow-widget: 0 4px 20px -2px hsl(350, 85%, 43% / 0.2);
-    --shadow-accent: 0 0 30px hsl(51, 100%, 50% / 0.4);
-    --shadow-success: 0 0 25px hsl(160, 100%, 38% / 0.4);
+    /* Modern Dashboard Shadows */
+    --shadow-elegant: 0 10px 30px -10px hsl(258, 89%, 66% / 0.3);
+    --shadow-glow: 0 0 40px hsl(258, 89%, 66% / 0.4);
+    --shadow-card: 0 8px 32px -4px hsl(222, 23%, 7% / 0.6);
+    --shadow-widget: 0 4px 20px -2px hsl(258, 89%, 66% / 0.2);
+    --shadow-accent: 0 0 30px hsl(142, 76%, 36% / 0.4);
+    --shadow-success: 0 0 25px hsl(142, 76%, 36% / 0.4);
     
     /* Transitions */
     --transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
