@@ -5,71 +5,73 @@
 
 @layer base {
   :root {
-    /* Base theme - Fond sombre + accents éclatants */
-    --background: 0 0% 4%;              /* Noir profond */
-    --foreground: 0 0% 98%;             /* Blanc pur */
+    /* Palette SNRT/SPARK - Couleurs exactes */
+    --background: 0 0% 5%;              /* #0D0D0D - Noir profond */
+    --foreground: 0 0% 100%;            /* #FFFFFF - Blanc pur */
 
     /* Card styles - cartes modulaires */
-    --card: 0 0% 8%;                    /* Gris très foncé pour contraste */
-    --card-foreground: 0 0% 98%;
+    --card: 0 0% 18%;                   /* #2F2F2F - Gris doux */
+    --card-foreground: 0 0% 100%;       /* #FFFFFF - Blanc pur */
 
     /* Popover styles */
-    --popover: 0 0% 10%;
-    --popover-foreground: 0 0% 98%;
+    --popover: 0 0% 18%;                /* #2F2F2F - Gris doux */
+    --popover-foreground: 0 0% 100%;    /* #FFFFFF - Blanc pur */
 
-    /* Primary - Rouge SNRT éclatant */
-    --primary: 0 84% 60%;               /* Rouge SNRT vibrant */
-    --primary-glow: 0 100% 70%;         /* Rouge éclatant */
-    --primary-foreground: 0 0% 100%;
+    /* Primary - Rouge SNRT (identité) */
+    --primary: 350 85% 43%;             /* #C8102E - Rouge royal SNRT */
+    --primary-glow: 350 85% 60%;        /* Version plus claire */
+    --primary-foreground: 0 0% 100%;    /* #FFFFFF - Blanc pur */
 
     /* Secondary - Bleu électrique */
-    --secondary: 210 100% 60%;          /* Bleu électrique */
-    --secondary-foreground: 0 0% 100%;
+    --secondary: 201 100% 56%;          /* #1FB6FF - Bleu électrique */
+    --secondary-foreground: 0 0% 100%;  /* #FFFFFF - Blanc pur */
 
-    /* Accent - Jaune étincelle */
-    --accent: 60 100% 50%;              /* Jaune éclatant */
-    --accent-foreground: 0 0% 0%;       /* Texte noir sur jaune */
+    /* Accent - Jaune SPARK (étincelle) */
+    --accent: 51 100% 50%;              /* #FFD700 - Jaune électrique */
+    --accent-foreground: 0 0% 5%;       /* #0D0D0D - Noir sur jaune */
 
     /* Muted tones */
-    --muted: 215 13.8% 15%;             /* Subtle gray-blue */
-    --muted-foreground: 217.2 10.6% 64.9%;
+    --muted: 0 0% 18%;                  /* #2F2F2F - Gris doux */
+    --muted-foreground: 0 0% 80%;       /* #CCCCCC - Gris clair neutre */
 
-    /* Success and error */
-    --success: 142 76% 36%;             /* Green */
-    --success-foreground: 0 0% 100%;
-    --destructive: 0 72.2% 50.6%;       /* Red */
-    --destructive-foreground: 0 0% 98%;
+    /* Success and error - États spécifiques */
+    --success: 160 100% 38%;            /* #00C17D - Vert menthe */
+    --success-foreground: 0 0% 100%;    /* #FFFFFF - Blanc pur */
+    --destructive: 4 100% 59%;          /* #FF3B30 - Rouge vif erreur */
+    --destructive-foreground: 0 0% 100%; /* #FFFFFF - Blanc pur */
 
     /* Borders and inputs */
-    --border: 215 13.8% 25%;            /* Subtle border */
-    --input: 215 13.8% 15%;             /* Input background */
-    --ring: 267 57% 50%;                /* Focus ring matches primary */
+    --border: 0 0% 80%;                 /* #CCCCCC - Gris clair bordures */
+    --input: 0 0% 18%;                  /* #2F2F2F - Gris doux */
+    --ring: 350 85% 43%;                /* #C8102E - Rouge SNRT focus */
 
     /* Warning */
-    --warning: 38 92% 50%;              /* Orange */
-    --warning-foreground: 0 0% 100%;
+    --warning: 51 100% 50%;             /* #FFD700 - Jaune étincelle */
+    --warning-foreground: 0 0% 5%;      /* #0D0D0D - Noir sur jaune */
 
     /* Design system variables */
     --radius: 0.75rem;                  /* Increased border radius */
     --shadow-color: 267 57% 50%;        /* Purple shadow base */
     
-    /* Gradients éclatants */
-    --gradient-primary: linear-gradient(135deg, hsl(0, 84%, 60%), hsl(0, 100%, 70%));
-    --gradient-secondary: linear-gradient(135deg, hsl(210, 100%, 60%), hsl(200, 100%, 50%));
-    --gradient-accent: linear-gradient(135deg, hsl(60, 100%, 50%), hsl(45, 100%, 55%));
-    --gradient-background: linear-gradient(180deg, hsl(0, 0%, 4%), hsl(0, 0%, 8%));
+    /* Gradients SNRT/SPARK */
+    --gradient-primary: linear-gradient(135deg, hsl(350, 85%, 43%), hsl(350, 85%, 60%));
+    --gradient-secondary: linear-gradient(135deg, hsl(201, 100%, 56%), hsl(201, 100%, 70%));
+    --gradient-accent: linear-gradient(135deg, hsl(51, 100%, 50%), hsl(51, 100%, 60%));
+    --gradient-background: linear-gradient(180deg, hsl(0, 0%, 5%), hsl(0, 0%, 18%));
     
     /* Gradients pour visualisations modernes */
-    --gradient-chart: linear-gradient(135deg, hsl(0, 84%, 60%), hsl(210, 100%, 60%));
-    --gradient-stats: linear-gradient(135deg, hsl(60, 100%, 50%), hsl(0, 84%, 60%));
-    --gradient-data: linear-gradient(135deg, hsl(210, 100%, 60%), hsl(60, 100%, 50%));
+    --gradient-chart: linear-gradient(135deg, hsl(350, 85%, 43%), hsl(201, 100%, 56%));
+    --gradient-stats: linear-gradient(135deg, hsl(51, 100%, 50%), hsl(350, 85%, 43%));
+    --gradient-data: linear-gradient(135deg, hsl(201, 100%, 56%), hsl(51, 100%, 50%));
+    --gradient-success: linear-gradient(135deg, hsl(160, 100%, 38%), hsl(160, 100%, 50%));
     
-    /* Shadows pour cartes modulaires */
-    --shadow-elegant: 0 10px 30px -10px hsl(0, 84%, 60% / 0.3);
-    --shadow-glow: 0 0 40px hsl(var(--primary-glow) / 0.6);
+    /* Shadows SNRT/SPARK */
+    --shadow-elegant: 0 10px 30px -10px hsl(350, 85%, 43% / 0.3);
+    --shadow-glow: 0 0 40px hsl(350, 85%, 60% / 0.6);
     --shadow-card: 0 8px 32px -4px hsl(0, 0%, 0% / 0.4);
-    --shadow-widget: 0 4px 20px -2px hsl(0, 84%, 60% / 0.2);
-    --shadow-accent: 0 0 30px hsl(60, 100%, 50% / 0.4);
+    --shadow-widget: 0 4px 20px -2px hsl(350, 85%, 43% / 0.2);
+    --shadow-accent: 0 0 30px hsl(51, 100%, 50% / 0.4);
+    --shadow-success: 0 0 25px hsl(160, 100%, 38% / 0.4);
     
     /* Transitions */
     --transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
