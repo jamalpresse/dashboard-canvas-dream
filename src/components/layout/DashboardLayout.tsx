@@ -201,9 +201,14 @@ export default function DashboardLayout() {
       )}>
         <div className="flex h-16 items-center border-b border-gray-800 px-6">
           <Link to="/">
-            <h1 className="text-2xl font-bold font-playfair text-snrt-red">
-              SPARK
-            </h1>
+            <div>
+              <h1 className="text-2xl font-bold font-playfair text-snrt-red">
+                SPARK
+              </h1>
+              <p className="text-sm text-gray-400 font-light -mt-1">
+                by JE
+              </p>
+            </div>
           </Link>
         </div>
         
