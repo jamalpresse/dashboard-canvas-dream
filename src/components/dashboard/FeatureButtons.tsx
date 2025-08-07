@@ -10,22 +10,22 @@ export const FeatureButtons: React.FC = () => {
   return <div className="mx-4 md:mx-8">
       {/* Features Buttons - Cartes modulaires éclatantes */}
       <div className={`cards-grid mb-6 ${isRTL ? 'rtl' : ''}`}>
-        <Link to="/search" className="group relative overflow-hidden bg-gradient-primary hover:scale-105 text-white font-semibold py-6 px-6 rounded-xl shadow-elegant hover:shadow-glow transition-all duration-300 flex flex-col items-center justify-center space-y-2 min-h-[120px]">
+        <Link to="/search" className="group relative overflow-hidden bg-gradient-to-br from-purple-600 to-purple-700 hover:from-purple-700 hover:to-purple-800 hover:scale-105 text-white font-semibold py-6 px-6 rounded-xl shadow-elegant hover:shadow-glow transition-all duration-300 flex flex-col items-center justify-center space-y-2 min-h-[120px]">
           <Search className="h-8 w-8 group-hover:scale-110 transition-transform" />
           <span className="text-lg">{t('dashboard', 'search')}</span>
           <div className="absolute inset-0 bg-gradient-to-br from-white/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
         </Link>
 
-        <Link to="/improve" className="group relative overflow-hidden bg-gradient-secondary hover:scale-105 text-white font-semibold py-6 px-6 rounded-xl shadow-elegant hover:shadow-glow transition-all duration-300 flex flex-col items-center justify-center space-y-2 min-h-[120px]">
+        <Link to="/improve" className="group relative overflow-hidden bg-gradient-to-br from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 hover:scale-105 text-white font-semibold py-6 px-6 rounded-xl shadow-elegant hover:shadow-glow transition-all duration-300 flex flex-col items-center justify-center space-y-2 min-h-[120px]">
           <FileText className="h-8 w-8 group-hover:scale-110 transition-transform" />
           <span className="text-lg">{t('dashboard', 'improve')}</span>
           <div className="absolute inset-0 bg-gradient-to-br from-white/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
         </Link>
 
-        <Link to="/translation" className="group relative overflow-hidden bg-gradient-accent hover:scale-105 text-black font-semibold py-6 px-6 rounded-xl shadow-elegant hover:shadow-accent transition-all duration-300 flex flex-col items-center justify-center space-y-2 min-h-[120px]">
+        <Link to="/translation" className="group relative overflow-hidden bg-gradient-to-br from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 hover:scale-105 text-white font-semibold py-6 px-6 rounded-xl shadow-elegant hover:shadow-glow transition-all duration-300 flex flex-col items-center justify-center space-y-2 min-h-[120px]">
           <Languages className="h-8 w-8 group-hover:scale-110 transition-transform" />
           <span className="text-lg">{t('dashboard', 'translate')}</span>
-          <div className="absolute inset-0 bg-gradient-to-br from-black/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+          <div className="absolute inset-0 bg-gradient-to-br from-white/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
         </Link>
       </div>
       
