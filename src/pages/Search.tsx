@@ -96,12 +96,12 @@ export default function Search() {
           
           {/* Navigation Buttons */}
           <div className={`flex flex-col sm:flex-row gap-4 w-full mt-8 ${isRTL ? 'flex-row-reverse' : ''}`}>
-            <Link to="/improve" className="flex-1 px-6 py-4 bg-snrt-red text-white rounded-xl shadow hover:shadow-lg transition-all hover:-translate-y-1 flex items-center justify-center gap-3">
+            <Link to="/improve" className="flex-1 px-6 py-4 bg-gradient-to-br from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-white rounded-xl shadow hover:shadow-lg transition-all hover:-translate-y-1 flex items-center justify-center gap-3">
               <Wrench size={20} />
               <span className="text-base font-medium">{t('improve', 'title')}</span>
             </Link>
             
-            <Link to="/translation" className="flex-1 px-6 py-4 bg-black text-white rounded-xl shadow hover:shadow-lg transition-all hover:-translate-y-1 flex items-center justify-center gap-3 hover:bg-snrt-red/90">
+            <Link to="/translation" className="flex-1 px-6 py-4 bg-gradient-to-br from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white rounded-xl shadow hover:shadow-lg transition-all hover:-translate-y-1 flex items-center justify-center gap-3">
               <Globe size={20} />
               <span className="text-base font-medium">{t('translation', 'title')}</span>
             </Link>
