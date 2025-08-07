@@ -60,49 +60,32 @@ export const useTranslation = (
     
     setLoading(true);
     
-    // Logique conditionnelle selon la langue
-    const useNewWebhook = langPair === 'any-fr';
-    const webhookUrl = useNewWebhook ? WEBHOOK_URL_NEW : WEBHOOK_URL_OLD;
+    // SOLUTION TEMPORAIRE: Utiliser uniquement l'ancien webhook stable
+    // Le nouveau webhook (automate.ihata.ma:5678) a des problèmes de connectivité
+    console.log(`Utilisation du webhook stable: ${WEBHOOK_URL_OLD}`);
+    console.log(`Traduction pour ${langPair}`);
     
-    console.log(`Envoi de la requête au webhook de traduction: ${webhookUrl}`);
-    console.log(`Traduction pour ${langPair} - Utilisation du ${useNewWebhook ? 'nouveau' : 'ancien'} webhook`);
+    // Payload standardisé pour l'ancien webhook
+    const payload = { 
+      text: text.trim(), 
+      langPair,
+      type: "translation",
+      service: "translation",
+      action: "translate",
+      request_type: "translation"
+    };
+    
+    console.log("Payload envoyé pour la traduction:", payload);
     
     try {
-      let response;
-      
-      if (useNewWebhook) {
-        // Nouveau webhook : GET avec paramètre query dans l'URL
-        const urlWithParams = `${WEBHOOK_URL_NEW}?query=${encodeURIComponent(text.trim())}`;
-        console.log("URL GET pour le nouveau webhook:", urlWithParams);
-        
-        response = await fetch(urlWithParams, {
-          method: 'GET',
-          headers: { 
-            'Accept': 'application/json',
-          },
-        });
-      } else {
-        // Ancien webhook : POST avec payload JSON
-        const payload = { 
-          text: text.trim(), 
-          langPair,
-          type: "translation",
-          service: "translation",
-          action: "translate",
-          request_type: "translation"
-        };
-        
-        console.log("Payload envoyé pour la traduction:", payload);
-        
-        response = await fetch(WEBHOOK_URL_OLD, {
-          method: 'POST',
-          headers: { 
-            'Content-Type': 'application/json',
-            'Accept': 'application/json',
-          },
-          body: JSON.stringify(payload),
-        });
-      }
+      const response = await fetch(WEBHOOK_URL_OLD, {
+        method: 'POST',
+        headers: { 
+          'Content-Type': 'application/json',
+          'Accept': 'application/json',
+        },
+        body: JSON.stringify(payload),
+      });
       
       console.log("Statut de la réponse:", response.status);
       
