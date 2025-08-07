@@ -1,53 +1,30 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Globe, Wrench } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { useLanguage } from '@/context/LanguageContext';
-import { Textarea } from "@/components/ui/textarea";
+import { useSearch } from '@/hooks/useSearch';
 
 // Détecte la présence de caractères arabes pour alignement RTL
 const usesArabic = (text: string) => /[\u0600-\u06FF]/.test(text);
 export default function Search() {
-  const [query, setQuery] = useState('');
-  const [loading, setLoading] = useState(false);
-  const [result, setResult] = useState('');
-  const [error, setError] = useState('');
   const {
     t,
     isRTL,
     dir
   } = useLanguage();
   
-  const handleSearch = async () => {
-    setLoading(true);
-    setError('');
-    try {
-      const res = await fetch('https://n8n-jamal-u38598.vm.elestio.app/webhook/8260e0a1-02e7-4b4c-b9ba-bb1e56a1f004', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-          query
-        })
-      });
-      const json = await res.json();
-      setResult(json.result || '');
-    } catch (e) {
-      setError(t('search', 'error'));
-    }
-    setLoading(false);
-  };
-  
-  const handleCopy = () => navigator.clipboard.writeText(result);
-  const handlePaste = async () => {
-    try {
-      setQuery(await navigator.clipboard.readText());
-    } catch (e) {
-      setError(t('search', 'permissionError'));
-    }
-  };
-  const handleClear = () => setResult('');
+  const {
+    query,
+    setQuery,
+    result,
+    loading,
+    error,
+    handleSearch,
+    handleCopy,
+    handlePaste,
+    handleClear,
+  } = useSearch();
   const isQueryRTL = usesArabic(query) || isRTL;
   const isResultRTL = usesArabic(result) || isRTL;
   
