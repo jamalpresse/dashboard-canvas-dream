@@ -58,11 +58,12 @@ export default function DashboardLayout() {
       .substring(0, 2);
   };
 
-  // Navigation items using translation context
+  // Navigation items using translation context - Dashboard en premier
   const navItems = [{
     title: t('navigation', 'dashboard'),
     href: "/",
-    icon: <LayoutDashboard className="h-6 w-6" />
+    icon: <LayoutDashboard className="h-6 w-6" />,
+    isHome: true
   }, {
     title: t('navigation', 'news'),
     href: "/news",
@@ -236,9 +237,12 @@ export default function DashboardLayout() {
             
             {navItems.map((item, i) => <NavLink key={i} to={item.href} onClick={() => isMobile && setSidebarOpen(false)} className={({
             isActive
-          }) => cn("flex items-center gap-4 rounded-lg px-4 py-3 text-lg font-medium transition-all duration-200 ease-in-out", isActive ? "bg-snrt-red text-white shadow-md" : "text-gray-300 hover:bg-gray-800 hover:text-white hover:shadow-sm")}>
+          }) => cn("flex items-center gap-4 rounded-lg px-4 py-3 text-lg font-medium transition-all duration-200 ease-in-out", 
+          isActive ? "bg-snrt-red text-white shadow-md" : "text-gray-300 hover:bg-gray-800 hover:text-white hover:shadow-sm",
+          item.isHome ? "ring-2 ring-primary/20 border border-primary/30" : "")}>
                 <span className="flex-shrink-0">{item.icon}</span>
                 <span>{item.title}</span>
+                {item.isHome && <span className="ml-auto text-xs bg-primary/20 px-2 py-1 rounded-full">🏠</span>}
               </NavLink>)}
             
             {/* SNRT News button */}
