@@ -96,14 +96,47 @@ export const useTranslation = (
       const responseData = await response.json();
       console.log("Réponse complète reçue du webhook:", responseData);
       
-      setDebugData({ ...responseData, webhook: 'old' });
+      setDebugData({ ...responseData, webhook: 'new' });
       setResponseType('direct-translation');
       
-      // Extraction spécifique du champ Traduction
+      let translationText = '';
+      
+      // Méthode 1: Extraction du champ Traduction (format standard)
       if (responseData && responseData.Traduction !== undefined) {
-        let translationText = responseData.Traduction;
-        
-        // Si Traduction est une chaîne JSON, essayer de la parser
+        translationText = responseData.Traduction;
+        console.log("Traduction extraite du champ Traduction:", translationText);
+      }
+      // Méthode 2: Format {"object Object": {"output": "..."}} pour any-ar
+      else if (responseData && responseData["object Object"] && responseData["object Object"].output) {
+        translationText = responseData["object Object"].output;
+        console.log("Traduction extraite du format object Object:", translationText);
+      }
+      // Méthode 3: Chercher dans toutes les clés pour une valeur de type string
+      else if (responseData && typeof responseData === 'object') {
+        console.log("Recherche de traduction dans toutes les clés de la réponse...");
+        for (const [key, value] of Object.entries(responseData)) {
+          if (typeof value === 'string' && value.trim().length > 0) {
+            translationText = value;
+            console.log(`Traduction trouvée dans la clé "${key}":`, translationText);
+            break;
+          }
+          // Si la valeur est un objet, chercher dedans
+          else if (typeof value === 'object' && value !== null) {
+            for (const [subKey, subValue] of Object.entries(value as any)) {
+              if (typeof subValue === 'string' && subValue.trim().length > 0) {
+                translationText = subValue;
+                console.log(`Traduction trouvée dans "${key}.${subKey}":`, translationText);
+                break;
+              }
+            }
+            if (translationText) break;
+          }
+        }
+      }
+      
+      // Si une traduction a été trouvée
+      if (translationText && translationText.trim()) {
+        // Si la traduction est une chaîne JSON, essayer de la parser
         if (typeof translationText === 'string' && 
             (translationText.trim().startsWith('{') || translationText.trim().startsWith('['))) {
           try {
@@ -124,7 +157,8 @@ export const useTranslation = (
           description: "Le texte a été traduit avec succès",
         });
       } else {
-        // Fallback au formateur existant si Traduction n'est pas présent
+        // Aucune traduction trouvée, utiliser le formateur de fallback
+        console.log("Aucune traduction trouvée, utilisation du formateur de fallback");
         const formattedResult = formatTranslationResult(responseData);
         setResult(formattedResult);
         
