@@ -230,19 +230,30 @@ export default function DashboardLayout() {
         </div>
         
         <nav className="flex-1 overflow-auto p-4">
+          {/* Bouton tableau de bord déplacé vers le haut */}
+          <div className="mb-6 -mt-4">
+            <NavLink to="/" onClick={() => isMobile && setSidebarOpen(false)} className={({
+              isActive
+            }) => cn("flex items-center gap-4 rounded-lg px-4 py-3 text-lg font-medium transition-all duration-200 ease-in-out", 
+            isActive ? "bg-snrt-red text-white shadow-md" : "text-gray-300 hover:bg-gray-800 hover:text-white hover:shadow-sm",
+            "ring-2 ring-primary/20 border border-primary/30")}>
+              <span className="flex-shrink-0"><LayoutDashboard className="h-6 w-6" /></span>
+              <span>{t('navigation', 'dashboard')}</span>
+              <span className="ml-auto text-xs bg-primary/20 px-2 py-1 rounded-full">🏠</span>
+            </NavLink>
+          </div>
+          
           <div className="space-y-1 pb-4">
             <h2 className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2 px-3">
               {t('navigation', 'mainMenu')}
             </h2>
             
-            {navItems.map((item, i) => <NavLink key={i} to={item.href} onClick={() => isMobile && setSidebarOpen(false)} className={({
+            {navItems.slice(1).map((item, i) => <NavLink key={i} to={item.href} onClick={() => isMobile && setSidebarOpen(false)} className={({
             isActive
           }) => cn("flex items-center gap-4 rounded-lg px-4 py-3 text-lg font-medium transition-all duration-200 ease-in-out", 
-          isActive ? "bg-snrt-red text-white shadow-md" : "text-gray-300 hover:bg-gray-800 hover:text-white hover:shadow-sm",
-          item.isHome ? "ring-2 ring-primary/20 border border-primary/30" : "")}>
+          isActive ? "bg-snrt-red text-white shadow-md" : "text-gray-300 hover:bg-gray-800 hover:text-white hover:shadow-sm")}>
                 <span className="flex-shrink-0">{item.icon}</span>
                 <span>{item.title}</span>
-                {item.isHome && <span className="ml-auto text-xs bg-primary/20 px-2 py-1 rounded-full">🏠</span>}
               </NavLink>)}
             
             {/* SNRT News button */}
