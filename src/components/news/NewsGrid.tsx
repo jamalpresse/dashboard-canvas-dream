@@ -27,33 +27,42 @@ export const NewsGrid: React.FC<NewsGridProps> = ({ news, className }) => {
   }
 
   return (
-    <div className={cn("news-grid", className)}>
+    <div className={cn("grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4", className)}>
       {news.map((item) => (
-        <div key={item.guid} className="bg-card rounded-lg overflow-hidden shadow-md hover:shadow-lg transition-shadow">
+        <article key={item.guid} className="group bg-card/50 backdrop-blur-sm rounded-lg overflow-hidden border border-border/50 hover:border-primary/20 transition-all duration-300 hover:shadow-lg hover:shadow-primary/10">
           {item.thumbnail && (
-            <div className="h-40 overflow-hidden">
+            <div className="relative h-48 overflow-hidden">
               <img
                 src={item.thumbnail || "https://via.placeholder.com/300x200?text=News"}
                 alt={item.title}
-                className="w-full h-full object-cover"
+                className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
               />
+              <div className="absolute inset-0 bg-gradient-to-t from-background/80 via-transparent to-transparent" />
+              {item.categories && item.categories[0] && (
+                <span className="absolute top-3 left-3 px-2 py-1 bg-primary/90 text-primary-foreground text-xs font-medium rounded-full backdrop-blur-sm">
+                  {item.categories[0]}
+                </span>
+              )}
             </div>
           )}
-          <div className="p-4">
-            {item.categories && item.categories[0] && (
-              <span className="snrt-category mb-2 inline-block">{item.categories[0]}</span>
-            )}
-            <h3 className="font-bold text-lg mb-1 line-clamp-2">{item.title}</h3>
-            <p className="text-gray-400 text-sm line-clamp-2 mb-3">{item.description}</p>
-            <div className="flex justify-between items-center">
-              <span className="snrt-timestamp">{new Date(item.pubDate).toLocaleTimeString('fr-FR', { 
-                hour: '2-digit', 
-                minute: '2-digit' 
-              })}</span>
-              <span className="text-xs text-gray-500">{item.source}</span>
+          <div className="p-4 space-y-3">
+            <h3 className="font-semibold text-base leading-tight line-clamp-2 group-hover:text-primary transition-colors">
+              {item.title}
+            </h3>
+            <p className="text-muted-foreground text-sm line-clamp-2 leading-relaxed">
+              {item.description}
+            </p>
+            <div className="flex justify-between items-center pt-2 border-t border-border/50">
+              <time className="text-xs text-muted-foreground font-medium">
+                {new Date(item.pubDate).toLocaleTimeString('fr-FR', { 
+                  hour: '2-digit', 
+                  minute: '2-digit' 
+                })}
+              </time>
+              <span className="text-xs text-primary/70 font-medium">{item.source}</span>
             </div>
           </div>
-        </div>
+        </article>
       ))}
     </div>
   );
