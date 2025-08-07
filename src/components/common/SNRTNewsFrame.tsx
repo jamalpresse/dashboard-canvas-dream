@@ -44,9 +44,9 @@ export function SNRTNewsFrame({ className, onClose }: SNRTNewsFrameProps) {
         sandbox="allow-same-origin allow-scripts"
       />
       
-      {/* Large Exit Button */}
+      {/* Large Exit Button - déplacé 2 cm vers le haut */}
       {onClose && (
-        <div className="fixed bottom-6 left-1/2 transform -translate-x-1/2 z-50">
+        <div className="fixed bottom-12 left-1/2 transform -translate-x-1/2 z-50" style={{ bottom: 'calc(1.5rem + 2cm)' }}>
           <Button 
             variant="default" 
             size="lg" 
