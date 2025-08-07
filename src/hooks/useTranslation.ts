@@ -60,31 +60,12 @@ export const useTranslation = (
     
     setLoading(true);
     
-    // Déterminer le webhook et le payload selon la paire de langues
-    const isNewWebhook = langPair === 'any-fr';
-    const webhookUrl = isNewWebhook ? WEBHOOK_URL_NEW : WEBHOOK_URL_OLD;
-    
-    console.log(`Envoi de la requête au webhook de traduction: ${webhookUrl}`);
-    console.log(`Utilisation du ${isNewWebhook ? 'nouveau' : 'ancien'} webhook pour ${langPair}`);
-    
-    // Adapter le payload selon le webhook
-    const payload = isNewWebhook 
-      ? { 
-          query: text.trim()  // Nouveau webhook utilise 'query'
-        }
-      : { 
-          text: text.trim(), 
-          langPair,
-          type: "translation",
-          service: "translation",
-          action: "translate",
-          request_type: "translation"
-        };
-    
-    console.log("Payload envoyé pour la traduction:", payload);
-    
-    try {
-      const response = await fetch(webhookUrl, {
+    // Fonction helper pour essayer un webhook
+    const tryWebhook = async (url: string, payload: any, isNewFormat = false) => {
+      console.log(`Tentative de connexion au webhook: ${url}`);
+      console.log("Payload:", payload);
+      
+      const response = await fetch(url, {
         method: 'POST',
         headers: { 
           'Content-Type': 'application/json',
@@ -93,21 +74,66 @@ export const useTranslation = (
         body: JSON.stringify(payload),
       });
       
-      console.log("Statut de la réponse:", response.status);
-      
       if (!response.ok) {
         throw new Error(`Erreur HTTP: ${response.status}`);
       }
-
-      // Traitement de la réponse selon le webhook
-      if (isNewWebhook) {
+      
+      if (isNewFormat) {
+        return await response.text();
+      } else {
+        return await response.json();
+      }
+    };
+    
+    try {
+      let result;
+      let webhookUsed = 'unknown';
+      
+      if (langPair === 'any-fr') {
+        // Essayer d'abord le nouveau webhook
+        try {
+          console.log("Tentative avec le nouveau webhook...");
+          const newPayload = { query: text.trim() };
+          result = await tryWebhook(WEBHOOK_URL_NEW, newPayload, true);
+          webhookUsed = 'new';
+          console.log("Succès avec le nouveau webhook");
+        } catch (newWebhookError) {
+          console.warn("Échec du nouveau webhook, fallback vers l'ancien:", newWebhookError);
+          
+          // Fallback vers l'ancien webhook
+          const oldPayload = { 
+            text: text.trim(), 
+            langPair,
+            type: "translation",
+            service: "translation",
+            action: "translate",
+            request_type: "translation"
+          };
+          result = await tryWebhook(WEBHOOK_URL_OLD, oldPayload, false);
+          webhookUsed = 'old-fallback';
+          console.log("Succès avec l'ancien webhook (fallback)");
+        }
+      } else {
+        // Pour any-ar, utiliser directement l'ancien webhook
+        console.log("Utilisation de l'ancien webhook pour", langPair);
+        const oldPayload = { 
+          text: text.trim(), 
+          langPair,
+          type: "translation",
+          service: "translation",
+          action: "translate",
+          request_type: "translation"
+        };
+        result = await tryWebhook(WEBHOOK_URL_OLD, oldPayload, false);
+        webhookUsed = 'old';
+      }
+      
+      // Traitement de la réponse selon le format
+      if (webhookUsed === 'new') {
         // Nouveau webhook retourne du texte simple
-        const responseText = await response.text();
-        console.log("Réponse texte reçue du nouveau webhook:", responseText);
-        
-        setDebugData({ rawResponse: responseText, webhook: 'new' });
+        setDebugData({ rawResponse: result, webhook: webhookUsed });
         setResponseType('direct-translation');
-        setResult(responseText);
+        setResult(result);
         
         toast({
           title: "Traduction complétée",
@@ -115,15 +141,12 @@ export const useTranslation = (
         });
       } else {
         // Ancien webhook retourne du JSON
-        const responseData = await response.json();
-        console.log("Réponse JSON reçue de l'ancien webhook:", responseData);
-        
-        setDebugData({ ...responseData, webhook: 'old' });
+        setDebugData({ ...result, webhook: webhookUsed });
         setResponseType('direct-translation');
         
         // Extraction spécifique du champ Traduction
-        if (responseData && responseData.Traduction !== undefined) {
-          let translationText = responseData.Traduction;
+        if (result && result.Traduction !== undefined) {
+          let translationText = result.Traduction;
           
           // Si Traduction est une chaîne JSON, essayer de la parser
           if (typeof translationText === 'string' && 
@@ -143,11 +166,11 @@ export const useTranslation = (
           
           toast({
             title: "Traduction complétée",
-            description: "Le texte a été traduit avec succès",
+            description: `Le texte a été traduit avec succès ${webhookUsed === 'old-fallback' ? '(webhook de secours utilisé)' : ''}`,
           });
         } else {
           // Fallback au formateur existant si Traduction n'est pas présent
-          const formattedResult = formatTranslationResult(responseData);
+          const formattedResult = formatTranslationResult(result);
           setResult(formattedResult);
           
           toast({
@@ -158,11 +181,20 @@ export const useTranslation = (
       }
     } catch (err: any) {
       console.error("Erreur de traduction:", err);
-      setError(err.message || 'Erreur lors de la traduction.');
+      
+      // Messages d'erreur plus spécifiques
+      let errorMessage = 'Erreur lors de la traduction.';
+      if (err.message.includes('NetworkError') || err.message.includes('fetch')) {
+        errorMessage = 'Impossible de joindre le service de traduction. Vérifiez votre connexion internet.';
+      } else if (err.message.includes('CORS')) {
+        errorMessage = 'Problème de configuration du service de traduction.';
+      }
+      
+      setError(errorMessage);
       setResponseType('error');
       toast({
         title: "Erreur",
-        description: `Erreur lors de la traduction: ${err.message || 'Problème de connexion'}`,
+        description: errorMessage,
         variant: "destructive",
       });
     } finally {
