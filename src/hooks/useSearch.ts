@@ -21,7 +21,7 @@ export const useSearch = () => {
     try {
       console.log("Début de la recherche avec la requête:", query);
       
-      const response = await fetch('https://automate.ihata.ma/webhook/c1d2aee7-e096-4dc9-a69c-023af6631d88', {
+      const response = await fetch('http://automate.ihata.ma:5678/webhook/c1d2aee7-e096-4dc9-a69c-023af6631d88', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

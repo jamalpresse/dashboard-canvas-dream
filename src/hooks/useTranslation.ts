@@ -16,7 +16,7 @@ export const useTranslation = (
 
   // URLs des webhooks n8n pour la traduction
   const WEBHOOK_URL_OLD = 'https://n8n-jamal-u38598.vm.elestio.app/webhook/4732aeff-7544-4f0e-8554-ebd0f614947b';
-  const WEBHOOK_URL_NEW = 'https://automate.ihata.ma/webhook/c1d2aee7-e096-4dc9-a69c-023af6631d88';
+  const WEBHOOK_URL_NEW = 'http://automate.ihata.ma:5678/webhook/c1d2aee7-e096-4dc9-a69c-023af6631d88';
 
   // Détection RTL uniquement pour la langue source ou cible arabe
   const isSourceRTL = langPair.split('-')[0] === 'ar';
