@@ -22,7 +22,7 @@ export const FeatureButtons: React.FC = () => {
 
         <Link 
           to="/improve" 
-          className="group relative overflow-hidden bg-snrt-red hover:scale-105 text-white font-semibold py-6 px-6 rounded-xl shadow-elegant hover:shadow-glow transition-all duration-300 flex flex-col items-center justify-center space-y-2 min-h-[120px]"
+          className="group relative overflow-hidden bg-gradient-secondary hover:scale-105 text-white font-semibold py-6 px-6 rounded-xl shadow-elegant hover:shadow-glow transition-all duration-300 flex flex-col items-center justify-center space-y-2 min-h-[120px]"
         >
           <FileText className="h-8 w-8 group-hover:scale-110 transition-transform" />
           <span className="text-lg">{t('dashboard', 'improve')}</span>
