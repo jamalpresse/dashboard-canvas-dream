@@ -17,7 +17,7 @@ const ImproveNavigationButtons: React.FC = () => {
       
       <Link 
         to="/search" 
-        className="flex-1 px-6 py-6 bg-black text-white rounded-xl shadow hover:shadow-lg transition-all hover:-translate-y-1 flex items-center justify-center hover:bg-snrt-red/90"
+        className="flex-1 px-6 py-6 bg-snrt-red text-white rounded-xl shadow hover:shadow-lg transition-all hover:-translate-y-1 flex items-center justify-center hover:bg-red-700"
       >
         <span className="text-xl font-medium">{t('search', 'title')}</span>
       </Link>
