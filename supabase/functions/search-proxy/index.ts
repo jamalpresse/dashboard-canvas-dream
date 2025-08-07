@@ -28,7 +28,7 @@ serve(async (req) => {
     }
 
     // Make request to n8n webhook
-    const webhookUrl = 'http://automate.ihata.ma:5678/webhook/c1d2aee7-e096-4dc9-a69c-023af6631d88';
+    const webhookUrl = 'https://automate.ihata.ma/webhook/c1d2aee7-e096-4dc9-a69c-023af6631d88';
     
     console.log('Search proxy - Making request to:', webhookUrl);
     
@@ -44,14 +44,32 @@ serve(async (req) => {
     });
 
     console.log('Search proxy - Response status:', response.status);
+    console.log('Search proxy - Response content-type:', response.headers.get('content-type'));
 
     if (!response.ok) {
       console.error('Search proxy - HTTP error:', response.status, response.statusText);
       throw new Error(`HTTP error! status: ${response.status}`);
     }
 
-    const responseData = await response.json();
-    console.log('Search proxy - Response data:', responseData);
+    // Get response text first to handle potential JSON parsing issues
+    const responseText = await response.text();
+    console.log('Search proxy - Raw response text:', responseText);
+
+    let responseData;
+    try {
+      if (responseText.trim()) {
+        responseData = JSON.parse(responseText);
+      } else {
+        console.warn('Search proxy - Empty response received');
+        responseData = { error: 'Empty response from search service' };
+      }
+    } catch (parseError) {
+      console.error('Search proxy - JSON parse error:', parseError);
+      // If it's not JSON, treat the text as the result
+      responseData = { result: responseText };
+    }
+    
+    console.log('Search proxy - Parsed response data:', responseData);
 
     return new Response(JSON.stringify(responseData), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
