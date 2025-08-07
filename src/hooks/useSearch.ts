@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useToast } from '@/hooks/use-toast';
+import { supabase } from '@/integrations/supabase/client';
 
 export const useSearch = () => {
   const [query, setQuery] = useState('');
@@ -21,22 +22,16 @@ export const useSearch = () => {
     try {
       console.log("Début de la recherche avec la requête:", query);
       
-      const response = await fetch('http://automate.ihata.ma:5678/webhook/c1d2aee7-e096-4dc9-a69c-023af6631d88', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
+      const { data: responseData, error: functionError } = await supabase.functions.invoke('search-proxy', {
+        body: {
           query: query.trim(),
           type: 'search'
-        }),
+        },
       });
 
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
+      if (functionError) {
+        throw new Error(functionError.message || 'Erreur du service de recherche');
       }
-
-      const responseData = await response.json();
       console.log("Réponse complète reçue du webhook de recherche:", responseData);
       
       let searchResult = '';
