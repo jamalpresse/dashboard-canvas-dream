@@ -16,7 +16,7 @@ export const useTranslation = (
 
   // URLs des webhooks n8n pour la traduction
   const WEBHOOK_URL_OLD = 'https://n8n-jamal-u38598.vm.elestio.app/webhook/4732aeff-7544-4f0e-8554-ebd0f614947b';
-  const WEBHOOK_URL_NEW = 'https://automate.ihata.ma:5678/webhook/c1d2aee7-e096-4dc9-a69c-023af6631d8';
+  const WEBHOOK_URL_NEW = 'https://automate.ihata.ma/webhook/c1d2aee7-e096-4dc9-a69c-023af6631d88';
 
   // Détection RTL uniquement pour la langue source ou cible arabe
   const isSourceRTL = langPair.split('-')[0] === 'ar';
@@ -60,12 +60,11 @@ export const useTranslation = (
     
     setLoading(true);
     
-    // SOLUTION TEMPORAIRE: Utiliser uniquement l'ancien webhook stable
-    // Le nouveau webhook (automate.ihata.ma:5678) a des problèmes de connectivité
-    console.log(`Utilisation du webhook stable: ${WEBHOOK_URL_OLD}`);
+    // Utilisation du nouveau webhook corrigé
+    console.log(`Utilisation du nouveau webhook: ${WEBHOOK_URL_NEW}`);
     console.log(`Traduction pour ${langPair}`);
     
-    // Payload standardisé pour l'ancien webhook
+    // Payload standardisé
     const payload = { 
       text: text.trim(), 
       langPair,
@@ -78,7 +77,7 @@ export const useTranslation = (
     console.log("Payload envoyé pour la traduction:", payload);
     
     try {
-      const response = await fetch(WEBHOOK_URL_OLD, {
+      const response = await fetch(WEBHOOK_URL_NEW, {
         method: 'POST',
         headers: { 
           'Content-Type': 'application/json',
