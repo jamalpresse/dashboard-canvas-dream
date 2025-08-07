@@ -18,15 +18,7 @@ interface NewsGridProps {
 }
 
 export const NewsGrid: React.FC<NewsGridProps> = ({ news, className }) => {
-  // Filtrer les articles qui n'ont pas d'image valide
-  const newsWithImages = news?.filter(item => 
-    item.thumbnail && 
-    item.thumbnail.trim() !== "" && 
-    !item.thumbnail.includes("placeholder") &&
-    item.thumbnail !== "https://via.placeholder.com/300x200?text=News"
-  ) || [];
-
-  if (!newsWithImages || newsWithImages.length === 0) {
+  if (!news || news.length === 0) {
     return (
       <div className="bg-card/50 backdrop-blur-sm border border-border/50 p-8 rounded-lg text-center">
         <p className="text-muted-foreground">Aucune actualité avec image disponible</p>
@@ -36,7 +28,7 @@ export const NewsGrid: React.FC<NewsGridProps> = ({ news, className }) => {
 
   return (
     <div className={cn("grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4", className)}>
-      {newsWithImages.map((item) => (
+      {news.map((item) => (
         <article key={item.guid} className="group bg-card/50 backdrop-blur-sm rounded-lg overflow-hidden border border-border/50 hover:border-primary/20 transition-all duration-300 hover:shadow-lg hover:shadow-primary/10">
           <div className="relative h-48 overflow-hidden">
             <img

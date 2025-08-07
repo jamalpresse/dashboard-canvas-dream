@@ -67,6 +67,42 @@ export function useNews() {
     return cleaned;
   };
 
+  // Fonction pour charger plus d'articles avec images
+  const loadMoreArticlesWithImages = async () => {
+    try {
+      const allSources = getSourcesByLanguageAndCountry(lang, activeTab === 'maroc' ? 'ma' : 'global');
+      const additionalNews: NewsItem[] = [];
+      
+      // Récupérer des articles depuis toutes les sources disponibles
+      for (const source of allSources.slice(0, 5)) { // Limiter à 5 sources pour éviter trop de requêtes
+        try {
+          const sourceNews = await fetchNewsFromSource(source.id);
+          const newsWithImages = sourceNews.filter(item => 
+            item.thumbnail && 
+            item.thumbnail.trim() !== "" && 
+            !item.thumbnail.includes("placeholder") &&
+            item.thumbnail !== "https://via.placeholder.com/300x200?text=News"
+          );
+          additionalNews.push(...newsWithImages.slice(0, 3)); // Prendre 3 articles par source
+        } catch (err) {
+          console.warn(`Erreur lors du chargement depuis ${source.id}:`, err);
+        }
+      }
+      
+      if (additionalNews.length > 0) {
+        const cleanedAdditional = additionalNews.map(item => ({
+          ...item,
+          description: item.description ? sanitizeHtmlPreservingImages(item.description) : 'Pas de description disponible',
+          content: item.content ? sanitizeHtmlPreservingImages(item.content) : ''
+        }));
+        
+        setNews(prev => [...prev, ...cleanedAdditional]);
+      }
+    } catch (err) {
+      console.warn('Erreur lors du chargement d\'articles supplémentaires:', err);
+    }
+  };
+
   // Charger les actualités selon l'onglet actif et la langue
   useEffect(() => {
     const loadNews = async () => {
@@ -173,7 +209,7 @@ export function useNews() {
       .trim();
   };
 
-  // Appliquer les filtres
+  // Appliquer les filtres et garantir des articles avec images
   const applyFilters = (newsItems: NewsItem[], query: string, source: string | null) => {
     let filtered = newsItems;
     
@@ -185,7 +221,21 @@ export function useNews() {
       filtered = filterNewsBySourceId(filtered, source);
     }
     
-    setFilteredNews(filtered);
+    // Filtrer pour ne garder que les articles avec images valides
+    const articlesWithImages = filtered.filter(item => 
+      item.thumbnail && 
+      item.thumbnail.trim() !== "" && 
+      !item.thumbnail.includes("placeholder") &&
+      item.thumbnail !== "https://via.placeholder.com/300x200?text=News"
+    );
+    
+    // Si on a moins de 6 articles avec images, récupérer plus d'articles
+    if (articlesWithImages.length < 6 && !query && !source) {
+      console.log(`Seulement ${articlesWithImages.length} articles avec images, récupération d'articles supplémentaires...`);
+      loadMoreArticlesWithImages();
+    }
+    
+    setFilteredNews(articlesWithImages);
   };
 
   // Gérer la recherche
