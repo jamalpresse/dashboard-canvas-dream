@@ -74,6 +74,13 @@ export const useImproveText = () => {
         throw error;
       }
 
+      if (data && typeof data === 'object') {
+        const status = typeof (data as any).status === 'number' ? (data as any).status : 200;
+        if ((data as any).ok === false || status < 200 || status >= 300) {
+          throw new Error((data as any)?.details || (data as any)?.error || `Webhook returned status ${status}`);
+        }
+      }
+
       setResult(data);
 
       toast({

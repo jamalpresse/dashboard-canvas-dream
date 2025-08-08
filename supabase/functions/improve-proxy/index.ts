@@ -53,15 +53,27 @@ serve(async (req) => {
       payload = { body: responseText };
     }
 
-    return new Response(JSON.stringify(payload), {
+    const normalized = {
+      ok: upstream.ok,
       status: upstream.status,
+      ...((typeof payload === 'object' && payload) ? payload : { body: String(payload) })
+    };
+
+    return new Response(JSON.stringify(normalized), {
+      status: 200,
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });
   } catch (error: any) {
     console.error('improve-proxy - error:', error?.message || error);
+    const errorPayload = {
+      ok: false,
+      status: 0,
+      error: 'Failed to improve text',
+      details: error?.message || String(error),
+    };
     return new Response(
-      JSON.stringify({ error: 'Failed to improve text', details: error?.message || String(error) }),
-      { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      JSON.stringify(errorPayload),
+      { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
   }
 });
