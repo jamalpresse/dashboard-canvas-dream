@@ -32,32 +32,14 @@ serve(async (req) => {
       );
     }
 
-    const primaryUrl = 'http://automate.ihata.ma/webhook/generate-tags-title';
-    const fallbackUrl = 'https://n8n-jamal-u38598.vm.elestio.app/webhook/d921f535-1665-4217-968c-acf14fdd55ce';
-    console.log('improve-proxy - trying primary:', primaryUrl);
+    const webhookUrl = 'http://automate.ihata.ma/webhook/generate-tags-title';
+    console.log('improve-proxy - forwarding to:', webhookUrl);
 
-    let upstream = await fetch(primaryUrl, {
+    const upstream = await fetch(webhookUrl, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ text }),
-    }).catch((e) => {
-      console.error('improve-proxy - primary fetch error:', e?.message || e);
-      return null;
     });
-
-    let usedUrl = primaryUrl;
-    if (!upstream || !upstream.ok) {
-      console.warn('improve-proxy - primary failed status:', upstream?.status);
-      console.log('improve-proxy - trying fallback:', fallbackUrl);
-      upstream = await fetch(fallbackUrl, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ text }),
-      });
-      usedUrl = fallbackUrl;
-    }
-
-    console.log('improve-proxy - used url:', usedUrl);
 
     const responseText = await upstream.text();
     console.log('improve-proxy - upstream status:', upstream.status);
