@@ -1,5 +1,7 @@
-
 project_id = "jajkfzwzmogpkwzclisv"
 
 [functions.image-generation]
+verify_jwt = false
+
+[functions.improve-proxy]
 verify_jwt = false
