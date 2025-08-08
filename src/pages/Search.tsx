@@ -56,7 +56,7 @@ export default function Search() {
             {!error && <>
                 <textarea 
                   readOnly 
-                  value={loading ? '' : result || t('search', 'noResult')} 
+                  value={loading ? '' : result || t('search', 'noResults')} 
                   dir={isResultRTL ? 'rtl' : 'ltr'} 
                   className={`w-full h-48 border border-gray-300 rounded-lg p-3 resize-none bg-white/80 backdrop-blur-sm shadow-inner focus:outline-none text-gray-900 ${isResultRTL ? 'text-right' : 'text-left'}`} 
                 />

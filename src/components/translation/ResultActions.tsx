@@ -2,7 +2,7 @@
 import React from 'react';
 import { Button } from "@/components/ui/button";
 import { Clipboard } from "lucide-react";
-
+import { useLanguage } from '@/context/LanguageContext';
 interface ResultActionsProps {
   result: string;
   handleCopy: () => void;
@@ -16,6 +16,7 @@ const ResultActions: React.FC<ResultActionsProps> = ({
   handleClear,
   onDebugToggle
 }) => {
+  const { t } = useLanguage();
   return (
     <div className="mt-2 flex flex-wrap gap-2">
       <Button 
@@ -24,7 +25,7 @@ const ResultActions: React.FC<ResultActionsProps> = ({
         className={`bg-gradient-to-r from-snrt-red to-red-700 text-white rounded-md hover:from-red-700 hover:to-red-800 transition-colors shadow-sm ${!result ? 'opacity-50 cursor-not-allowed' : ''}`}
       >
         <Clipboard className="mr-1 h-4 w-4" />
-        COPIER
+        {t('translation', 'copy')}
       </Button>
       
       <Button 
@@ -32,7 +33,7 @@ const ResultActions: React.FC<ResultActionsProps> = ({
         variant="outline" 
         className="bg-gray-200 text-black rounded-md hover:bg-gray-300 transition-colors shadow-sm"
       >
-        EFFACER
+        {t('translation', 'clear')}
       </Button>
       
       <Button 
@@ -41,7 +42,7 @@ const ResultActions: React.FC<ResultActionsProps> = ({
         className="bg-gray-100 text-gray-700 rounded-md hover:bg-gray-200 transition-colors ml-auto"
         size="sm"
       >
-        DEBUG
+        {t('common', 'debug')}
       </Button>
     </div>
   );

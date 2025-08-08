@@ -2,7 +2,7 @@
 import React from 'react';
 import { Button } from "@/components/ui/button";
 import { Languages } from "lucide-react";
-
+import { useLanguage } from '@/context/LanguageContext';
 interface TranslationControlsProps {
   loading: boolean;
   handleTranslate: () => void;
@@ -14,6 +14,7 @@ const TranslationControls: React.FC<TranslationControlsProps> = ({
   handleTranslate,
   handleClear
 }) => {
+  const { t } = useLanguage();
   return (
     <div className="flex flex-wrap gap-2">
       <Button
@@ -26,14 +27,14 @@ const TranslationControls: React.FC<TranslationControlsProps> = ({
         }`}
       >
         <Languages className="mr-1 h-4 w-4" />
-        {loading ? 'TRADUCTION...' : 'TRADUIRE'}
+        {loading ? t('translation', 'loading') : t('translation', 'translate')}
       </Button>
       <Button
         onClick={handleClear}
         variant="outline"
         className="bg-gray-200 text-black rounded-md hover:bg-gray-300 transition-colors shadow-sm"
       >
-        EFFACER
+        {t('translation', 'clear')}
       </Button>
     </div>
   );
