@@ -10,7 +10,6 @@ const Briefing: React.FC = () => {
   const { t, dir } = useLanguage();
   const [subject, setSubject] = useState("");
   const [loading, setLoading] = useState(false);
-  const [loading, setLoading] = useState(false);
 
   // Basic SEO: title, description, canonical
   useEffect(() => {
