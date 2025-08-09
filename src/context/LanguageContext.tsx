@@ -249,6 +249,7 @@ const translations = {
       translation: "الترجمة",
       improve: "التحسين",
       improveText: "تحسين النص",
+      briefing: "إحاطة",
       imageGeneration: "الصور",
       settings: "الإعدادات",
       logout: "تسجيل الخروج",
