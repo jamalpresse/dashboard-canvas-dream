@@ -32,7 +32,7 @@ serve(async (req) => {
       );
     }
 
-    const webhookUrl = 'http://automate.ihata.ma/webhook/generate-tags-title';
+    const webhookUrl = 'https://automate.ihata.ma/webhook/generate-tags-title';
     console.log('improve-proxy - forwarding to:', webhookUrl);
 
     const upstream = await fetch(webhookUrl, {
