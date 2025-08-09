@@ -49,6 +49,11 @@
     --warning: 25 95% 53%;              /* #F59E0B - Orange warning */
     --warning-foreground: 0 0% 100%;    /* #FFFFFF - White text */
 
+    /* Brand - IHATA (Dark Blue) */
+    --brand-ihata: 215 80% 23%;         /* Dark blue */
+    --brand-ihata-hover: 215 80% 28%;   /* Slightly lighter on hover */
+    --brand-ihata-foreground: 0 0% 100%;/* White text */
+
     /* Additional gradient colors for cards */
     --gradient-purple: 258 89% 66%;     /* #8B5CF6 - Purple */
     --gradient-coral: 14 83% 60%;       /* #F56565 - Coral */
@@ -362,5 +367,15 @@
 .border-glow:hover {
   border-color: hsl(var(--primary) / 0.6);
   box-shadow: 0 0 30px hsl(var(--primary) / 0.2);
+}
+
+/* Sidebar: IHATA button theming */
+aside a[href="/briefing"] {
+  background-color: hsl(var(--brand-ihata)) !important;
+  color: hsl(var(--brand-ihata-foreground)) !important;
+}
+
+aside a[href="/briefing"]:hover {
+  background-color: hsl(var(--brand-ihata-hover)) !important;
 }
 
