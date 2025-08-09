@@ -61,6 +61,8 @@ export function ResultsSection({ result, handleCopy }: ResultsSectionProps) {
     );
   }
 
+  console.log('Improve keys', Object.keys(processedResult), Object.keys(processedResult?.content || {}), Object.keys(processedResult?.data || {}));
+
   // Enhanced and comprehensive cleaning function for keywords
   const cleanKeywords = (keywordString: string): string[] => {
     console.log("Original keyword string:", keywordString);
@@ -124,6 +126,9 @@ export function ResultsSection({ result, handleCopy }: ResultsSectionProps) {
 
   // Normalize fields into 5 target sections
   const improvedText: string | null =
+    (typeof processedResult.rewrittenText === 'string' && processedResult.rewrittenText) ||
+    (typeof processedResult?.content?.rewrittenText === 'string' && processedResult.content.rewrittenText) ||
+    (typeof processedResult?.data?.rewrittenText === 'string' && processedResult.data.rewrittenText) ||
     (typeof processedResult.body === 'string' && processedResult.body) ||
     (typeof processedResult.improved_text === 'string' && processedResult.improved_text) ||
     (typeof processedResult.texte_ameliore === 'string' && processedResult.texte_ameliore) ||
@@ -134,6 +139,7 @@ export function ResultsSection({ result, handleCopy }: ResultsSectionProps) {
     null;
 
   const recommendedTitlesRaw =
+    processedResult.seoTitles ??
     processedResult.seo_titles ??
     processedResult.titles ??
     processedResult.titres_recommandes ??
@@ -167,6 +173,7 @@ export function ResultsSection({ result, handleCopy }: ResultsSectionProps) {
     (typeof processedResult.short_title === 'string' && processedResult.short_title) ||
     (typeof processedResult.youtube_thumbnail_title === 'string' && processedResult.youtube_thumbnail_title) ||
     (typeof processedResult.titre_court === 'string' && processedResult.titre_court) ||
+    (typeof processedResult.thumbnailTitle === 'string' && processedResult.thumbnailTitle) ||
     null;
 
   // Determine if there are any recognized fields beyond improved text
