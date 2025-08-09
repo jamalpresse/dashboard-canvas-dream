@@ -7,7 +7,7 @@ const corsHeaders = {
   "Access-Control-Allow-Methods": "POST, OPTIONS",
 };
 
-const WEBHOOK_URL = "http://automate.ihata.ma/webhook/204dc11f-4f0f-4467-9e8c-96f04717c3eb";
+const WEBHOOK_URL = "https://automate.ihata.ma/webhook/204dc11f-4f0f-4467-9e8c-96f04717c3eb";
 
 serve(async (req) => {
   // Handle CORS preflight requests
