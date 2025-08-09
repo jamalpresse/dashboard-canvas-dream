@@ -23,7 +23,7 @@ export function ResultsSection({ result, handleCopy }: ResultsSectionProps) {
       return (
         <div className="grid gap-6">
           <ResultCard 
-            title="Résultat" 
+            title="Texte après amélioration" 
             content={result} 
             handleCopy={handleCopy} 
           />
@@ -39,7 +39,7 @@ export function ResultsSection({ result, handleCopy }: ResultsSectionProps) {
     return (
       <div className="grid gap-6">
         <ResultCard 
-          title="Contenu Amélioré" 
+          title="Texte après amélioration" 
           content={processedResult.body} 
           handleCopy={handleCopy} 
         />
@@ -127,6 +127,10 @@ export function ResultsSection({ result, handleCopy }: ResultsSectionProps) {
     (typeof processedResult.body === 'string' && processedResult.body) ||
     (typeof processedResult.improved_text === 'string' && processedResult.improved_text) ||
     (typeof processedResult.texte_ameliore === 'string' && processedResult.texte_ameliore) ||
+    (typeof processedResult.text === 'string' && processedResult.text) ||
+    (typeof processedResult.content === 'string' && processedResult.content) ||
+    (typeof processedResult.result === 'string' && processedResult.result) ||
+    (processedResult.response && typeof processedResult.response.body === 'string' && processedResult.response.body) ||
     null;
 
   const recommendedTitlesRaw =
@@ -165,34 +169,20 @@ export function ResultsSection({ result, handleCopy }: ResultsSectionProps) {
     (typeof processedResult.titre_court === 'string' && processedResult.titre_court) ||
     null;
 
-  const hasExpectedFields = Boolean(
-    improvedText || recommendedTitles.length || tags.length || hashtags.length || shortTitle
+  // Determine if there are any recognized fields beyond improved text
+  const hasOtherFields = Boolean(
+    recommendedTitles.length || tags.length || hashtags.length || shortTitle
   );
-
-  if (!hasExpectedFields) {
-    // Display as raw JSON if we can't interpret it
-    console.log("Result doesn't have expected fields, showing raw JSON");
-    return (
-      <div className="grid gap-6">
-        <ResultCard 
-          title="Résultat (Format Brut)" 
-          content={JSON.stringify(processedResult, null, 2)} 
-          handleCopy={(value) => handleCopy(value)} 
-        />
-      </div>
-    );
-  }
+  const shouldShowRawJSON = !hasOtherFields && !improvedText;
 
   // Display the result with the requested 5 sections
   return (
     <div className="grid gap-6">
-      {improvedText && (
-        <ResultCard 
-          title="Texte après amélioration" 
-          content={improvedText} 
-          handleCopy={handleCopy} 
-        />
-      )}
+      <ResultCard 
+        title="Texte après amélioration" 
+        content={improvedText ?? ''} 
+        handleCopy={handleCopy} 
+      />
 
       {recommendedTitles.length > 0 && (
         <ResultCard 
@@ -226,6 +216,14 @@ export function ResultsSection({ result, handleCopy }: ResultsSectionProps) {
           title="Titre court" 
           content={shortTitle} 
           handleCopy={handleCopy} 
+        />
+      )}
+
+      {shouldShowRawJSON && (
+        <ResultCard 
+          title="Résultat (Format Brut)" 
+          content={JSON.stringify(processedResult, null, 2)} 
+          handleCopy={(value) => handleCopy(value)} 
         />
       )}
     </div>
