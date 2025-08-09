@@ -32,25 +32,35 @@ serve(async (req) => {
       );
     }
 
-    const webhookUrl = 'http://automate.ihata.ma/webhook/c1d2aee7-e096-4dc9-a69c-023af6631d88';
+    const webhookUrl = 'https://automate.ihata.ma/webhook/c1d2aee7-e096-4dc9-a69c-023af6631d88';
     console.log('improve-proxy - forwarding to:', webhookUrl);
 
-    // 20s timeout to avoid hanging requests
-    const controller = new AbortController();
-    const timeoutId = setTimeout(() => {
-      try { controller.abort(); } catch (_) {}
-    }, 20_000);
+    // Overall timeout to avoid hanging requests
+    const overallTimeoutMs = 55_000;
+    const deadline = Date.now() + overallTimeoutMs;
+
+    const fetchWithTimeout = async (url: string, init: RequestInit) => {
+      const remaining = Math.max(1_000, deadline - Date.now());
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => {
+        try { controller.abort(); } catch (_) {}
+      }, remaining);
+      try {
+        return await fetch(url, { ...init, signal: controller.signal });
+      } finally {
+        clearTimeout(timeoutId);
+      }
+    };
 
     let finalRes: Response | null = null;
     let finalText = '';
     let attempt: 'post' | 'redirect-post' | 'get-fallback' = 'post';
     try {
-      const firstRes = await fetch(webhookUrl, {
+      const firstRes = await fetchWithTimeout(webhookUrl, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ text }),
         redirect: 'manual',
-        signal: controller.signal,
       });
 
       // Handle redirects manually to preserve POST body
@@ -59,11 +69,10 @@ serve(async (req) => {
         console.log('improve-proxy - redirect status:', firstRes.status, 'location:', location);
         if (location) {
           const redirectedUrl = new URL(location, webhookUrl).toString();
-          finalRes = await fetch(redirectedUrl, {
+          finalRes = await fetchWithTimeout(redirectedUrl, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ text }),
-            signal: controller.signal,
           });
           attempt = 'redirect-post';
         } else {
@@ -83,10 +92,9 @@ serve(async (req) => {
         const getUrl = new URL(webhookUrl);
         getUrl.searchParams.set('text', text);
 
-        const getFirst = await fetch(getUrl.toString(), {
+        const getFirst = await fetchWithTimeout(getUrl.toString(), {
           method: 'GET',
           redirect: 'manual',
-          signal: controller.signal,
         });
 
         if (getFirst.status >= 300 && getFirst.status < 400) {
@@ -94,9 +102,8 @@ serve(async (req) => {
           console.log('improve-proxy - GET redirect status:', getFirst.status, 'location:', location);
           if (location) {
             const redirectedUrl = new URL(location, getUrl.toString()).toString();
-            finalRes = await fetch(redirectedUrl, {
+            finalRes = await fetchWithTimeout(redirectedUrl, {
               method: 'GET',
-              signal: controller.signal,
             });
           } else {
             finalRes = getFirst;
@@ -113,8 +120,6 @@ serve(async (req) => {
     } catch (err) {
       console.error('improve-proxy - upstream error:', (err as any)?.message || String(err));
       throw err;
-    } finally {
-      clearTimeout(timeoutId);
     }
 
     let payload: any;
