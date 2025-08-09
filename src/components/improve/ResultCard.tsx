@@ -21,7 +21,7 @@ export function ResultCard({
   isArrayContent = false, 
   displayMode = "badges" 
 }: ResultCardProps) {
-  const { t } = useLanguage();
+  const { t, isRTL: uiIsRTL } = useLanguage();
 
   // Check if we're dealing with keywords (both "Keywords" and "Mots-clés" titles)
   const isKeywords = title === "Keywords" || title === "Mots-clés" || title === "Tags";
@@ -103,10 +103,11 @@ export function ResultCard({
     
     console.log("Thoroughly cleaned individual items:", thoroughlyCleanedItems);
     
-    // Step 2: Join with single Arabic comma and space
-    let joinedText = thoroughlyCleanedItems.join('، ');
+    // Step 2: Join with locale-aware separator
+    const sep = uiIsRTL ? '، ' : ', ';
+    let joinedText = thoroughlyCleanedItems.join(sep);
     
-    // Step 3: Final emergency cleanup of the joined text
+    // Step 3: Final emergency cleanup of the joined text for both comma types
     joinedText = joinedText
       // Remove any double commas that might have slipped through
       .replace(/،{2,}/g, '،')
@@ -114,9 +115,11 @@ export function ResultCard({
       // Clean mixed patterns one more time
       .replace(/،\s*,+\s*/g, '، ')
       .replace(/,+\s*،\s*/g, '، ')
-      // Ensure proper spacing
+      // Ensure proper spacing around both comma types
+      .replace(/,(?!\s)/g, ', ')
       .replace(/،(?!\s)/g, '، ')
-      .replace(/\s+،/g, '،')
+      .replace(/\s+،/g, '، ')
+      .replace(/\s+,/g, ', ')
       .replace(/\s+/g, ' ')
       .trim();
     
@@ -136,7 +139,7 @@ export function ResultCard({
           size="sm"
           className="mt-2"
         >
-          <Copy className="h-4 w-4 mr-2" /> {t('improve', 'copy')}
+          <Copy className="h-4 w-4 mr-2" /> {t('improve', 'copyAll')}
         </Button>
       </div>
     );

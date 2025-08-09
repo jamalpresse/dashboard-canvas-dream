@@ -206,6 +206,7 @@ export function ResultsSection({ result, handleCopy }: ResultsSectionProps) {
           content={tags} 
           handleCopy={handleCopy}
           isArrayContent={true}
+          displayMode="paragraph"
         />
       )}
 
