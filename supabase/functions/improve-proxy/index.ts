@@ -32,30 +32,66 @@ serve(async (req) => {
       );
     }
 
-    const webhookUrl = 'https://automate.ihata.ma/webhook/generate-tags-title';
+    const webhookUrl = 'http://automate.ihata.ma/webhook-test/generate-tags-title';
     console.log('improve-proxy - forwarding to:', webhookUrl);
 
-    const upstream = await fetch(webhookUrl, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ text }),
-    });
+    // 20s timeout to avoid hanging requests
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => {
+      try { controller.abort(); } catch (_) {}
+    }, 20_000);
 
-    const responseText = await upstream.text();
-    console.log('improve-proxy - upstream status:', upstream.status);
-    console.log('improve-proxy - raw response length:', responseText.length);
+    let finalRes: Response | null = null;
+    let finalText = '';
+    try {
+      const firstRes = await fetch(webhookUrl, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ text }),
+        redirect: 'manual',
+        signal: controller.signal,
+      });
+
+      // Handle redirects manually to preserve POST body
+      if (firstRes.status >= 300 && firstRes.status < 400) {
+        const location = firstRes.headers.get('location');
+        console.log('improve-proxy - redirect status:', firstRes.status, 'location:', location);
+        if (location) {
+          const redirectedUrl = new URL(location, webhookUrl).toString();
+          finalRes = await fetch(redirectedUrl, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ text }),
+            signal: controller.signal,
+          });
+        } else {
+          finalRes = firstRes;
+        }
+      } else {
+        finalRes = firstRes;
+      }
+
+      finalText = await finalRes.text();
+      console.log('improve-proxy - upstream status:', finalRes.status);
+      console.log('improve-proxy - raw response length:', finalText.length);
+    } catch (err) {
+      console.error('improve-proxy - upstream error:', (err as any)?.message || String(err));
+      throw err;
+    } finally {
+      clearTimeout(timeoutId);
+    }
 
     let payload: any;
     try {
-      payload = responseText.trim() ? JSON.parse(responseText) : { body: '' };
+      payload = finalText.trim() ? JSON.parse(finalText) : { body: '' };
     } catch (e) {
       // Non-JSON response, return as body string for nicer UI rendering
-      payload = { body: responseText };
+      payload = { body: finalText };
     }
 
     const normalized = {
-      ok: upstream.ok,
-      status: upstream.status,
+      ok: finalRes?.ok ?? false,
+      status: finalRes?.status ?? 0,
       ...((typeof payload === 'object' && payload) ? payload : { body: String(payload) })
     };
 
