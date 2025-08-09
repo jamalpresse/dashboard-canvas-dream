@@ -1,5 +1,6 @@
 
 import React from "react";
+import { Link } from "react-router-dom";
 import { useNews } from "@/hooks/useNews";
 import { useIndexStats } from "@/hooks/useIndexStats";
 import { IndexHeader } from "@/components/dashboard/IndexHeader";
@@ -8,6 +9,7 @@ import { HeroSection } from "@/components/dashboard/HeroSection";
 import { NewsSection } from "@/components/dashboard/NewsSection";
 import { LoadingState } from "@/components/dashboard/LoadingState";
 import { ErrorState } from "@/components/dashboard/ErrorState";
+import { useLanguage } from "@/context/LanguageContext";
 
 const Index = () => {
   // Use custom hooks for data fetching
@@ -21,6 +23,7 @@ const Index = () => {
     featuredArticle,
     featuredLoading
   } = useNews();
+  const { t } = useLanguage();
 
   // Get news items for grid only with validation
   const gridNews = news && Array.isArray(news) ? news.slice(0, 6) : [];
@@ -64,6 +67,14 @@ const Index = () => {
           />
         </div>
       </div>
+
+        <section aria-labelledby="briefing-section" className="mt-6">
+          <h2 id="briefing-section" className="text-xl font-semibold">
+            <Link to="/briefing" className="hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
+              {t('briefing', 'title')}
+            </Link>
+          </h2>
+        </section>
 
       <style>
         {`

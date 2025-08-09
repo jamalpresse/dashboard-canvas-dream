@@ -78,6 +78,11 @@ const translations = {
       date: "Date",
       relevance: "Pertinence"
     },
+    briefing: {
+      title: "Briefing",
+      subjectLabel: "Sujet de l'article",
+      placeholder: "Écrivez le sujet de l'article..."
+    },
     navigation: {
       home: "Accueil",
       news: "Actualités",
@@ -85,6 +90,7 @@ const translations = {
       translation: "Traduction",
       improve: "Améliorer",
       improveText: "Améliorer le texte",
+      briefing: "Briefing",
       imageGeneration: "Images",
       settings: "Paramètres",
       logout: "Déconnexion",
@@ -230,6 +236,11 @@ const translations = {
       sortBy: "ترتيب حسب",
       date: "التاريخ",
       relevance: "الصلة"
+    },
+    briefing: {
+      title: "إحاطة",
+      subjectLabel: "موضوع المقال",
+      placeholder: "اكتب موضوع المقال..."
     },
     navigation: {
       home: "الرئيسية",

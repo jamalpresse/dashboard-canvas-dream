@@ -20,6 +20,7 @@ import Improve from "./pages/Improve";
 import Translation from "./pages/Translation";
 import News from "./pages/News";
 import ImageGeneration from "./pages/ImageGeneration";
+import Briefing from "./pages/Briefing";
 import Auth from "./pages/Auth";
 
 // Configure Query Client with retries for better network resilience
@@ -90,6 +91,11 @@ const App = () => (
                     <Route path="/translation" element={
                       <ErrorBoundary>
                         <Translation />
+                      </ErrorBoundary>
+                    } />
+                    <Route path="/briefing" element={
+                      <ErrorBoundary>
+                        <Briefing />
                       </ErrorBoundary>
                     } />
                     <Route path="/news" element={
