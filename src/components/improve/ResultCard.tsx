@@ -24,7 +24,7 @@ export function ResultCard({
   const { t } = useLanguage();
 
   // Check if we're dealing with keywords (both "Keywords" and "Mots-clés" titles)
-  const isKeywords = title === "Keywords" || title === "Mots-clés";
+  const isKeywords = title === "Keywords" || title === "Mots-clés" || title === "Tags";
   const isHashtags = title === "Hashtags";
 
   // Comprehensive keyword cleaning function as ultimate defensive measure

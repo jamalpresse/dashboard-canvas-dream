@@ -122,15 +122,52 @@ export function ResultsSection({ result, handleCopy }: ResultsSectionProps) {
     console.log("Processed mots_cles from string:", processedResult.mots_cles);
   }
 
-  // If the result is empty or doesn't have any of the expected fields
-  const hasExpectedFields = 
-    processedResult.main_title !== undefined ||
-    processedResult.body !== undefined ||
-    Array.isArray(processedResult.seo_titles) ||
-    Array.isArray(processedResult.keywords) ||
-    Array.isArray(processedResult.mots_cles) ||
-    Array.isArray(processedResult.hashtags) ||
-    processedResult.youtube_thumbnail_title !== undefined;
+  // Normalize fields into 5 target sections
+  const improvedText: string | null =
+    (typeof processedResult.body === 'string' && processedResult.body) ||
+    (typeof processedResult.improved_text === 'string' && processedResult.improved_text) ||
+    (typeof processedResult.texte_ameliore === 'string' && processedResult.texte_ameliore) ||
+    null;
+
+  const recommendedTitlesRaw =
+    processedResult.seo_titles ??
+    processedResult.titles ??
+    processedResult.titres_recommandes ??
+    null;
+  const recommendedTitles: string[] = Array.isArray(recommendedTitlesRaw)
+    ? recommendedTitlesRaw
+    : (typeof recommendedTitlesRaw === 'string' && recommendedTitlesRaw.trim() !== ''
+      ? recommendedTitlesRaw.split(/\r?\n|[•\-]\s+/).map((s: string) => s.trim()).filter(Boolean)
+      : []);
+
+  // Build tags from keywords/mots_cles/tags (string or array), clean and dedupe
+  const collectToArray = (val: any): string[] => {
+    if (!val) return [];
+    if (Array.isArray(val)) return val.map(String);
+    if (typeof val === 'string') return cleanKeywords(val);
+    return [];
+  };
+
+  const tagsRaw: string[] = [
+    ...collectToArray(processedResult.keywords),
+    ...collectToArray(processedResult.mots_cles),
+    ...collectToArray(processedResult.tags),
+  ];
+  const tags: string[] = Array.from(new Set(tagsRaw.map((k) => k.trim()).filter(Boolean)));
+
+  const hashtags: string[] = Array.isArray(processedResult.hashtags)
+    ? processedResult.hashtags.map(String)
+    : (typeof processedResult.hashtags === 'string' ? cleanKeywords(processedResult.hashtags) : []);
+
+  const shortTitle: string | null =
+    (typeof processedResult.short_title === 'string' && processedResult.short_title) ||
+    (typeof processedResult.youtube_thumbnail_title === 'string' && processedResult.youtube_thumbnail_title) ||
+    (typeof processedResult.titre_court === 'string' && processedResult.titre_court) ||
+    null;
+
+  const hasExpectedFields = Boolean(
+    improvedText || recommendedTitles.length || tags.length || hashtags.length || shortTitle
+  );
 
   if (!hasExpectedFields) {
     // Display as raw JSON if we can't interpret it
@@ -146,78 +183,48 @@ export function ResultsSection({ result, handleCopy }: ResultsSectionProps) {
     );
   }
 
-  // Display the result with the expected format
+  // Display the result with the requested 5 sections
   return (
     <div className="grid gap-6">
-      {processedResult.main_title !== undefined && (
+      {improvedText && (
         <ResultCard 
-          title="Titre Principal" 
-          content={processedResult.main_title} 
+          title="Texte après amélioration" 
+          content={improvedText} 
           handleCopy={handleCopy} 
         />
       )}
-      
-      {processedResult.body !== undefined && (
+
+      {recommendedTitles.length > 0 && (
         <ResultCard 
-          title="Corps du Texte" 
-          content={processedResult.body} 
-          handleCopy={handleCopy} 
-        />
-      )}
-      
-      {Array.isArray(processedResult.seo_titles) && processedResult.seo_titles.length > 0 && (
-        <ResultCard 
-          title="Titres SEO" 
-          content={processedResult.seo_titles} 
+          title="Titres recommandés" 
+          content={recommendedTitles} 
           handleCopy={handleCopy} 
           isArrayContent={true} 
         />
       )}
-      
-      {/* Support both "keywords" and "mots_cles" fields with paragraph display mode */}
-      {Array.isArray(processedResult.keywords) && processedResult.keywords.length > 0 && (
+
+      {tags.length > 0 && (
         <ResultCard 
-          title="Mots-clés" 
-          content={processedResult.keywords} 
+          title="Tags" 
+          content={tags} 
           handleCopy={handleCopy}
           isArrayContent={true}
-          displayMode="paragraph" 
         />
       )}
-      
-      {/* Add support for French "mots_cles" field with paragraph display mode */}
-      {Array.isArray(processedResult.mots_cles) && processedResult.mots_cles.length > 0 && (
-        <ResultCard 
-          title="Mots-clés" 
-          content={processedResult.mots_cles} 
-          handleCopy={handleCopy}
-          isArrayContent={true}
-          displayMode="paragraph"
-        />
-      )}
-      
-      {/* Handle string keywords that weren't processed earlier */}
-      {processedResult.keywords && !Array.isArray(processedResult.keywords) && (
-        <ResultCard 
-          title="Mots-clés" 
-          content={String(processedResult.keywords)} 
-          handleCopy={handleCopy}
-        />
-      )}
-      
-      {Array.isArray(processedResult.hashtags) && processedResult.hashtags.length > 0 && (
+
+      {hashtags.length > 0 && (
         <ResultCard 
           title="Hashtags" 
-          content={processedResult.hashtags} 
+          content={hashtags} 
           handleCopy={handleCopy}
           isArrayContent={true} 
         />
       )}
-      
-      {processedResult.youtube_thumbnail_title !== undefined && (
+
+      {shortTitle && (
         <ResultCard 
-          title="Titre Miniature YouTube" 
-          content={processedResult.youtube_thumbnail_title} 
+          title="Titre court" 
+          content={shortTitle} 
           handleCopy={handleCopy} 
         />
       )}
