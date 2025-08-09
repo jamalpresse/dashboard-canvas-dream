@@ -5,3 +5,7 @@ verify_jwt = false
 
 [functions.improve-proxy]
 verify_jwt = false
+
+[functions.briefing-proxy]
+verify_jwt = false
+

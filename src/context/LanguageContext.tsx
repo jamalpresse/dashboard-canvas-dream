@@ -81,7 +81,8 @@ const translations = {
     briefing: {
       title: "IHATA",
       subjectLabel: "Sujet de l'article",
-      placeholder: "Écrivez le sujet de l'article..."
+      placeholder: "Écrivez le sujet de l'article...",
+      go: "Go"
     },
     navigation: {
       home: "Accueil",
