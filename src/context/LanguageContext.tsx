@@ -79,7 +79,7 @@ const translations = {
       relevance: "Pertinence"
     },
     briefing: {
-      title: "Briefing",
+      title: "IHATA",
       subjectLabel: "Sujet de l'article",
       placeholder: "Écrivez le sujet de l'article..."
     },
