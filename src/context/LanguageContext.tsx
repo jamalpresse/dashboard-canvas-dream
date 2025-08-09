@@ -82,7 +82,10 @@ const translations = {
       title: "IHATA",
       subjectLabel: "Sujet de l'article",
       placeholder: "Écrivez le sujet de l'article...",
-      go: "Go"
+      go: "Go",
+      successToastTitle: "Briefing prêt",
+      successToastDescription: "Le workflow n8n s'est terminé.",
+      viewResult: "Voir le résultat"
     },
     navigation: {
       home: "Accueil",
@@ -241,7 +244,11 @@ const translations = {
     briefing: {
       title: "إحاطة",
       subjectLabel: "موضوع المقال",
-      placeholder: "اكتب موضوع المقال..."
+      placeholder: "اكتب موضوع المقال...",
+      go: "إرسال",
+      successToastTitle: "تم إعداد الإحاطة",
+      successToastDescription: "اكتمل سير عمل n8n.",
+      viewResult: "عرض النتيجة"
     },
     navigation: {
       home: "الرئيسية",

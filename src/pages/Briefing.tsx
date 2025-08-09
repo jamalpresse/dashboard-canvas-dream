@@ -4,6 +4,7 @@ import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { toast } from "@/hooks/use-toast";
+import { ToastAction } from "@/components/ui/toast";
 import { supabase } from "@/integrations/supabase/client";
 
 const Briefing: React.FC = () => {
@@ -50,10 +51,48 @@ const Briefing: React.FC = () => {
       });
       if (error) throw error;
       console.log("briefing-proxy response:", data);
-      toast({
-        title: t("common", "success"),
-        description: t("improve", "successMessage"),
-      });
+
+      // Try to detect a URL in the response
+      const findUrl = (obj: any): string | null => {
+        if (!obj) return null;
+        if (typeof obj === "string" && /^https?:\/\//i.test(obj)) return obj;
+        if (typeof obj === "object") {
+          for (const key of Object.keys(obj)) {
+            const val = (obj as any)[key];
+            const found = findUrl(val);
+            if (found) return found;
+          }
+        }
+        return null;
+      };
+
+      const url = findUrl(data);
+      const ok = typeof data?.ok === "boolean" ? data.ok : true;
+      const message =
+        (typeof data?.message === "string" && data.message) ||
+        (typeof data?.status === "string" && data.status) ||
+        "";
+
+      // Show toast depending on result
+      if (!ok) {
+        toast({
+          title: t("common", "error"),
+          description: message || t("common", "loadingError"),
+        });
+      } else {
+        toast({
+          title: t("briefing", "successToastTitle"),
+          description: message || t("briefing", "successToastDescription"),
+          action: url ? (
+            <ToastAction
+              altText={t("common", "open")}
+              onClick={() => window.open(url as string, "_blank", "noopener,noreferrer")}
+            >
+              {t("briefing", "viewResult")}
+            </ToastAction>
+          ) : undefined,
+        });
+      }
     } catch (err: any) {
       console.error("briefing-proxy error:", err);
       toast({
