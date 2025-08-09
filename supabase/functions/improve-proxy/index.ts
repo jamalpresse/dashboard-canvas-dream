@@ -32,7 +32,7 @@ serve(async (req) => {
       );
     }
 
-    const webhookUrl = 'http://automate.ihata.ma/webhook/generate-tags-title';
+    const webhookUrl = 'http://automate.ihata.ma/webhook/c1d2aee7-e096-4dc9-a69c-023af6631d88';
     console.log('improve-proxy - forwarding to:', webhookUrl);
 
     // 20s timeout to avoid hanging requests
@@ -43,6 +43,7 @@ serve(async (req) => {
 
     let finalRes: Response | null = null;
     let finalText = '';
+    let attempt: 'post' | 'redirect-post' | 'get-fallback' = 'post';
     try {
       const firstRes = await fetch(webhookUrl, {
         method: 'POST',
@@ -64,6 +65,7 @@ serve(async (req) => {
             body: JSON.stringify({ text }),
             signal: controller.signal,
           });
+          attempt = 'redirect-post';
         } else {
           finalRes = firstRes;
         }
@@ -74,6 +76,40 @@ serve(async (req) => {
       finalText = await finalRes.text();
       console.log('improve-proxy - upstream status:', finalRes.status);
       console.log('improve-proxy - raw response length:', finalText.length);
+
+      // Fallback to GET if upstream suggests GET usage
+      if (finalRes.status === 404 && /not registered for POST|Did you mean to make a GET request/i.test(finalText)) {
+        console.log('improve-proxy - attempting GET fallback for webhook');
+        const getUrl = new URL(webhookUrl);
+        getUrl.searchParams.set('text', text);
+
+        const getFirst = await fetch(getUrl.toString(), {
+          method: 'GET',
+          redirect: 'manual',
+          signal: controller.signal,
+        });
+
+        if (getFirst.status >= 300 && getFirst.status < 400) {
+          const location = getFirst.headers.get('location');
+          console.log('improve-proxy - GET redirect status:', getFirst.status, 'location:', location);
+          if (location) {
+            const redirectedUrl = new URL(location, getUrl.toString()).toString();
+            finalRes = await fetch(redirectedUrl, {
+              method: 'GET',
+              signal: controller.signal,
+            });
+          } else {
+            finalRes = getFirst;
+          }
+        } else {
+          finalRes = getFirst;
+        }
+
+        finalText = await finalRes.text();
+        attempt = 'get-fallback';
+        console.log('improve-proxy - GET upstream status:', finalRes.status);
+        console.log('improve-proxy - GET raw response length:', finalText.length);
+      }
     } catch (err) {
       console.error('improve-proxy - upstream error:', (err as any)?.message || String(err));
       throw err;
@@ -92,6 +128,7 @@ serve(async (req) => {
     const normalized = {
       ok: finalRes?.ok ?? false,
       status: finalRes?.status ?? 0,
+      attempt,
       ...((typeof payload === 'object' && payload) ? payload : { body: String(payload) })
     };
 
