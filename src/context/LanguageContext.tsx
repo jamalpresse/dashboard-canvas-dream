@@ -90,7 +90,7 @@ const translations = {
       translation: "Traduction",
       improve: "Améliorer",
       improveText: "Améliorer le texte",
-      briefing: "Briefing",
+      briefing: "IHATA",
       imageGeneration: "Images",
       settings: "Paramètres",
       logout: "Déconnexion",
