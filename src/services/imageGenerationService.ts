@@ -1,5 +1,6 @@
 // Service for image generation using the external webhook
 import { translatePromptIfNeeded } from './promptTranslationService';
+import { supabase } from "@/integrations/supabase/client";
 
 export interface ImageGenerationResponse {
   imageUrl: string;
@@ -167,47 +168,36 @@ export async function generateImageWithN8n(prompt: string): Promise<ImageGenerat
     // Translate prompt if needed
     const translationResult = await translatePromptIfNeeded(prompt);
     const finalPrompt = translationResult.translatedPrompt;
-    
-    console.log("Using translated prompt for n8n generation:", finalPrompt);
-    
-    const webhookUrl = `https://n8n-jamal-u38598.vm.elestio.app/webhook/generate-image?prompt=${encodeURIComponent(finalPrompt)}`;
-    
-    const response = await fetch(webhookUrl, {
-      method: 'GET',
+
+    console.log("Invoking edge function image-generation with prompt:", finalPrompt);
+    const { data, error } = await supabase.functions.invoke('image-generation', {
+      body: { prompt: finalPrompt }
     });
 
-    if (!response.ok) {
-      throw new Error(`Error: ${response.status} - ${response.statusText}`);
+    if (error) {
+      console.error("Edge function error:", error);
+      return {
+        imageUrl: "https://images.unsplash.com/photo-1581091226825-a6a2a5aee158",
+        error: "Erreur lors de l'appel de la fonction Edge",
+        details: (error as any)?.message ?? String(error),
+        translationInfo: {
+          originalPrompt: translationResult.originalPrompt,
+          translatedPrompt: translationResult.translatedPrompt,
+          detectedLanguage: translationResult.detectedLanguage,
+          wasTranslated: translationResult.wasTranslated
+        }
+      };
     }
 
-    const data = await response.json();
-    console.log("N8n webhook response:", data);
-    
-    // Affichage plus détaillé de la réponse pour le débogage
-    console.log("Type de réponse:", typeof data);
-    console.log("Structure de la réponse:", JSON.stringify(data, null, 2));
-    
-    // Vérifier si nous avons reçu un objet 'data' qui contient imageUrl
-    if (data && data.data && data.data.imageUrl) {
-      console.log("Format de réponse détecté: { data: { imageUrl: ... } }");
-      data.imageUrl = data.data.imageUrl;
-    }
-    
-    // Handle nested imageUrl structure (when imageUrl is an object that contains imageUrl)
-    if (data.imageUrl && typeof data.imageUrl === 'object' && data.imageUrl.imageUrl) {
-      console.log("Detected nested imageUrl structure, extracting inner URL");
-      data.imageUrl = data.imageUrl.imageUrl;
-    }
-    
-    // Handle template strings in the response
-    if (data.imageUrl && isTemplateString(data.imageUrl)) {
-      const templatePath = extractPathFromTemplate(data.imageUrl);
-      
+    // data is the JSON from the edge function
+    console.log("Edge function response:", data);
+
+    // If the function returned an error field
+    if (data?.error) {
       return {
-        imageUrl: "https://images.unsplash.com/photo-1581091226825-a6a2a5aee158", // Fallback image
-        error: "Le modèle n8n n'a pas été évalué correctement",
-        details: `L'URL contient un modèle non évalué: ${data.imageUrl}. Ajoutez un nœud 'Set' dans n8n pour évaluer cette expression avant le nœud 'Répondre Webhook'.`,
-        templatePath: templatePath,
+        imageUrl: "https://images.unsplash.com/photo-1581091226825-a6a2a5aee158",
+        error: data.error,
+        details: data.details,
         originalResponse: data,
         translationInfo: {
           originalPrompt: translationResult.originalPrompt,
@@ -217,14 +207,28 @@ export async function generateImageWithN8n(prompt: string): Promise<ImageGenerat
         }
       };
     }
-    
-    // Vérifier si l'URL est valide avec la nouvelle fonction
-    if (!isValidImageUrl(data.imageUrl)) {
-      console.warn("URL d'image invalide:", data.imageUrl);
-      return { 
+
+    // Normalize possible shapes
+    let imageUrl: any = data?.imageUrl;
+    if (!imageUrl && data?.data?.imageUrl) imageUrl = data.data.imageUrl;
+    if (!imageUrl && data?.url) imageUrl = data.url;
+    if (!imageUrl && data?.image_url) imageUrl = data.image_url;
+    if (!imageUrl && typeof data === 'string') imageUrl = data;
+
+    // Handle nested objects like { imageUrl: { imageUrl: "..." } }
+    if (imageUrl && typeof imageUrl === 'object' && imageUrl.imageUrl) {
+      imageUrl = imageUrl.imageUrl;
+    }
+
+    // Handle template strings in the response
+    if (typeof imageUrl === 'string' && isTemplateString(imageUrl)) {
+      const templatePath = extractPathFromTemplate(imageUrl);
+      return {
         imageUrl: "https://images.unsplash.com/photo-1581091226825-a6a2a5aee158",
-        error: "URL d'image invalide dans la réponse",
-        details: "Le webhook a retourné: " + JSON.stringify(data),
+        error: "Le modèle n8n n'a pas été évalué correctement",
+        details: `L'URL contient un modèle non évalué: ${imageUrl}. Ajoutez un nœud 'Set' dans n8n pour évaluer cette expression avant le nœud 'Répondre Webhook'.`,
+        templatePath,
+        originalResponse: data,
         translationInfo: {
           originalPrompt: translationResult.originalPrompt,
           translatedPrompt: translationResult.translatedPrompt,
@@ -233,9 +237,25 @@ export async function generateImageWithN8n(prompt: string): Promise<ImageGenerat
         }
       };
     }
-    
+
+    // Validate URL
+    if (!isValidImageUrl(imageUrl)) {
+      console.warn("URL d'image invalide:", imageUrl);
+      return {
+        imageUrl: "https://images.unsplash.com/photo-1581091226825-a6a2a5aee158",
+        error: "URL d'image invalide dans la réponse",
+        details: "La fonction a retourné: " + JSON.stringify(data),
+        translationInfo: {
+          originalPrompt: translationResult.originalPrompt,
+          translatedPrompt: translationResult.translatedPrompt,
+          detectedLanguage: translationResult.detectedLanguage,
+          wasTranslated: translationResult.wasTranslated
+        }
+      };
+    }
+
     return {
-      imageUrl: data.imageUrl,
+      imageUrl: imageUrl,
       originalResponse: data,
       translationInfo: {
         originalPrompt: translationResult.originalPrompt,
@@ -245,8 +265,8 @@ export async function generateImageWithN8n(prompt: string): Promise<ImageGenerat
       }
     };
   } catch (error) {
-    console.error('Error calling n8n webhook:', error);
-    return { 
+    console.error('Error invoking edge function:', error);
+    return {
       imageUrl: "https://images.unsplash.com/photo-1581091226825-a6a2a5aee158",
       error: "Une erreur s'est produite lors de la génération de l'image",
       details: error instanceof Error ? error.message : "Erreur inconnue"

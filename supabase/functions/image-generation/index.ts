@@ -71,19 +71,27 @@ serve(async (req) => {
 
     console.log("Génération d'image pour prompt:", prompt);
 
-    // L'URL du webhook externe pour la génération d'images - URL harmonisée
-    const externalWebhookUrl = "https://n8n-jamal-u38598.vm.elestio.app/webhook/generate-image";
-    
-    // Appeler le service externe avec une méthode GET
-    const webhookUrl = `${externalWebhookUrl}?prompt=${encodeURIComponent(prompt)}`;
-    console.log("URL du webhook:", webhookUrl);
+    // L'URL du webhook externe pour la génération d'images - mise à jour vers l'instance utilisateur
+    const externalWebhookUrl = "http://automate.ihata.ma/webhook/generate-image";
 
-    const response = await fetch(webhookUrl, {
-      method: 'GET',
+    // Tenter d'abord une requête POST (JSON), puis basculer sur GET en cas d'échec
+    let response = await fetch(externalWebhookUrl, {
+      method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-      }
+      },
+      body: JSON.stringify({ prompt })
     });
+
+    if (!response.ok) {
+      console.warn("POST vers n8n a échoué, tentative en GET…", response.status, await response.text());
+      const webhookUrl = `${externalWebhookUrl}?prompt=${encodeURIComponent(prompt)}`;
+      console.log("URL du webhook (GET):", webhookUrl);
+      response = await fetch(webhookUrl, {
+        method: 'GET',
+        headers: { 'Content-Type': 'application/json' }
+      });
+    }
 
     if (!response.ok) {
       const errorText = await response.text();
