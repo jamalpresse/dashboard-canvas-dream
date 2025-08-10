@@ -71,38 +71,80 @@ serve(async (req) => {
 
     console.log("Génération d'image pour prompt:", prompt);
 
-    // L'URL du webhook externe pour la génération d'images - mise à jour vers l'instance utilisateur
-    const externalWebhookUrl = "http://automate.ihata.ma/webhook/generate-image";
+    // Préparer plusieurs tentatives (HTTPS puis HTTP, POST JSON, POST form, GET)
+    const webhookHttps = "https://automate.ihata.ma/webhook/generate-image";
+    const webhookHttp = "http://automate.ihata.ma/webhook/generate-image";
 
-    // Tenter d'abord une requête POST (JSON), puis basculer sur GET en cas d'échec
-    let response = await fetch(externalWebhookUrl, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
+    const attempts: Array<{ label: string; exec: () => Promise<Response> }> = [
+      {
+        label: "HTTPS POST JSON",
+        exec: () => fetch(webhookHttps, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ prompt })
+        })
       },
-      body: JSON.stringify({ prompt })
-    });
+      {
+        label: "HTTPS POST form-urlencoded",
+        exec: () => fetch(webhookHttps, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+          body: new URLSearchParams({ prompt }).toString()
+        })
+      },
+      {
+        label: "HTTPS GET",
+        exec: () => fetch(`${webhookHttps}?prompt=${encodeURIComponent(prompt)}`, { method: 'GET' })
+      },
+      {
+        label: "HTTP POST JSON",
+        exec: () => fetch(webhookHttp, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ prompt })
+        })
+      },
+      {
+        label: "HTTP POST form-urlencoded",
+        exec: () => fetch(webhookHttp, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+          body: new URLSearchParams({ prompt }).toString()
+        })
+      },
+      {
+        label: "HTTP GET",
+        exec: () => fetch(`${webhookHttp}?prompt=${encodeURIComponent(prompt)}`, { method: 'GET' })
+      },
+    ];
 
-    if (!response.ok) {
-      console.warn("POST vers n8n a échoué, tentative en GET…", response.status, await response.text());
-      const webhookUrl = `${externalWebhookUrl}?prompt=${encodeURIComponent(prompt)}`;
-      console.log("URL du webhook (GET):", webhookUrl);
-      response = await fetch(webhookUrl, {
-        method: 'GET',
-        headers: { 'Content-Type': 'application/json' }
-      });
+    const errors: string[] = [];
+    let response: Response | null = null;
+
+    for (const attempt of attempts) {
+      try {
+        console.log(`Tentative: ${attempt.label}`);
+        const res = await attempt.exec();
+        if (res.ok) {
+          response = res;
+          console.log(`Succès avec: ${attempt.label}`);
+          break;
+        } else {
+          const txt = await res.text();
+          errors.push(`${attempt.label}: ${res.status} ${txt.substring(0, 200)}`);
+        }
+      } catch (e) {
+        errors.push(`${attempt.label}: ${(e as Error).message}`);
+      }
     }
 
-    if (!response.ok) {
-      const errorText = await response.text();
-      console.error("Erreur du service externe:", response.status, errorText);
-      
-      // En cas d'erreur, retourner une réponse avec une image de secours
+    if (!response) {
+      console.error("Toutes les tentatives ont échoué:", errors.join(" | "));
       return new Response(
         JSON.stringify({
           imageUrl: fallbackImageUrl,
-          error: `Erreur du service externe: ${response.status}`,
-          details: errorText
+          error: `Erreur du service externe: 404`,
+          details: errors.join(" | ")
         }),
         { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 200 }
       );
@@ -111,45 +153,63 @@ serve(async (req) => {
     // Traiter la réponse
     const data = await response.json();
     console.log("Réponse du webhook:", data);
-    
+
+    // Fonction utilitaire pour trouver une URL dans un objet arbitraire
+    const findUrl = (obj: unknown): string | null => {
+      if (!obj) return null;
+      if (typeof obj === 'string' && /^https?:\/\//i.test(obj)) return obj;
+      if (Array.isArray(obj)) {
+        for (const item of obj) {
+          const found = findUrl(item);
+          if (found) return found;
+        }
+      } else if (typeof obj === 'object') {
+        for (const [k, v] of Object.entries(obj as Record<string, unknown>)) {
+          if (k === 'imageUrl' || k === 'url' || k === 'image_url') {
+            const s = findUrl(v);
+            if (s) return s;
+          }
+        }
+        for (const v of Object.values(obj as Record<string, unknown>)) {
+          const found = findUrl(v);
+          if (found) return found;
+        }
+      }
+      return null;
+    };
+
     // Gérer la structure imbriquée (si imageUrl est un objet contenant imageUrl)
-    if (data.imageUrl && typeof data.imageUrl === 'object' && data.imageUrl.imageUrl) {
-      console.log("Structure d'URL imbriquée détectée, extraction de l'URL interne");
-      data.imageUrl = data.imageUrl.imageUrl;
+    let candidateUrl: any = (data as any)?.imageUrl ?? (data as any)?.url ?? (data as any)?.image_url;
+    if (!candidateUrl && (data as any)?.data?.imageUrl) candidateUrl = (data as any).data.imageUrl;
+    if (!candidateUrl && (data as any)?.data?.url) candidateUrl = (data as any).data.url;
+    if (!candidateUrl) candidateUrl = findUrl(data);
+
+    if (candidateUrl && typeof candidateUrl === 'object' && (candidateUrl as any).imageUrl) {
+      candidateUrl = (candidateUrl as any).imageUrl;
     }
-    
+
     // Vérifier si l'imageUrl est un modèle n8n non évalué
     let finalImageUrl = fallbackImageUrl;
-    
-    if (data.imageUrl) {
-      const templateInfo = extractPathFromN8nTemplate(data.imageUrl);
-      
+    if (candidateUrl) {
+      const templateInfo = extractPathFromN8nTemplate(candidateUrl);
       if (templateInfo.isTemplate) {
-        console.log("Détecté modèle n8n non évalué:", data.imageUrl);
-        console.log("Utilisation de l'image de secours car le template n8n n'est pas évalué");
-        
-        // Ajouter des détails supplémentaires sur le problème pour faciliter le débogage
+        console.log("Détecté modèle n8n non évalué:", candidateUrl);
         return new Response(
           JSON.stringify({
             imageUrl: fallbackImageUrl,
             error: "Le modèle n8n n'a pas été évalué correctement",
-            details: `Modèle reçu: ${data.imageUrl}. Ajoutez un nœud 'Set' dans n8n pour évaluer cette expression avant le nœud 'Répondre Webhook'.`,
+            details: `Modèle reçu: ${candidateUrl}. Ajoutez un nœud 'Set' dans n8n pour évaluer cette expression avant le nœud 'Répondre Webhook'.`,
             templatePath: templateInfo.path,
             originalResponse: data
           }),
           { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
         );
-      }
-      else if (typeof data.imageUrl === 'string' && data.imageUrl.startsWith('http')) {
-        finalImageUrl = data.imageUrl;
+      } else if (typeof candidateUrl === 'string' && candidateUrl.startsWith('http')) {
+        finalImageUrl = candidateUrl;
       }
     }
-    
-    // Formatter la réponse de manière simplifiée avec uniquement l'imageUrl
-    const formattedResponse = {
-      imageUrl: finalImageUrl
-    };
-    
+
+    const formattedResponse = { imageUrl: finalImageUrl };
     console.log("Réponse formatée:", formattedResponse);
 
     return new Response(
