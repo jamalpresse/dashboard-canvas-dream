@@ -71,52 +71,65 @@ serve(async (req) => {
 
     console.log("Génération d'image pour prompt:", prompt);
 
-    // Préparer plusieurs tentatives (HTTPS puis HTTP, POST JSON, POST form, GET)
+    // Préparer plusieurs tentatives (HTTPS puis HTTP, POST/GET, multiples noms de paramètres)
     const webhookHttps = "https://automate.ihata.ma/webhook/generate-image";
     const webhookHttp = "http://automate.ihata.ma/webhook/generate-image";
 
-    const attempts: Array<{ label: string; exec: () => Promise<Response> }> = [
-      {
-        label: "HTTPS POST JSON",
-        exec: () => fetch(webhookHttps, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ prompt })
-        })
-      },
-      {
-        label: "HTTPS POST form-urlencoded",
-        exec: () => fetch(webhookHttps, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-          body: new URLSearchParams({ prompt }).toString()
-        })
-      },
-      {
-        label: "HTTPS GET",
-        exec: () => fetch(`${webhookHttps}?prompt=${encodeURIComponent(prompt)}`, { method: 'GET' })
-      },
-      {
-        label: "HTTP POST JSON",
-        exec: () => fetch(webhookHttp, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ prompt })
-        })
-      },
-      {
-        label: "HTTP POST form-urlencoded",
-        exec: () => fetch(webhookHttp, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-          body: new URLSearchParams({ prompt }).toString()
-        })
-      },
-      {
-        label: "HTTP GET",
-        exec: () => fetch(`${webhookHttp}?prompt=${encodeURIComponent(prompt)}`, { method: 'GET' })
-      },
+    const paramVariants = [
+      { prompt },
+      { description: prompt },
+      { text: prompt },
+      { input: prompt },
+      { q: prompt },
+      { prompt, description: prompt, text: prompt }
     ];
+
+    const attempts: Array<{ label: string; exec: () => Promise<Response> }> = [];
+
+    for (const bodyObj of paramVariants) {
+      attempts.push(
+        {
+          label: `HTTPS POST JSON ${Object.keys(bodyObj).join(',')}`,
+          exec: () => fetch(webhookHttps, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(bodyObj)
+          })
+        },
+        {
+          label: `HTTPS POST form ${Object.keys(bodyObj).join(',')}`,
+          exec: () => fetch(webhookHttps, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+            body: new URLSearchParams(bodyObj as Record<string, string>).toString()
+          })
+        },
+        {
+          label: `HTTPS GET ${Object.keys(bodyObj).join(',')}`,
+          exec: () => fetch(`${webhookHttps}?${new URLSearchParams(bodyObj as Record<string, string>).toString()}`, { method: 'GET' })
+        },
+        {
+          label: `HTTP POST JSON ${Object.keys(bodyObj).join(',')}`,
+          exec: () => fetch(webhookHttp, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(bodyObj)
+          })
+        },
+        {
+          label: `HTTP POST form ${Object.keys(bodyObj).join(',')}`,
+          exec: () => fetch(webhookHttp, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+            body: new URLSearchParams(bodyObj as Record<string, string>).toString()
+          })
+        },
+        {
+          label: `HTTP GET ${Object.keys(bodyObj).join(',')}`,
+          exec: () => fetch(`${webhookHttp}?${new URLSearchParams(bodyObj as Record<string, string>).toString()}`, { method: 'GET' })
+        }
+      );
+    }
 
     const errors: string[] = [];
     let response: Response | null = null;
@@ -151,8 +164,14 @@ serve(async (req) => {
     }
 
     // Traiter la réponse
-    const data = await response.json();
-    console.log("Réponse du webhook:", data);
+    const raw = await response.text();
+    let data: any;
+    try {
+      data = JSON.parse(raw);
+    } catch {
+      data = raw; // certains webhooks renvoient directement une URL en texte brut
+    }
+    console.log("Réponse du webhook:", typeof data === 'string' ? data : data);
 
     // Fonction utilitaire pour trouver une URL dans un objet arbitraire
     const findUrl = (obj: unknown): string | null => {
