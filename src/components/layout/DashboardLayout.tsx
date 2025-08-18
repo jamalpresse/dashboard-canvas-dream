@@ -220,7 +220,7 @@ export default function DashboardLayout() {
           <Link to="/">
             <div>
               <h1 className="text-2xl font-bold font-playfair text-snrt-red">
-                SPARK
+                SIRAJ
               </h1>
               <p className="text-sm text-gray-400 font-light -mt-1">
                 by JE
