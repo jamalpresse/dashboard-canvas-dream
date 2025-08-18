@@ -4,7 +4,7 @@ import { LayoutDashboard, Settings, Menu, X, Users, Newspaper, ImageIcon, Clock,
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { useIsMobile } from "@/hooks/use-mobile";
-import { WeatherWidget } from "@/components/dashboard/WeatherWidget";
+
 import { SNRTNewsFrame } from "@/components/common/SNRTNewsFrame";
 import BreadcrumbNav from "@/components/common/BreadcrumbNav";
 import { RssTickerFloat } from "@/components/common/RssTickerFloat";
@@ -104,6 +104,10 @@ export default function DashboardLayout() {
     title: t('navigation', 'translation'),
     href: "/translation",
     icon: <Languages className="h-5 w-5" />
+  }, {
+    title: t('navigation', 'transcription'),
+    href: "/transcription",
+    icon: <FileText className="h-5 w-5" />
   }, {
     title: t('navigation', 'imageGeneration'),
     href: "/image-generation",
@@ -278,10 +282,6 @@ export default function DashboardLayout() {
                 <span>{item.title}</span>
               </NavLink>)}
             
-            {/* Weather Widget */}
-            <div className="mt-4 px-2">
-              <WeatherWidget city={isRTL ? "الدار البيضاء" : "Casablanca"} className="w-full shadow-sm border border-gray-800" />
-            </div>
           </div>
         </nav>
         

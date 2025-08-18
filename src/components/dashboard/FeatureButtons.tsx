@@ -1,7 +1,7 @@
 import React from "react";
 import { Link } from "react-router-dom";
 import { useLanguage } from "@/context/LanguageContext";
-import { Search, FileText, Languages, ImageIcon } from "lucide-react";
+import { Search, FileText, Languages, ImageIcon, Camera } from "lucide-react";
 export const FeatureButtons: React.FC = () => {
   const {
     t,
@@ -25,6 +25,12 @@ export const FeatureButtons: React.FC = () => {
         <Link to="/translation" className="group relative overflow-hidden bg-gradient-to-br from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 hover:scale-105 text-white font-semibold py-6 px-6 rounded-xl shadow-elegant hover:shadow-glow transition-all duration-300 flex flex-col items-center justify-center space-y-2 min-h-[120px]">
           <Languages className="h-8 w-8 group-hover:scale-110 transition-transform" />
           <span className="text-lg">{t('dashboard', 'translate')}</span>
+          <div className="absolute inset-0 bg-gradient-to-br from-white/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+        </Link>
+
+        <Link to="/transcription" className="group relative overflow-hidden bg-gradient-to-br from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 hover:scale-105 text-white font-semibold py-6 px-6 rounded-xl shadow-elegant hover:shadow-glow transition-all duration-300 flex flex-col items-center justify-center space-y-2 min-h-[120px]">
+          <Camera className="h-8 w-8 group-hover:scale-110 transition-transform" />
+          <span className="text-lg">{t('dashboard', 'transcription') || 'Transcription'}</span>
           <div className="absolute inset-0 bg-gradient-to-br from-white/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
         </Link>
       </div>
