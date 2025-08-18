@@ -1,7 +1,7 @@
 import React from "react";
 import { Link } from "react-router-dom";
 import { useLanguage } from "@/context/LanguageContext";
-import { Search, FileText, Languages, ImageIcon, Camera, Video } from "lucide-react";
+import { Search, FileText, Languages, ImageIcon, Camera, Video, FileDown } from "lucide-react";
 export const FeatureButtons: React.FC = () => {
   const {
     t,
@@ -37,6 +37,12 @@ export const FeatureButtons: React.FC = () => {
         <Link to="/video-transcription" className="group relative overflow-hidden bg-gradient-to-br from-indigo-500 to-indigo-600 hover:from-indigo-600 hover:to-indigo-700 hover:scale-105 text-white font-semibold py-6 px-6 rounded-xl shadow-elegant hover:shadow-glow transition-all duration-300 flex flex-col items-center justify-center space-y-2 min-h-[120px]">
           <Video className="h-8 w-8 group-hover:scale-110 transition-transform" />
           <span className="text-lg">{t('dashboard', 'videoTranscription') || 'Transcription vidéo'}</span>
+          <div className="absolute inset-0 bg-gradient-to-br from-white/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+        </Link>
+
+        <Link to="/pdf-transcription" className="group relative overflow-hidden bg-gradient-to-br from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 hover:scale-105 text-white font-semibold py-6 px-6 rounded-xl shadow-elegant hover:shadow-glow transition-all duration-300 flex flex-col items-center justify-center space-y-2 min-h-[120px]">
+          <FileDown className="h-8 w-8 group-hover:scale-110 transition-transform" />
+          <span className="text-lg">{t('dashboard', 'pdfTranscription') || 'Transcription PDF'}</span>
           <div className="absolute inset-0 bg-gradient-to-br from-white/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
         </Link>
       </div>

@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { NavLink, Outlet, Link, useLocation } from "react-router-dom";
-import { LayoutDashboard, Settings, Menu, X, Users, Newspaper, ImageIcon, Clock, Bell, Search, Pencil, Languages, LogOut, User, FileText, Video } from "lucide-react";
+import { LayoutDashboard, Settings, Menu, X, Users, Newspaper, ImageIcon, Clock, Bell, Search, Pencil, Languages, LogOut, User, FileText, Video, FileDown } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { useIsMobile } from "@/hooks/use-mobile";
@@ -112,6 +112,10 @@ export default function DashboardLayout() {
     title: t('navigation', 'videoTranscription') || 'Transcription vidéo',
     href: "/video-transcription",
     icon: <Video className="h-5 w-5" />
+  }, {
+    title: t('navigation', 'pdfTranscription') || 'Transcription PDF',
+    href: "/pdf-transcription",
+    icon: <FileDown className="h-5 w-5" />
   }, {
     title: t('navigation', 'imageGeneration'),
     href: "/image-generation",
