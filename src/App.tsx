@@ -19,6 +19,7 @@ import Search from "./pages/Search";
 import Improve from "./pages/Improve";
 import Translation from "./pages/Translation";
 import Transcription from "./pages/Transcription";
+import VideoTranscription from "./pages/VideoTranscription";
 import News from "./pages/News";
 import ImageGeneration from "./pages/ImageGeneration";
 import Briefing from "./pages/Briefing";
@@ -97,6 +98,11 @@ const App = () => (
                     <Route path="/transcription" element={
                       <ErrorBoundary>
                         <Transcription />
+                      </ErrorBoundary>
+                    } />
+                    <Route path="/video-transcription" element={
+                      <ErrorBoundary>
+                        <VideoTranscription />
                       </ErrorBoundary>
                     } />
                     <Route path="/briefing" element={
