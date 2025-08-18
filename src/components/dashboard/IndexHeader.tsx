@@ -1,6 +1,5 @@
 
 import React from "react";
-import { LanguageSelector } from "@/components/common/LanguageSelector";
 import { useLanguage } from "@/context/LanguageContext";
 
 export const IndexHeader: React.FC = () => {
@@ -16,7 +15,6 @@ export const IndexHeader: React.FC = () => {
           L'IA au service de votre plume
         </p>
       </div>
-      <LanguageSelector />
     </div>
   );
 };

@@ -2,6 +2,7 @@
 import { useState } from 'react';
 import { useToast } from "@/hooks/use-toast";
 import { formatTranslationResult } from '@/utils/translationUtils';
+import { isRTL } from '@/utils/textUtils';
 
 export const useTranslation = (
   setDebugData: (data: any) => void
@@ -18,8 +19,8 @@ export const useTranslation = (
   const WEBHOOK_URL_OLD = 'https://n8n-jamal-u38598.vm.elestio.app/webhook/4732aeff-7544-4f0e-8554-ebd0f614947b';
   const WEBHOOK_URL_NEW = 'http://automate.ihata.ma:5678/webhook/c1d2aee7-e096-4dc9-a69c-023af6631d88';
 
-  // Détection RTL uniquement pour la langue source ou cible arabe
-  const isSourceRTL = langPair.split('-')[0] === 'ar';
+  // Détection automatique RTL pour le texte source, basée sur le contenu
+  const isSourceRTL = isRTL(text);
   const isTargetRTL = langPair.split('-')[1] === 'ar';
 
   const handlePaste = async () => {
