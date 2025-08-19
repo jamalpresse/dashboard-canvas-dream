@@ -27,29 +27,53 @@ serve(async (req) => {
       );
     }
 
-    // Make request to n8n webhook
-    const webhookUrl = 'https://automate.ihata.ma/webhook/ace564c4-9f4a-40bf-aa42-fc5f5e29a3c7';
+    // Prepare enriched payload for n8n compatibility
+    const payload = {
+      query: query.trim(),
+      q: query.trim(),
+      text: query.trim(),
+      type: type,
+      source: 'search-proxy',
+      timestamp: new Date().toISOString()
+    };
+
+    // Try production webhook first
+    const productionUrl = 'https://automate.ihata.ma/webhook/ace564c4-9f4a-40bf-aa42-fc5f5e29a3c7';
     
-    console.log('Search proxy - Making request to:', webhookUrl);
+    console.log('Search proxy - Making request to production URL:', productionUrl);
+    console.log('Search proxy - Payload:', JSON.stringify(payload));
     
-    const response = await fetch(webhookUrl, {
+    let response = await fetch(productionUrl, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({
-        query: query.trim(),
-        type: type
-      }),
+      body: JSON.stringify(payload),
     });
 
-    console.log('Search proxy - Response status:', response.status);
-    console.log('Search proxy - Response content-type:', response.headers.get('content-type'));
+    console.log('Search proxy - Production response status:', response.status);
+
+    // If production fails with 404, try test URL
+    if (response.status === 404) {
+      const testUrl = productionUrl.replace('/webhook/', '/webhook-test/');
+      console.log('Search proxy - Production returned 404, trying test URL:', testUrl);
+      
+      response = await fetch(testUrl, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(payload),
+      });
+      
+      console.log('Search proxy - Test response status:', response.status);
+    }
+
+    console.log('Search proxy - Final response content-type:', response.headers.get('content-type'));
 
     if (!response.ok) {
       console.error('Search proxy - HTTP error:', response.status, response.statusText);
-      console.error('Search proxy - Request URL:', webhookUrl);
-      console.error('Search proxy - Request body:', JSON.stringify({ query: query.trim(), type: type }));
+      console.error('Search proxy - Request payload:', JSON.stringify(payload));
       
       // Try to get error response body
       let errorBody = '';

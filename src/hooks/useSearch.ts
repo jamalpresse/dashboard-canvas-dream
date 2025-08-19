@@ -130,11 +130,22 @@ export const useSearch = () => {
     } catch (error) {
       console.error('Erreur lors de la recherche:', error);
       const errorMessage = error instanceof Error ? error.message : 'Erreur inconnue';
-      setError(`Erreur lors de la recherche: ${errorMessage}`);
+      
+      // Provide more specific error messages
+      let userFriendlyMessage = errorMessage;
+      if (errorMessage.includes('404')) {
+        userFriendlyMessage = 'Le service de recherche semble inactif. Veuillez vérifier que le workflow n8n est actif.';
+      } else if (errorMessage.includes('500')) {
+        userFriendlyMessage = 'Erreur serveur du service de recherche. Veuillez réessayer plus tard.';
+      } else if (errorMessage.includes('Network')) {
+        userFriendlyMessage = 'Problème de connexion réseau. Vérifiez votre connexion internet.';
+      }
+      
+      setError(`Erreur lors de la recherche: ${userFriendlyMessage}`);
       
       toast({
         title: "Erreur de recherche",
-        description: errorMessage,
+        description: userFriendlyMessage,
         variant: "destructive",
       });
     } finally {
