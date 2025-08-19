@@ -48,7 +48,19 @@ serve(async (req) => {
 
     if (!response.ok) {
       console.error('Search proxy - HTTP error:', response.status, response.statusText);
-      throw new Error(`HTTP error! status: ${response.status}`);
+      console.error('Search proxy - Request URL:', webhookUrl);
+      console.error('Search proxy - Request body:', JSON.stringify({ query: query.trim(), type: type }));
+      
+      // Try to get error response body
+      let errorBody = '';
+      try {
+        errorBody = await response.text();
+        console.error('Search proxy - Error response body:', errorBody);
+      } catch (e) {
+        console.error('Search proxy - Could not read error response body');
+      }
+      
+      throw new Error(`HTTP error! status: ${response.status} - ${response.statusText}. Body: ${errorBody}`);
     }
 
     // Get response text first to handle potential JSON parsing issues
