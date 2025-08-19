@@ -38,8 +38,8 @@ serve(async (req) => {
 
     console.log('improve-proxy - primary webhook:', primaryWebhookUrl);
 
-    // Overall timeout to avoid hanging requests
-    const overallTimeoutMs = 55_000;
+    // Optimized timeout for faster user feedback
+    const overallTimeoutMs = 30_000; // Reduced to 30 seconds
     const deadline = Date.now() + overallTimeoutMs;
 
     const fetchWithTimeout = async (url: string, init: RequestInit) => {
@@ -82,7 +82,10 @@ serve(async (req) => {
           if (variation.method === 'POST') {
             response = await fetchWithTimeout(variation.url, {
               method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
+              headers: { 
+                'Content-Type': 'application/json',
+                'User-Agent': 'Supabase-Edge-Function/1.0'
+              },
               body: JSON.stringify({ text }),
               redirect: 'follow',
             });
@@ -91,6 +94,9 @@ serve(async (req) => {
             getUrl.searchParams.set('text', text);
             response = await fetchWithTimeout(getUrl.toString(), {
               method: 'GET',
+              headers: {
+                'User-Agent': 'Supabase-Edge-Function/1.0'
+              },
               redirect: 'follow',
             });
           }

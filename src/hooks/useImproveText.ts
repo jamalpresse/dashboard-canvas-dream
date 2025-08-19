@@ -64,13 +64,19 @@ export const useImproveText = () => {
         description: "Envoi de la demande d'amélioration...",
       });
 
+      console.log('improve-proxy - sending request with text length:', inputText.trim().length);
+      
       const { data, error } = await supabase.functions.invoke('improve-proxy', {
         body: { text: inputText.trim() },
       });
 
       setRequestSent(true);
+      
+      console.log('improve-proxy - raw response:', data);
+      console.log('improve-proxy - error:', error);
 
       if (error) {
+        console.error('improve-proxy - Supabase function error:', error);
         throw error;
       }
 
@@ -79,10 +85,14 @@ export const useImproveText = () => {
         const attemptedUrls = (data as any).attemptedUrls;
         const attemptUsed = (data as any).attemptUsed;
 
-        // Log debugging info if available
-        if (attemptedUrls) {
-          console.log('improve-proxy attempts:', attemptedUrls);
-          console.log('improve-proxy success method:', attemptUsed);
+        // Enhanced debugging logs
+        console.log('improve-proxy - response status:', status);
+        console.log('improve-proxy - attemptUsed:', attemptUsed);
+        if (attemptedUrls && Array.isArray(attemptedUrls)) {
+          console.log('improve-proxy - all attempts:', attemptedUrls);
+          attemptedUrls.forEach((attempt: any, index: number) => {
+            console.log(`  Attempt ${index + 1}: ${attempt.method} ${attempt.url} -> ${attempt.status} (${attempt.description})`);
+          });
         }
 
         // Check if we have a recognizable response payload even if upstream status was non-2xx
@@ -96,16 +106,25 @@ export const useImproveText = () => {
           (data as any).result
         );
 
-        // Only fail if we don't have a recognized payload and got a real error
+        // Enhanced error handling with detailed debugging
         if ((data as any).ok === false && !hasRecognizedPayload) {
           const errorMsg = (data as any)?.details || (data as any)?.error || `Webhook returned status ${status}`;
+          console.error('improve-proxy - webhook failed:', { status, errorMsg, attemptedUrls, attemptUsed });
+          
+          // Show detailed debugging info in console for troubleshooting
+          if (attemptedUrls && Array.isArray(attemptedUrls) && attemptedUrls.length > 0) {
+            console.log('improve-proxy - Debug: All attempted URLs and their results:');
+            attemptedUrls.forEach((attempt: any, index: number) => {
+              console.log(`  ${index + 1}. ${attempt.method} ${attempt.url} -> Status: ${attempt.status} (${attempt.description})`);
+            });
+          }
           
           // Special handling for 404 errors
           if (status === 404 || errorMsg.includes('404') || errorMsg.includes('not registered')) {
-            throw new Error(`Webhook indisponible (404). Le workflow n8n doit être activé (Production) ou utilisez l'URL test. Tentatives: ${attemptedUrls?.length || 0}`);
+            throw new Error(`❌ Webhook indisponible (404)\n\nLe workflow n8n doit être:\n• Activé en mode Production\n• Configuré pour accepter POST avec {"text": "..."}\n• Retourner JSON avec rewrittenText/seoTitles\n\nVérifiez les logs console pour plus de détails.`);
           }
           
-          throw new Error(errorMsg);
+          throw new Error(`❌ Erreur webhook (${status}): ${errorMsg}\n\nConsultez les logs console pour le détail des tentatives.`);
         }
       }
 
