@@ -20,7 +20,8 @@ export const useSearch = () => {
     setResult('');
 
     try {
-      console.log("Début de la recherche avec la requête:", query);
+      console.log("🔍 Search - Starting search with query:", query);
+      console.log("🔍 Search - Invoking edge function search-proxy...");
       
       const { data: responseData, error: functionError } = await supabase.functions.invoke('search-proxy', {
         body: {
@@ -29,10 +30,35 @@ export const useSearch = () => {
         },
       });
 
+      console.log("🔍 Search - Raw Supabase response:");
+      console.log("🔍 Search - responseData:", responseData);
+      console.log("🔍 Search - functionError:", functionError);
+      console.log("🔍 Search - responseData type:", typeof responseData);
+      console.log("🔍 Search - functionError type:", typeof functionError);
+
       if (functionError) {
+        console.error("🔍 Search - Function error details:", JSON.stringify(functionError, null, 2));
+        
+        // Enhanced error analysis
+        if (functionError.message && functionError.message.includes('non-2xx')) {
+          console.error("🔍 Search - This is a non-2xx status code error from the edge function");
+          console.error("🔍 Search - This means our edge function received an error from the n8n webhook");
+        }
+        
         throw new Error(functionError.message || 'Erreur du service de recherche');
       }
-      console.log("Réponse complète reçue du webhook de recherche:", responseData);
+
+      // Check if the response indicates an error (new format)
+      if (responseData && responseData.success === false) {
+        console.error("🔍 Search - Edge function returned error in response:", responseData);
+        const errorMsg = `${responseData.error || 'Erreur inconnue'}. ${responseData.suggestion || ''}`;
+        if (responseData.attemptedUrls) {
+          console.log("🔍 Search - Attempted URLs:", responseData.attemptedUrls);
+        }
+        throw new Error(errorMsg);
+      }
+
+      console.log("🔍 Search - Réponse complète reçue du webhook de recherche:", responseData);
       
       let searchResult = '';
       

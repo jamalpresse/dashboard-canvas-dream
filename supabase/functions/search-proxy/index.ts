@@ -7,17 +7,23 @@ const corsHeaders = {
 };
 
 serve(async (req) => {
+  console.log('🚀 Search proxy - Request received:', req.method, req.url);
+  
   // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
+    console.log('🚀 Search proxy - Handling CORS preflight');
     return new Response(null, { headers: corsHeaders });
   }
 
   try {
-    const { query, type = 'search' } = await req.json();
+    console.log('🚀 Search proxy - Processing request body...');
+    const requestBody = await req.json();
+    const { query, type = 'search' } = requestBody;
     
-    console.log('Search proxy - Received request:', { query, type });
+    console.log('🚀 Search proxy - Received request:', { query, type, fullBody: requestBody });
 
     if (!query || !query.trim()) {
+      console.error('🚀 Search proxy - Missing or empty query');
       return new Response(
         JSON.stringify({ error: 'Query is required' }), 
         { 
@@ -93,19 +99,21 @@ serve(async (req) => {
     }
 
     if (!response || !response.ok) {
-      console.error('Search proxy - All URL variations failed');
-      console.error('Search proxy - Attempted URLs:', attemptedUrls);
-      console.error('Search proxy - Last error:', lastError);
+      console.error('🚀 Search proxy - All URL variations failed');
+      console.error('🚀 Search proxy - Attempted URLs:', attemptedUrls);
+      console.error('🚀 Search proxy - Last error:', lastError);
       
+      // Return 200 with error in body instead of 503 to avoid Supabase "non-2xx" error
       return new Response(
         JSON.stringify({ 
+          success: false,
           error: 'Tous les endpoints de recherche sont inaccessibles',
           details: lastError,
           attemptedUrls: attemptedUrls,
           suggestion: 'Vérifiez que le workflow n8n est actif et que l\'URL du webhook est correcte'
         }), 
         {
-          status: 503,
+          status: 200, // Changed from 503 to 200
           headers: { ...corsHeaders, 'Content-Type': 'application/json' }
         }
       );
@@ -138,15 +146,18 @@ serve(async (req) => {
     });
 
   } catch (error) {
-    console.error('Search proxy - Error:', error);
+    console.error('🚀 Search proxy - Unexpected error:', error);
     
+    // Return 200 with error in body instead of 500 to avoid Supabase "non-2xx" error
     return new Response(
       JSON.stringify({ 
+        success: false,
         error: 'Search service temporarily unavailable',
-        details: error.message 
+        details: error.message,
+        suggestion: 'Veuillez réessayer dans quelques instants'
       }), 
       {
-        status: 500,
+        status: 200, // Changed from 500 to 200
         headers: { ...corsHeaders, 'Content-Type': 'application/json' }
       }
     );
