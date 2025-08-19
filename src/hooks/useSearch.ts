@@ -131,10 +131,30 @@ export const useSearch = () => {
       console.error('Erreur lors de la recherche:', error);
       const errorMessage = error instanceof Error ? error.message : 'Erreur inconnue';
       
+      // Try to parse error response for detailed information
+      let detailedError = errorMessage;
+      let attemptedUrls: string[] = [];
+      
+      try {
+        // If the error contains JSON response, try to parse it
+        if (errorMessage.includes('attemptedUrls')) {
+          const errorMatch = errorMessage.match(/\{.*\}/);
+          if (errorMatch) {
+            const errorData = JSON.parse(errorMatch[0]);
+            detailedError = errorData.error || errorData.details || errorMessage;
+            attemptedUrls = errorData.attemptedUrls || [];
+          }
+        }
+      } catch (parseError) {
+        console.warn('Could not parse error details:', parseError);
+      }
+      
       // Provide more specific error messages
-      let userFriendlyMessage = errorMessage;
-      if (errorMessage.includes('404')) {
-        userFriendlyMessage = 'Le service de recherche semble inactif. Veuillez vérifier que le workflow n8n est actif.';
+      let userFriendlyMessage = detailedError;
+      if (detailedError.includes('inaccessibles') || attemptedUrls.length > 0) {
+        userFriendlyMessage = `Service de recherche indisponible. ${attemptedUrls.length} endpoints testés.`;
+      } else if (errorMessage.includes('404')) {
+        userFriendlyMessage = 'Le service de recherche semble inactif. Vérifiez que le workflow n8n est actif.';
       } else if (errorMessage.includes('500')) {
         userFriendlyMessage = 'Erreur serveur du service de recherche. Veuillez réessayer plus tard.';
       } else if (errorMessage.includes('Network')) {
@@ -142,6 +162,11 @@ export const useSearch = () => {
       }
       
       setError(`Erreur lors de la recherche: ${userFriendlyMessage}`);
+      
+      // Show attempted URLs in console for debugging
+      if (attemptedUrls.length > 0) {
+        console.log('URLs tentées:', attemptedUrls);
+      }
       
       toast({
         title: "Erreur de recherche",
