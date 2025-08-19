@@ -32,8 +32,11 @@ serve(async (req) => {
       );
     }
 
-    const webhookUrl = 'https://automate.ihata.ma/webhook/d2e6c8f7-13aa-4bf7-b714-7f32cf5b0fe5';
-    console.log('improve-proxy - forwarding to:', webhookUrl);
+    // Configurable webhook URLs
+    const primaryWebhookUrl = Deno.env.get('N8N_IMPROVE_WEBHOOK_URL') || 'https://automate.ihata.ma/webhook/d2e6c8f7-13aa-4bf7-b714-7f32cf5b0fe5';
+    const testWebhookUrl = Deno.env.get('N8N_IMPROVE_WEBHOOK_TEST_URL') || 'https://automate.ihata.ma/webhook-test/d2e6c8f7-13aa-4bf7-b714-7f32cf5b0fe5';
+
+    console.log('improve-proxy - primary webhook:', primaryWebhookUrl);
 
     // Overall timeout to avoid hanging requests
     const overallTimeoutMs = 55_000;
@@ -52,73 +55,82 @@ serve(async (req) => {
       }
     };
 
+    // Try multiple URL variations until one succeeds
+    const urlVariations = [
+      { url: primaryWebhookUrl, method: 'POST', description: 'POST to primary' },
+      { url: primaryWebhookUrl + (primaryWebhookUrl.endsWith('/') ? '' : '/'), method: 'POST', description: 'POST to primary with slash' },
+      { url: testWebhookUrl, method: 'POST', description: 'POST to test URL' },
+      { url: primaryWebhookUrl, method: 'GET', description: 'GET to primary' },
+      { url: primaryWebhookUrl + (primaryWebhookUrl.endsWith('/') ? '' : '/'), method: 'GET', description: 'GET to primary with slash' },
+      { url: testWebhookUrl, method: 'GET', description: 'GET to test URL' }
+    ];
+
     let finalRes: Response | null = null;
     let finalText = '';
-    let attempt: 'post' | 'redirect-post' | 'get-fallback' = 'post';
+    let attemptUsed = '';
+    const attemptedUrls: Array<{ url: string; method: string; status: number; description: string }> = [];
+
     try {
-      const firstRes = await fetchWithTimeout(webhookUrl, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ text }),
-        redirect: 'manual',
-      });
+      for (const variation of urlVariations) {
+        if (Date.now() > deadline) break;
 
-      // Handle redirects manually to preserve POST body
-      if (firstRes.status >= 300 && firstRes.status < 400) {
-        const location = firstRes.headers.get('location');
-        console.log('improve-proxy - redirect status:', firstRes.status, 'location:', location);
-        if (location) {
-          const redirectedUrl = new URL(location, webhookUrl).toString();
-          finalRes = await fetchWithTimeout(redirectedUrl, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ text }),
-          });
-          attempt = 'redirect-post';
-        } else {
-          finalRes = firstRes;
-        }
-      } else {
-        finalRes = firstRes;
-      }
+        console.log(`improve-proxy - trying: ${variation.description} (${variation.method} ${variation.url})`);
 
-      finalText = await finalRes.text();
-      console.log('improve-proxy - upstream status:', finalRes.status);
-      console.log('improve-proxy - raw response length:', finalText.length);
-
-      // Fallback to GET if upstream suggests GET usage
-      if (finalRes.status === 404 && /not registered for POST|Did you mean to make a GET request/i.test(finalText)) {
-        console.log('improve-proxy - attempting GET fallback for webhook');
-        const getUrl = new URL(webhookUrl);
-        getUrl.searchParams.set('text', text);
-
-        const getFirst = await fetchWithTimeout(getUrl.toString(), {
-          method: 'GET',
-          redirect: 'manual',
-        });
-
-        if (getFirst.status >= 300 && getFirst.status < 400) {
-          const location = getFirst.headers.get('location');
-          console.log('improve-proxy - GET redirect status:', getFirst.status, 'location:', location);
-          if (location) {
-            const redirectedUrl = new URL(location, getUrl.toString()).toString();
-            finalRes = await fetchWithTimeout(redirectedUrl, {
-              method: 'GET',
+        try {
+          let response: Response;
+          
+          if (variation.method === 'POST') {
+            response = await fetchWithTimeout(variation.url, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ text }),
+              redirect: 'follow',
             });
           } else {
-            finalRes = getFirst;
+            const getUrl = new URL(variation.url);
+            getUrl.searchParams.set('text', text);
+            response = await fetchWithTimeout(getUrl.toString(), {
+              method: 'GET',
+              redirect: 'follow',
+            });
           }
-        } else {
-          finalRes = getFirst;
-        }
 
-        finalText = await finalRes.text();
-        attempt = 'get-fallback';
-        console.log('improve-proxy - GET upstream status:', finalRes.status);
-        console.log('improve-proxy - GET raw response length:', finalText.length);
+          const responseText = await response.text();
+          attemptedUrls.push({
+            url: variation.url,
+            method: variation.method,
+            status: response.status,
+            description: variation.description
+          });
+
+          console.log(`improve-proxy - ${variation.description}: status ${response.status}, length ${responseText.length}`);
+
+          // Accept any 2xx status as success
+          if (response.status >= 200 && response.status < 300) {
+            finalRes = response;
+            finalText = responseText;
+            attemptUsed = variation.description;
+            console.log(`improve-proxy - SUCCESS with ${variation.description}`);
+            break;
+          }
+
+        } catch (err) {
+          console.log(`improve-proxy - ${variation.description} failed:`, (err as any)?.message || String(err));
+          attemptedUrls.push({
+            url: variation.url,
+            method: variation.method,
+            status: 0,
+            description: `${variation.description} (error: ${(err as any)?.message || String(err)})`
+          });
+        }
       }
+
+      if (!finalRes) {
+        throw new Error('All webhook URL variations failed');
+      }
+
     } catch (err) {
-      console.error('improve-proxy - upstream error:', (err as any)?.message || String(err));
+      console.error('improve-proxy - all attempts failed:', (err as any)?.message || String(err));
       throw err;
     }
 
@@ -133,7 +145,8 @@ serve(async (req) => {
     const normalized = {
       ok: finalRes?.ok ?? false,
       status: finalRes?.status ?? 0,
-      attempt,
+      attemptUsed,
+      attemptedUrls,
       ...((typeof payload === 'object' && payload) ? payload : { body: String(payload) })
     };
 

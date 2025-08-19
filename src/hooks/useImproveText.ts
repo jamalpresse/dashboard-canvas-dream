@@ -76,8 +76,36 @@ export const useImproveText = () => {
 
       if (data && typeof data === 'object') {
         const status = typeof (data as any).status === 'number' ? (data as any).status : 200;
-        if ((data as any).ok === false || status < 200 || status >= 300) {
-          throw new Error((data as any)?.details || (data as any)?.error || `Webhook returned status ${status}`);
+        const attemptedUrls = (data as any).attemptedUrls;
+        const attemptUsed = (data as any).attemptUsed;
+
+        // Log debugging info if available
+        if (attemptedUrls) {
+          console.log('improve-proxy attempts:', attemptedUrls);
+          console.log('improve-proxy success method:', attemptUsed);
+        }
+
+        // Check if we have a recognizable response payload even if upstream status was non-2xx
+        const hasRecognizedPayload = Boolean(
+          (data as any).rewrittenText || 
+          (data as any).improved_text || 
+          (data as any).texte_ameliore || 
+          (data as any).body || 
+          (data as any).text || 
+          (data as any).content || 
+          (data as any).result
+        );
+
+        // Only fail if we don't have a recognized payload and got a real error
+        if ((data as any).ok === false && !hasRecognizedPayload) {
+          const errorMsg = (data as any)?.details || (data as any)?.error || `Webhook returned status ${status}`;
+          
+          // Special handling for 404 errors
+          if (status === 404 || errorMsg.includes('404') || errorMsg.includes('not registered')) {
+            throw new Error(`Webhook indisponible (404). Le workflow n8n doit être activé (Production) ou utilisez l'URL test. Tentatives: ${attemptedUrls?.length || 0}`);
+          }
+          
+          throw new Error(errorMsg);
         }
       }
 
