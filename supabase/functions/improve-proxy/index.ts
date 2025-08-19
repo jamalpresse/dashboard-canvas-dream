@@ -32,9 +32,9 @@ serve(async (req) => {
       );
     }
 
-    // Use the confirmed working webhook URL
-    const primaryWebhookUrl = 'https://automate.ihata.ma/webhook/d2e6c8f7-13aa-4bf7-b714-7f32cf5b0fe5';
-    const testWebhookUrl = 'https://automate.ihata.ma/webhook-test/d2e6c8f7-13aa-4bf7-b714-7f32cf5b0fe5';
+    // Get webhook URLs from environment variables
+    const primaryWebhookUrl = Deno.env.get('N8N_IMPROVE_URL') || 'https://automate.ihata.ma/webhook/d2e6c8f7-13aa-4bf7-b714-7f32cf5b0fe5';
+    const testWebhookUrl = Deno.env.get('N8N_IMPROVE_TEST_URL') || 'https://automate.ihata.ma/webhook-test/d2e6c8f7-13aa-4bf7-b714-7f32cf5b0fe5';
 
     console.log('improve-proxy - primary webhook:', primaryWebhookUrl);
 
