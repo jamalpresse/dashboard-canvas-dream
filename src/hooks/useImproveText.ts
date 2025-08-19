@@ -110,33 +110,23 @@ export const useImproveText = () => {
 
         // Enhanced error handling with detailed debugging
         if ((data as any).ok === false && !hasRecognizedPayload) {
-          console.error('improve-proxy failed:', data);
+          const errorMsg = (data as any)?.details || (data as any)?.error || `Webhook returned status ${status}`;
+          console.error('improve-proxy - webhook failed:', { status, errorMsg, attemptedUrls, attemptUsed });
           
-          // Enhanced error messages based on response data
-          let errorMessage = "Erreur lors de l'amélioration du texte";
-          
-          if ((data as any).error?.includes('404') || (data as any).details?.includes('not registered')) {
-            errorMessage = `Service d'amélioration non disponible (404). Debug: ${debugVersion}`;
-          } else if ((data as any).error?.includes('timeout') || (data as any).details?.includes('timeout')) {
-            errorMessage = "Délai d'attente dépassé. Réessayez.";
-          } else if ((data as any).details) {
-            errorMessage = `Erreur: ${(data as any).details}`;
+          // Show detailed debugging info in console for troubleshooting
+          if (attemptedUrls && Array.isArray(attemptedUrls) && attemptedUrls.length > 0) {
+            console.log('improve-proxy - Debug: All attempted URLs and their results:');
+            attemptedUrls.forEach((attempt: any, index: number) => {
+              console.log(`  ${index + 1}. ${attempt.method} ${attempt.url} -> Status: ${attempt.status} (${attempt.description})`);
+            });
           }
           
-          // Show attempted URLs for debugging
-          if (attemptedUrls.length > 0) {
-            console.log('Tentatives effectuées:', attemptedUrls.map((a: any) => 
-              `${a.method} ${a.url} -> ${a.status}`
-            ));
+          // Special handling for 404 errors
+          if (status === 404 || errorMsg.includes('404') || errorMsg.includes('not registered')) {
+            throw new Error(`❌ Webhook indisponible (404)\n\nLe workflow n8n doit être:\n• Activé en mode Production\n• Configuré pour accepter POST avec {"text": "..."}\n• Retourner JSON avec rewrittenText/seoTitles\n\nVérifiez les logs console pour plus de détails.`);
           }
           
-          toast({
-            title: "Erreur",
-            description: errorMessage,
-            variant: "destructive",
-          });
-          
-          throw new Error(errorMessage);
+          throw new Error(`❌ Erreur webhook (${status}): ${errorMsg}\n\nConsultez les logs console pour le détail des tentatives.`);
         }
       }
 
