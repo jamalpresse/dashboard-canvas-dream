@@ -81,17 +81,19 @@ export const useImproveText = () => {
       }
 
       if (data && typeof data === 'object') {
-        const status = typeof (data as any).status === 'number' ? (data as any).status : 200;
-        const attemptedUrls = (data as any).attemptedUrls;
-        const attemptUsed = (data as any).attemptUsed;
+        const status = (data as any).status || 0;
+        const attemptedUrls = (data as any).attemptedUrls || [];
+        const attemptUsed = (data as any).attemptUsed || 'none';
+        const debugVersion = (data as any).debugVersion || 'unknown';
 
-        // Enhanced debugging logs
-        console.log('improve-proxy - response status:', status);
-        console.log('improve-proxy - attemptUsed:', attemptUsed);
-        if (attemptedUrls && Array.isArray(attemptedUrls)) {
-          console.log('improve-proxy - all attempts:', attemptedUrls);
+        // Log debugging info (always available now)
+        console.log('improve-proxy debug version:', debugVersion);
+        console.log('improve-proxy attempts:', attemptedUrls);
+        console.log('improve-proxy success method:', attemptUsed);
+        
+        if (attemptedUrls.length > 0) {
           attemptedUrls.forEach((attempt: any, index: number) => {
-            console.log(`  Attempt ${index + 1}: ${attempt.method} ${attempt.url} -> ${attempt.status} (${attempt.description})`);
+            console.log(`  Attempt ${index + 1}: ${attempt.method} ${attempt.url} -> ${attempt.status} (${attempt.description || 'no desc'})`);
           });
         }
 
@@ -108,23 +110,33 @@ export const useImproveText = () => {
 
         // Enhanced error handling with detailed debugging
         if ((data as any).ok === false && !hasRecognizedPayload) {
-          const errorMsg = (data as any)?.details || (data as any)?.error || `Webhook returned status ${status}`;
-          console.error('improve-proxy - webhook failed:', { status, errorMsg, attemptedUrls, attemptUsed });
+          console.error('improve-proxy failed:', data);
           
-          // Show detailed debugging info in console for troubleshooting
-          if (attemptedUrls && Array.isArray(attemptedUrls) && attemptedUrls.length > 0) {
-            console.log('improve-proxy - Debug: All attempted URLs and their results:');
-            attemptedUrls.forEach((attempt: any, index: number) => {
-              console.log(`  ${index + 1}. ${attempt.method} ${attempt.url} -> Status: ${attempt.status} (${attempt.description})`);
-            });
+          // Enhanced error messages based on response data
+          let errorMessage = "Erreur lors de l'amélioration du texte";
+          
+          if ((data as any).error?.includes('404') || (data as any).details?.includes('not registered')) {
+            errorMessage = `Service d'amélioration non disponible (404). Debug: ${debugVersion}`;
+          } else if ((data as any).error?.includes('timeout') || (data as any).details?.includes('timeout')) {
+            errorMessage = "Délai d'attente dépassé. Réessayez.";
+          } else if ((data as any).details) {
+            errorMessage = `Erreur: ${(data as any).details}`;
           }
           
-          // Special handling for 404 errors
-          if (status === 404 || errorMsg.includes('404') || errorMsg.includes('not registered')) {
-            throw new Error(`❌ Webhook indisponible (404)\n\nLe workflow n8n doit être:\n• Activé en mode Production\n• Configuré pour accepter POST avec {"text": "..."}\n• Retourner JSON avec rewrittenText/seoTitles\n\nVérifiez les logs console pour plus de détails.`);
+          // Show attempted URLs for debugging
+          if (attemptedUrls.length > 0) {
+            console.log('Tentatives effectuées:', attemptedUrls.map((a: any) => 
+              `${a.method} ${a.url} -> ${a.status}`
+            ));
           }
           
-          throw new Error(`❌ Erreur webhook (${status}): ${errorMsg}\n\nConsultez les logs console pour le détail des tentatives.`);
+          toast({
+            title: "Erreur",
+            description: errorMessage,
+            variant: "destructive",
+          });
+          
+          throw new Error(errorMessage);
         }
       }
 

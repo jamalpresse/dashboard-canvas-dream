@@ -39,7 +39,7 @@ serve(async (req) => {
     console.log('improve-proxy - primary webhook:', primaryWebhookUrl);
 
     // Optimized timeout for faster user feedback
-    const overallTimeoutMs = 30_000; // Reduced to 30 seconds
+    const overallTimeoutMs = 15_000; // Reduced to 15 seconds
     const deadline = Date.now() + overallTimeoutMs;
 
     const fetchWithTimeout = async (url: string, init: RequestInit) => {
@@ -55,14 +55,11 @@ serve(async (req) => {
       }
     };
 
-    // Try multiple URL variations until one succeeds
+    // Focus on POST method only (n8n webhook expects POST)
     const urlVariations = [
       { url: primaryWebhookUrl, method: 'POST', description: 'POST to primary' },
       { url: primaryWebhookUrl + (primaryWebhookUrl.endsWith('/') ? '' : '/'), method: 'POST', description: 'POST to primary with slash' },
-      { url: testWebhookUrl, method: 'POST', description: 'POST to test URL' },
-      { url: primaryWebhookUrl, method: 'GET', description: 'GET to primary' },
-      { url: primaryWebhookUrl + (primaryWebhookUrl.endsWith('/') ? '' : '/'), method: 'GET', description: 'GET to primary with slash' },
-      { url: testWebhookUrl, method: 'GET', description: 'GET to test URL' }
+      { url: testWebhookUrl, method: 'POST', description: 'POST to test URL' }
     ];
 
     let finalRes: Response | null = null;
@@ -77,29 +74,15 @@ serve(async (req) => {
         console.log(`improve-proxy - trying: ${variation.description} (${variation.method} ${variation.url})`);
 
         try {
-          let response: Response;
-          
-          if (variation.method === 'POST') {
-            response = await fetchWithTimeout(variation.url, {
-              method: 'POST',
-              headers: { 
-                'Content-Type': 'application/json',
-                'User-Agent': 'Supabase-Edge-Function/1.0'
-              },
-              body: JSON.stringify({ text }),
-              redirect: 'follow',
-            });
-          } else {
-            const getUrl = new URL(variation.url);
-            getUrl.searchParams.set('text', text);
-            response = await fetchWithTimeout(getUrl.toString(), {
-              method: 'GET',
-              headers: {
-                'User-Agent': 'Supabase-Edge-Function/1.0'
-              },
-              redirect: 'follow',
-            });
-          }
+          const response = await fetchWithTimeout(variation.url, {
+            method: 'POST',
+            headers: { 
+              'Content-Type': 'application/json',
+              'User-Agent': 'Supabase-Edge-Function/1.0'
+            },
+            body: JSON.stringify({ text }),
+            redirect: 'follow',
+          });
 
           const responseText = await response.text();
           attemptedUrls.push({
@@ -151,8 +134,9 @@ serve(async (req) => {
     const normalized = {
       ok: finalRes?.ok ?? false,
       status: finalRes?.status ?? 0,
-      attemptUsed,
-      attemptedUrls,
+      debugVersion: '2025-01-19-v2',
+      attemptUsed: attemptUsed || 'none',
+      attemptedUrls: attemptedUrls || [],
       ...((typeof payload === 'object' && payload) ? payload : { body: String(payload) })
     };
 
@@ -165,8 +149,11 @@ serve(async (req) => {
     const errorPayload = {
       ok: false,
       status: 0,
+      debugVersion: '2025-01-19-v2',
       error: 'Failed to improve text',
       details: error?.message || String(error),
+      attemptUsed: 'error-occurred',
+      attemptedUrls: attemptedUrls || [],
     };
     return new Response(
       JSON.stringify(errorPayload),

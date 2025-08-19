@@ -20,6 +20,7 @@ export const testImproveEndpoint = async () => {
     
     const data = await response.json();
     console.log('✅ Raw response:', data);
+    console.log('🔧 Debug version:', data.debugVersion || 'unknown');
     
     if (data.attemptedUrls) {
       console.log('📊 Attempts made:');
@@ -28,9 +29,7 @@ export const testImproveEndpoint = async () => {
       });
     }
     
-    if (data.attemptUsed) {
-      console.log('🎯 Successful method:', data.attemptUsed);
-    }
+    console.log('🎯 Method used:', data.attemptUsed || 'none');
     
     return data;
   } catch (error) {
