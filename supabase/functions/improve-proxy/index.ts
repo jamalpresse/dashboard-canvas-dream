@@ -32,7 +32,7 @@ serve(async (req) => {
       );
     }
 
-    const webhookUrl = 'https://automate.ihata.ma/webhook/c1d2aee7-e096-4dc9-a69c-023af6631d88';
+    const webhookUrl = 'https://automate.ihata.ma/webhook/d2e6c8f7-13aa-4bf7-b714-7f32cf5b0fe5';
     console.log('improve-proxy - forwarding to:', webhookUrl);
 
     // Overall timeout to avoid hanging requests
