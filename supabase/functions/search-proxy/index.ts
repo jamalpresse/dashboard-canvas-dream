@@ -28,7 +28,7 @@ serve(async (req) => {
     }
 
     // Make request to n8n webhook
-    const webhookUrl = 'https://automate.ihata.ma/webhook/c1d2aee7-e096-4dc9-a69c-023af6631d88';
+    const webhookUrl = 'https://automate.ihata.ma/webhook/ace564c4-9f4a-40bf-aa42-fc5f5e29a3c7';
     
     console.log('Search proxy - Making request to:', webhookUrl);
     

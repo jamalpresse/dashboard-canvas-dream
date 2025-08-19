@@ -51,7 +51,22 @@ export const useSearch = () => {
         searchResult = responseData["object Object"].output;
         console.log("Résultat extrait du format object Object:", searchResult);
       }
-      // Méthode 4: Chercher dans toutes les clés pour une valeur de type string
+      // Méthode 4: Extraction du champ message
+      else if (responseData && responseData.message !== undefined) {
+        searchResult = responseData.message;
+        console.log("Résultat extrait du champ message:", searchResult);
+      }
+      // Méthode 5: Extraction du champ data
+      else if (responseData && responseData.data !== undefined) {
+        searchResult = responseData.data;
+        console.log("Résultat extrait du champ data:", searchResult);
+      }
+      // Méthode 6: Extraction du champ payload
+      else if (responseData && responseData.payload !== undefined) {
+        searchResult = responseData.payload;
+        console.log("Résultat extrait du champ payload:", searchResult);
+      }
+      // Méthode 7: Chercher dans toutes les clés pour une valeur de type string
       else if (responseData && typeof responseData === 'object') {
         console.log("Recherche de résultat dans toutes les clés de la réponse...");
         for (const [key, value] of Object.entries(responseData)) {
